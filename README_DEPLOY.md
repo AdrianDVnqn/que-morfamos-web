@@ -53,7 +53,7 @@ Build settings for Vercel:
 - Output directory: `build`
 
 5) Variables de entorno
-Si usas un túnel o URL externa para backend, añade `REACT_APP_BACKEND_URL` en Vercel (Project Settings -> Environment Variables).
+Si usas un túnel o URL externa para backend, añade `REACT_APP_BACKEND_URL` o `REACT_APP_API_URL` en Vercel (Project Settings -> Environment Variables).
 
 Conectar al backend desplegado en Render
 
@@ -61,6 +61,8 @@ Si tu backend está desplegado en Render y expone la API en `https://<tu-app>.on
 
 ```
 REACT_APP_BACKEND_URL=https://<tu-app>.onrender.com
+-- o --
+REACT_APP_API_URL=https://<tu-app>.onrender.com
 ```
 
 Notas:

@@ -152,16 +152,15 @@ const detectFoodType = (query) => {
 
 // Función para obtener la URL del backend
 const getBackendURL = () => {
-  // Si hay una URL de túnel configurada, usarla
-  if (process.env.REACT_APP_BACKEND_URL) {
-    return process.env.REACT_APP_BACKEND_URL;
-  }
-  
+  // Aceptar ambas formas de variable de entorno usadas en distintos despliegues
+  const envUrl = process.env.REACT_APP_API_URL || process.env.REACT_APP_BACKEND_URL;
+  if (envUrl) return envUrl;
+
   // En desarrollo, usar localhost
   if (process.env.NODE_ENV === 'development') {
     return 'http://localhost:8000';
   }
-  
+
   // En producción, usar la misma IP que el frontend pero puerto 8000
   return `http://${window.location.hostname}:8000`;
 };
