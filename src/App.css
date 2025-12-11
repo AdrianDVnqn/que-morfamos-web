@@ -62,6 +62,16 @@ body {
   align-items: flex-start;
 }
 
+/* Mejora visual para evitar flash blanco mientras cargan tiles */
+.leaflet-container {
+  background-color: #081124; /* tono cercano al mapa oscuro por defecto */
+}
+
+/* Transición suave de aparición de tiles para reducir parpadeo */
+.leaflet-tile {
+  transition: opacity 200ms linear;
+}
+
 /* Main content wrapper */
 .main-content {
   display: flex;

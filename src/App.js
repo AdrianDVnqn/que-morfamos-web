@@ -13,7 +13,15 @@ function ChangeMapStyle({ url, attribution }) {
     // Forzar re-render del mapa cuando cambia el estilo
     map.invalidateSize();
   }, [map, url]);
-  return <TileLayer url={url} attribution={attribution} />;
+  // Opciones recomendadas para mejorar la experiencia de carga de tiles
+  const tileOpts = {
+    attribution,
+    detectRetina: true,
+    keepBuffer: 2, // mantener algunos tiles fuera de la vista para zoom/pan suave
+    updateWhenIdle: true, // renderizar tiles cuando el mapa quede idle
+  };
+
+  return <TileLayer url={url} {...tileOpts} />;
 }
 
 // Componente para forzar que el mapa cargue correctamente
@@ -845,6 +853,9 @@ function App() {
               key={mapLocations.map(l => l.nombre).join('-')}
               center={[mapLocations[0].lat, mapLocations[0].lng]}
               zoom={13}
+              preferCanvas={true}
+              zoomAnimation={true}
+              fadeAnimation={true}
               style={{ height: '300px', width: '100%', borderRadius: '12px' }}
             >
               <MapResizer />
