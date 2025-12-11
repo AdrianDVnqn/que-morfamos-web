@@ -72,14 +72,39 @@ function FitBounds({ locations }) {
 // Componente para centrar el mapa en el restaurante hovereado (solo desde tarjetas)
 function CenterOnHover({ centerOn, locations }) {
   const map = useMap();
+  const prevViewRef = useRef({ center: null, zoom: null });
+
   useEffect(() => {
     if (centerOn && locations.length > 0) {
       const loc = locations.find(l => l.nombre === centerOn);
       if (loc) {
+        // Guardar vista previa si no está guardada
+        try {
+          if (!prevViewRef.current.center) {
+            const c = map.getCenter();
+            prevViewRef.current.center = [c.lat, c.lng];
+            prevViewRef.current.zoom = map.getZoom();
+          }
+        } catch (e) {
+          console.warn('No se pudo guardar la vista previa del mapa:', e);
+        }
+
         map.flyTo([loc.lat, loc.lng], 15, { duration: 0.5 });
+      }
+    } else {
+      // Restaurar la vista previa cuando se deja de hacer hover
+      if (prevViewRef.current.center) {
+        try {
+          map.flyTo(prevViewRef.current.center, prevViewRef.current.zoom || 13, { duration: 0.5 });
+        } catch (e) {
+          console.warn('No se pudo restaurar la vista previa del mapa:', e);
+        }
+        prevViewRef.current.center = null;
+        prevViewRef.current.zoom = null;
       }
     }
   }, [centerOn, locations, map]);
+
   return null;
 }
 
