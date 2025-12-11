@@ -1,0 +1,17 @@
+# Node
+node_modules/
+
+# Build output
+build/
+
+# Local env
+.env
+.env.*
+
+# Logs
+npm-debug.log*
+.yarn-integrity
+
+# OS
+.DS_Store
+Thumbs.db
