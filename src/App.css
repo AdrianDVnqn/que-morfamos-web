@@ -64,7 +64,7 @@ body {
 
 /* Mejora visual para evitar flash blanco mientras cargan tiles */
 .leaflet-container {
-  background-color: #081124; /* tono cercano al mapa oscuro por defecto */
+  background-color: #080808; /* fondo oscuro solicitado */
 }
 
 /* Transición suave de aparición de tiles para reducir parpadeo */
