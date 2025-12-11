@@ -52,7 +52,7 @@ function MapResizer() {
 }
 
 // Componente para ajustar el zoom para mostrar todos los marcadores
-function FitBounds({ locations }) {
+function FitBounds({ locations, allViewRef }) {
   const map = useMap();
   // Zoom por defecto cuando solo hay 1 marcador
   const DEFAULT_SINGLE_ZOOM = 15;
@@ -66,11 +66,25 @@ function FitBounds({ locations }) {
       if (locations.length === 1) {
         // Centrar en la única ubicación con zoom estándar
         map.setView([locations[0].lat, locations[0].lng], DEFAULT_SINGLE_ZOOM);
+        // Guardar vista que muestra la ubicación única (útil para restaurar)
+        try {
+          const c = map.getCenter();
+          allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: map.getZoom() });
+        } catch (e) {
+          console.warn('No se pudo guardar allViewRef para single marker:', e);
+        }
       } else {
         // Calcular bounds y ajustar zoom para que entren todos los íconos
         const bounds = L.latLngBounds(locations.map(loc => [loc.lat, loc.lng]));
         // fitBounds con padding y límite máximo de zoom para evitar un zoom excesivo
         map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: 16 });
+        // Guardar la vista que muestra todos los íconos
+        try {
+          const c = map.getCenter();
+          allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: map.getZoom() });
+        } catch (e) {
+          console.warn('No se pudo guardar allViewRef después de fitBounds:', e);
+        }
       }
     } catch (e) {
       console.warn('FitBounds error:', e);
@@ -81,40 +95,35 @@ function FitBounds({ locations }) {
 }
 
 // Componente para centrar el mapa en el restaurante hovereado (solo desde tarjetas)
-function CenterOnHover({ centerOn, locations }) {
+function CenterOnHover({ centerOn, locations, allViewRef }) {
   const map = useMap();
-  const prevViewRef = useRef({ center: null, zoom: null });
+  // Si queremos que el zoom al hover sea "un poco menos" que la vista que muestra todos los íconos
+  const HOVER_ZOOM_DELTA = -1; // valor negativo -> zoom más "abierto"
+  const DEFAULT_HOVER_ZOOM = 14;
 
   useEffect(() => {
     if (centerOn && locations.length > 0) {
       const loc = locations.find(l => l.nombre === centerOn);
       if (loc) {
-        // Guardar vista previa si no está guardada
-        try {
-          if (!prevViewRef.current.center) {
-            const c = map.getCenter();
-            prevViewRef.current.center = [c.lat, c.lng];
-            prevViewRef.current.zoom = map.getZoom();
-          }
-        } catch (e) {
-          console.warn('No se pudo guardar la vista previa del mapa:', e);
+        // Determinar zoom objetivo: basado en allViewRef si existe
+        let hoverZoom = DEFAULT_HOVER_ZOOM;
+        if (allViewRef && allViewRef.current && allViewRef.current.zoom) {
+          hoverZoom = Math.max((allViewRef.current.zoom || DEFAULT_HOVER_ZOOM) + HOVER_ZOOM_DELTA, 3);
         }
 
-        map.flyTo([loc.lat, loc.lng], 15, { duration: 0.5 });
+        map.flyTo([loc.lat, loc.lng], hoverZoom, { duration: 0.5 });
       }
     } else {
-      // Restaurar la vista previa cuando se deja de hacer hover
-      if (prevViewRef.current.center) {
+      // Restaurar la vista que muestra todos los íconos
+      if (allViewRef && allViewRef.current && allViewRef.current.center) {
         try {
-          map.flyTo(prevViewRef.current.center, prevViewRef.current.zoom || 13, { duration: 0.5 });
+          map.flyTo(allViewRef.current.center, allViewRef.current.zoom || 13, { duration: 0.5 });
         } catch (e) {
-          console.warn('No se pudo restaurar la vista previa del mapa:', e);
+          console.warn('No se pudo restaurar la vista allViewRef del mapa:', e);
         }
-        prevViewRef.current.center = null;
-        prevViewRef.current.zoom = null;
       }
     }
-  }, [centerOn, locations, map]);
+  }, [centerOn, locations, map, allViewRef]);
 
   return null;
 }
@@ -246,6 +255,7 @@ function App() {
   const cardRefs = useRef({}); // Refs para scroll a tarjetas
   const cardsContainerRef = useRef(null); // Ref del contenedor de tarjetas
   const scrollingFromMap = useRef(false); // Flag para evitar centrar mapa cuando scroll es desde marcador
+  const allViewRef = useRef({ center: null, zoom: null }); // Guarda la vista que muestra todos los iconos
 
   // Función para scroll a una tarjeta específica (solo dentro del contenedor)
   const scrollToCard = (nombre, fromMap = false) => {
@@ -834,7 +844,7 @@ function App() {
               style={{ height: '300px', width: '100%', borderRadius: '12px' }}
             >
               <MapResizer />
-              <FitBounds locations={mapLocations} />
+              <FitBounds locations={mapLocations} allViewRef={allViewRef} />
               <ChangeMapStyle 
                 url={MAP_STYLE.url} 
                 attribution={MAP_STYLE.attribution} 
@@ -842,6 +852,7 @@ function App() {
               <CenterOnHover 
                 centerOn={centerMapOn} 
                 locations={mapLocations} 
+                allViewRef={allViewRef}
               />
               {mapLocations.map((loc, idx) => (
                 <Marker 
