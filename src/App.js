@@ -54,18 +54,29 @@ function MapResizer() {
 // Componente para ajustar el zoom para mostrar todos los marcadores
 function FitBounds({ locations }) {
   const map = useMap();
+  // Zoom por defecto cuando solo hay 1 marcador
+  const DEFAULT_SINGLE_ZOOM = 15;
+  // Padding para asegurar que los íconos no queden pegados al borde
+  const FIT_PADDING = [40, 40];
+
   useEffect(() => {
-    if (locations && locations.length > 0) {
+    if (!locations || locations.length === 0) return;
+
+    try {
       if (locations.length === 1) {
-        // Si hay solo un marcador, centrar y usar zoom 15
-        map.setView([locations[0].lat, locations[0].lng], 15);
+        // Centrar en la única ubicación con zoom estándar
+        map.setView([locations[0].lat, locations[0].lng], DEFAULT_SINGLE_ZOOM);
       } else {
-        // Si hay múltiples marcadores, calcular bounds y ajustar zoom
+        // Calcular bounds y ajustar zoom para que entren todos los íconos
         const bounds = L.latLngBounds(locations.map(loc => [loc.lat, loc.lng]));
-        map.fitBounds(bounds, { padding: [20, 20] });
+        // fitBounds con padding y límite máximo de zoom para evitar un zoom excesivo
+        map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: 16 });
       }
+    } catch (e) {
+      console.warn('FitBounds error:', e);
     }
   }, [map, locations]);
+
   return null;
 }
 
