@@ -66,25 +66,29 @@ function FitBounds({ locations, allViewRef }) {
       if (locations.length === 1) {
         // Centrar en la única ubicación con zoom estándar
         map.setView([locations[0].lat, locations[0].lng], DEFAULT_SINGLE_ZOOM);
-        // Guardar vista que muestra la ubicación única (útil para restaurar)
-        try {
-          const c = map.getCenter();
-          allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: map.getZoom() });
-        } catch (e) {
-          console.warn('No se pudo guardar allViewRef para single marker:', e);
-        }
+        // Guardar vista que muestra la ubicación única (después de corto delay para asegurar cálculo)
+        setTimeout(() => {
+          try {
+            const c = map.getCenter();
+            allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: map.getZoom() });
+          } catch (e) {
+            console.warn('No se pudo guardar allViewRef para single marker (delayed):', e);
+          }
+        }, 300);
       } else {
         // Calcular bounds y ajustar zoom para que entren todos los íconos
         const bounds = L.latLngBounds(locations.map(loc => [loc.lat, loc.lng]));
         // fitBounds con padding y límite máximo de zoom para evitar un zoom excesivo
         map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: 16 });
-        // Guardar la vista que muestra todos los íconos
-        try {
-          const c = map.getCenter();
-          allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: map.getZoom() });
-        } catch (e) {
-          console.warn('No se pudo guardar allViewRef después de fitBounds:', e);
-        }
+        // Guardar la vista que muestra todos los íconos después de permitir que Leaflet calcule zoom
+        setTimeout(() => {
+          try {
+            const c = map.getCenter();
+            allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: map.getZoom() });
+          } catch (e) {
+            console.warn('No se pudo guardar allViewRef después de fitBounds (delayed):', e);
+          }
+        }, 300);
       }
     } catch (e) {
       console.warn('FitBounds error:', e);
@@ -97,9 +101,9 @@ function FitBounds({ locations, allViewRef }) {
 // Componente para centrar el mapa en el restaurante hovereado (solo desde tarjetas)
 function CenterOnHover({ centerOn, locations, allViewRef }) {
   const map = useMap();
-  // Si queremos que el zoom al hover sea "un poco menos" que la vista que muestra todos los íconos
-  const HOVER_ZOOM_DELTA = -1; // valor negativo -> zoom más "abierto"
-  const DEFAULT_HOVER_ZOOM = 14;
+  // Zoom del hover: valor positivo -> más cercano (más zoom in)
+  const HOVER_ZOOM_DELTA = 2; // aumentar en 2 niveles respecto a la vista de todos los iconos
+  const DEFAULT_HOVER_ZOOM = 16;
 
   useEffect(() => {
     if (centerOn && locations.length > 0) {
