@@ -240,6 +240,9 @@ const BG_BAKERY = 'https://images.unsplash.com/photo-1568254183919-78a4f43a2877?
 const BG_BARS = 'https://images.unsplash.com/photo-1569924995012-c4c706bfcd51?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 const BG_PARRILLA = 'https://images.unsplash.com/photo-1529694157872-4e0c0f3b238b?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 const BG_VEGANO = 'https://images.unsplash.com/photo-1511690078903-71dc5a49f5e3?q=80&w=928&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+const BG_HELADOS = 'https://images.unsplash.com/photo-1567206563064-6f60f40a2b57?q=80&w=1548&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+const BG_HAMBURGUESA = 'https://images.unsplash.com/photo-1695606392809-0da228da6b83?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+const BG_SUSHI = 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
 // Configurar axios: solo añadir header para localtunnel cuando se use
 const axiosConfig = {};
@@ -262,7 +265,10 @@ function App() {
       BG_BAKERY,
       BG_BARS,
       BG_PARRILLA,
-      BG_VEGANO
+      BG_VEGANO,
+      BG_HELADOS,
+      BG_HAMBURGUESA,
+      BG_SUSHI
     ];
     imagesToPreload.forEach(src => {
       const img = new Image();
@@ -373,6 +379,12 @@ function App() {
     if (t.includes('bar') || t.includes('cocktail') || t.includes('trago') || t.includes('cerveza') || t.includes('birra') || t.includes('pub')) return [BG_BARS];
     if (t.includes('parrill') || t.includes('asado') || t.includes('carne') || t.includes('bife')) return [BG_PARRILLA];
     if (t.includes('vegano') || t.includes('vegetar') || t.includes('vegan')) return [BG_VEGANO];
+    // Helados / Heladerías / Gelato
+    if (t.includes('helado') || t.includes('helader')) return [BG_HELADOS];
+    // Hamburguesas / burger
+    if (t.includes('hamburg') || t.includes('burger')) return [BG_HAMBURGUESA];
+    // Sushi / Japan / Asiática
+    if (t.includes('sushi') || t.includes('japon') || t.includes('asiat')) return [BG_SUSHI];
     return BACKGROUND_IMAGES;
   };
 
