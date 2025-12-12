@@ -243,8 +243,8 @@ body {
 
 /* ========== CHAT CONTAINER ========== */
 .chat-container {
-  /* Mantener color sólido del chat pero con ligera transparencia (mejor legibilidad) */
-  background: rgba(15,15,35,0.96); /* casi opaco */
+  /* Mantener color del chat apenas transparente para mejor legibilidad */
+  background: rgba(15,15,35,0.98); /* apenas transparente */
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--border-color);
