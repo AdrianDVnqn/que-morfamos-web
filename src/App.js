@@ -336,6 +336,23 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   const [hoveredRestaurant, setHoveredRestaurant] = useState(null);
   const [chipsExpanded, setChipsExpanded] = useState(false);
   const [tonesExpanded, setTonesExpanded] = useState(false);
+  const toneToggleRef = useRef(null);
+
+  useEffect(() => {
+    const handleDocumentClick = (e) => {
+      try {
+        if (!toneToggleRef.current) return;
+        if (tonesExpanded && !toneToggleRef.current.contains(e.target)) {
+          setTonesExpanded(false);
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    document.addEventListener('mousedown', handleDocumentClick);
+    return () => document.removeEventListener('mousedown', handleDocumentClick);
+  }, [tonesExpanded]);
   const cardsPositionsRef = useRef(null);
 
   // Capture current cards positions (before changing the DOM order)
@@ -947,6 +964,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
           </div>
           <div className="header-controls">
             <div 
+              ref={toneToggleRef}
               className={`tone-toggle ${tonesExpanded ? 'expanded' : ''}`}
               role="tablist" 
               aria-label="Tono de la IA"
