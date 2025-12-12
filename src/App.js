@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useLayoutEffect } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -1034,7 +1034,7 @@ function App() {
                 <div className="cards-list" ref={cardsContainerRef}>
                   {sortedCards.map((card, idx) => (
                     <div 
-                      key={idx} 
+                      key={card.nombre} 
                       data-card-name={card.nombre}
                       ref={(el) => { if (el) cardRefs.current[card.nombre] = el; }}
                       className={`card-mini ${hoveredRestaurant === card.nombre ? 'card-highlighted' : ''}`}
@@ -1058,7 +1058,7 @@ function App() {
               <div className="cards-grid" ref={cardsContainerRef}>
                 {sortedCards.map((card, idx) => (
                   <div 
-                    key={idx} 
+                    key={card.nombre} 
                     data-card-name={card.nombre}
                     ref={(el) => { if (el) cardRefs.current[card.nombre] = el; }}
                     className={`restaurant-card ${hoveredRestaurant === card.nombre ? 'card-highlighted' : ''}`}
