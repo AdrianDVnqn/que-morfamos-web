@@ -299,11 +299,11 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
 
 🍕 Recomendaciones: "¿Dónde explota la pizza?"
 
-🧐 La verdad de la milanesa: "¿Qué onda Growler Bar? ¿Está bueno?"
+🧐 La verdad de la milanesa: "¿Qué onda este bar que me dijo mi amigo? ¿Está bueno?"
 
-🎯 A medida: "Lugares veganos" o "Restaurantes aptos celíacos".
+🎯 A medida: "Lugares veganos", "Restaurantes aptos celíacos", "Lugares románticos" o "Lugares para ir en familia."
 
-🌟 Datazo: "Lugares románticos" o "Lugares para ir en familia."
+🤓 Dato nerd: "¿Cuántos lugares de sushi hay?"
 
 ¡Dale! Decime qué querés y arrancamos.
 `,
@@ -314,6 +314,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   const [loading, setLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState('checking');
   const [conversationContext, setConversationContext] = useState({});
+  const [tone, setTone] = useState('cordial'); // 'cordial' (default), 'soberbio', 'sassy'
   const [mapLocations, setMapLocations] = useState([]);
   const [lastQuery, setLastQuery] = useState('');
   const [currentTopic, setCurrentTopic] = useState(''); // Última búsqueda o tópico que escribió el usuario
@@ -349,6 +350,10 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [detailsCache, setDetailsCache] = useState({});
+  const getDetailsCacheKey = (nombre, topicParam = null) => {
+    const t = topicParam || conversationContext?.topic || 'default';
+    return `${nombre}__${t}__${tone || 'cordial'}`;
+  };
   const [inlineDetail, setInlineDetail] = useState(null); // Para modo resumen
   const [loadingInlineDetail, setLoadingInlineDetail] = useState(false);
   const messagesEndRef = useRef(null);
@@ -560,15 +565,16 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         setLoadingInlineDetail(true);
         
         // Usar cache si existe
-        if (detailsCache[nombre]) {
-          setInlineDetail(detailsCache[nombre]);
+        const inlineCacheKey = getDetailsCacheKey(nombre);
+        if (detailsCache[inlineCacheKey]) {
+          setInlineDetail(detailsCache[inlineCacheKey]);
           setLoadingInlineDetail(false);
         } else {
           // Cargar desde API
-          axios.get(`${API_URL}/restaurant/${encodeURIComponent(nombre)}`, axiosConfig)
+          axios.get(`${API_URL}/restaurant/${encodeURIComponent(nombre)}?tone=${encodeURIComponent(tone)}`, axiosConfig)
             .then(response => {
               setInlineDetail(response.data);
-              setDetailsCache(prev => ({ ...prev, [nombre]: response.data }));
+              setDetailsCache(prev => ({ ...prev, [inlineCacheKey]: response.data }));
             })
             .catch(error => console.error('Error cargando detalles:', error))
             .finally(() => setLoadingInlineDetail(false));
@@ -580,12 +586,13 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         // Cargar en background los detalles de cada restaurante
         restaurantCards.forEach(async (card) => {
           // Solo cargar si no está en cache
-          if (!detailsCache[card.nombre]) {
+          const bgKey = getDetailsCacheKey(card.nombre);
+          if (!detailsCache[bgKey]) {
           try {
-            const response = await axios.get(`${API_URL}/restaurant/${encodeURIComponent(card.nombre)}`, axiosConfig);
+            const response = await axios.get(`${API_URL}/restaurant/${encodeURIComponent(card.nombre)}?tone=${encodeURIComponent(tone)}`, axiosConfig);
             setDetailsCache(prev => ({
               ...prev,
-              [card.nombre]: response.data
+              [bgKey]: response.data
             }));
           } catch (error) {
             console.error(`Error pre-cargando ${card.nombre}:`, error);
@@ -599,14 +606,15 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       console.log('[FRONTEND DEBUG] Cargando detalles desde location:', nombre);
       setLoadingInlineDetail(true);
       
-      if (detailsCache[nombre]) {
-        setInlineDetail(detailsCache[nombre]);
+      const inlineCacheKey2 = getDetailsCacheKey(nombre);
+      if (detailsCache[inlineCacheKey2]) {
+        setInlineDetail(detailsCache[inlineCacheKey2]);
         setLoadingInlineDetail(false);
       } else {
-        axios.get(`${API_URL}/restaurant/${encodeURIComponent(nombre)}`, axiosConfig)
+        axios.get(`${API_URL}/restaurant/${encodeURIComponent(nombre)}?tone=${encodeURIComponent(tone)}`, axiosConfig)
           .then(response => {
             setInlineDetail(response.data);
-            setDetailsCache(prev => ({ ...prev, [nombre]: response.data }));
+            setDetailsCache(prev => ({ ...prev, [inlineCacheKey2]: response.data }));
           })
           .catch(error => console.error('Error cargando detalles:', error))
           .finally(() => setLoadingInlineDetail(false));
@@ -659,16 +667,18 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     console.log('[FRONTEND DEBUG] Contexto actual:', conversationContext);
 
     try {
+      // Enviar el tono como parte del request para que el backend lo tome en cuenta
       const response = await axios.post(`${API_URL}/chat`, {
         query: userMessage,
-        conversation_context: conversationContext
+        conversation_context: { ...conversationContext, tone },
+        tone
       }, { timeout: 60000, ...axiosConfig }); // 60 segundos para respuestas del LLM
 
       console.log('[FRONTEND DEBUG] Respuesta recibida:', response.data);
       console.log('[FRONTEND DEBUG] Nuevo contexto:', response.data.conversation_context);
 
       // Actualizar contexto de conversación
-      setConversationContext(response.data.conversation_context || {});
+      setConversationContext({ ...(response.data.conversation_context || {}), tone });
 
       // Actualizar ubicaciones del mapa si hay
       if (response.data.locations && response.data.locations.length > 0) {
@@ -766,7 +776,8 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     try {
       const response = await axios.post(`${API_URL}/chat`, {
         query: selectionStr,
-        conversation_context: conversationContext
+        conversation_context: { ...conversationContext, tone },
+        tone
       }, { timeout: 60000, ...axiosConfig });
 
       // Actualizar contexto y UI igual que en sendMessage
@@ -836,7 +847,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     // Usar cache si está disponible
     // Priorizar currentTopic (última búsqueda del usuario), si existe
     const topic = currentTopic && currentTopic.length > 0 ? currentTopic : conversationContext?.topic;
-    const cacheKey = topic ? `${nombreRestaurante}__${topic}` : nombreRestaurante;
+    const cacheKey = `${nombreRestaurante}__${topic || 'default'}__${tone || 'cordial'}`;
     if (detailsCache[cacheKey]) {
       setSelectedRestaurant(detailsCache[cacheKey]);
       return;
@@ -847,8 +858,8 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     try {
       // Si hay topic en el contexto, pasarlo como query param para obtener reseñas filtradas
       const url = topic
-        ? `${API_URL}/restaurant/${encodeURIComponent(nombreRestaurante)}?topic=${encodeURIComponent(topic)}`
-        : `${API_URL}/restaurant/${encodeURIComponent(nombreRestaurante)}`;
+        ? `${API_URL}/restaurant/${encodeURIComponent(nombreRestaurante)}?topic=${encodeURIComponent(topic)}&tone=${encodeURIComponent(tone)}`
+        : `${API_URL}/restaurant/${encodeURIComponent(nombreRestaurante)}?tone=${encodeURIComponent(tone)}`;
       const response = await axios.get(url, axiosConfig);
       setSelectedRestaurant(response.data);
       // Guardar en cache con key que incluye topic si aplica
@@ -911,6 +922,14 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
           onClick={() => window.location.reload()}
         >🍽️ ¿Qué Morfamos?</h1>
         <span className="header-subtitle">Tu IA gastronómica de Neuquén y alrededores</span>
+        <div className="header-controls">
+          <label htmlFor="tone-select" className="tone-label">Tono</label>
+          <select id="tone-select" className="tone-select" value={tone} onChange={(e) => { const newTone = e.target.value; setTone(newTone); setConversationContext(prev => ({ ...prev, tone: newTone })); }}>
+            <option value="cordial">Cordial</option>
+            <option value="soberbio">Soberbio</option>
+            <option value="sassy">Irónico</option>
+          </select>
+        </div>
         <div className={`status-indicator status-${apiStatus}`}>
           <span className="status-dot"></span>
           {apiStatus === 'connected' ? 'Conectado' : apiStatus === 'checking' ? 'Conectando...' : 'Sin conexión'}

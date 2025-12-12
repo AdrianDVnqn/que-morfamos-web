@@ -1828,3 +1828,22 @@ body {
 @media (max-width: 800px) {
   .bg-slide { filter: blur(4px) saturate(0.9) contrast(0.92); }
 }
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.tone-label {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.tone-select {
+  background: rgba(255,255,255,0.03);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+}
