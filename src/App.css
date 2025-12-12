@@ -10,9 +10,9 @@
 
 :root {
   --bg-primary: #0d0d0d;
-  --bg-secondary: #1a1a2e;
-  --bg-card: #16213e;
-  --bg-chat: #0f0f23;
+  --bg-secondary: rgba(26,26,46,0.94);
+  --bg-card: rgba(22,33,62,0.88);
+  --bg-chat: rgba(15,15,35,0.92);
   --accent-primary: #e94560;
   --accent-secondary: #ff6b6b;
   --accent-tertiary: #feca57;
@@ -48,12 +48,14 @@ body {
   transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative; /* para que el slideshow fijo quede detrás */
   z-index: 1;
+  background: transparent;
 }
 
 /* Layout con sidebar activado */
 .App.sidebar-layout {
   max-width: 100%;
   padding: 20px 30px;
+  background: transparent;
 }
 
 .App.sidebar-layout .main-content {
@@ -99,7 +101,7 @@ body {
 /* ========== HEADER ========== */
 .app-header {
   /* ligera transparencia para layer sobre el fondo */
-  background: rgba(18,20,36,0.92);
+  background: rgba(18,20,36,0.88);
   padding: 20px 30px;
   border-radius: 20px 20px 0 0;
   border: 1px solid rgba(255,255,255,0.03);
@@ -107,7 +109,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px) saturate(0.95);
 }
 
 .app-header h1 {
@@ -244,8 +246,8 @@ body {
 
 /* ========== CHAT CONTAINER ========== */
 .chat-container {
-  /* Mantener color del chat apenas transparente para mejor legibilidad */
-  background: rgba(15,15,35,0.98); /* apenas transparente */
+  /* Mantener color del chat con leve transparencia para mostrar el fondo */
+  background: rgba(15,15,35,0.92); /* levemente transparente */
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--border-color);
@@ -253,7 +255,7 @@ body {
   min-height: 400px;
   max-height: 500px;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  /* rounded bottom so the input/footer area looks like a single card */
+  backdrop-filter: blur(6px) saturate(0.95);
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
 }
@@ -275,22 +277,18 @@ body {
 
 @keyframes slideInLeft {
   from {
-    opacity: 0;
     transform: translateX(-30px) scale(0.95);
   }
   to {
-    opacity: 1;
     transform: translateX(0) scale(1);
   }
 }
 
 @keyframes fadeInContent {
   from {
-    opacity: 0;
     transform: translateY(20px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
@@ -328,7 +326,8 @@ body {
 
 /* Cuando el layout es sidebar (resultados mostrados), hacer los paneles levemente transparentes */
 .App.sidebar-layout .chat-container.chat-sidebar {
-  background: rgba(15,15,35,0.94); /* un pelín más transparente que el default para sensación de layered UI */
+  background: rgba(15,15,35,0.92); /* leve transparencia */
+  backdrop-filter: blur(6px) saturate(0.95);
 }
 
 .App.sidebar-layout .cards-container {
@@ -401,7 +400,6 @@ body {
   display: flex;
   flex-direction: column;
   max-width: 85%;
-  animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .message-user {
@@ -414,11 +412,15 @@ body {
 
 .message-mode {
   font-size: 11px;
-  color: var(--accent-secondary);
-  margin-bottom: 6px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
+  display: inline-block;
+  background: rgba(0,0,0,0.9);
+  padding: 6px 10px;
+  border-radius: 12px;
 }
 
 .message-content {
@@ -437,13 +439,13 @@ body {
 }
 
 .message-assistant .message-content {
-  /* Mayor opacidad y contraste para legibilidad sobre el slideshow */
-  background: rgba(20,24,40,0.98);
+  /* Leve transparencia para mostrar fondo sutilmente */
+  background: rgba(20,24,40,0.96);
   color: #ffffff;
   border: 1px solid rgba(255,255,255,0.04);
   border-bottom-left-radius: 6px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px) saturate(0.9);
+  backdrop-filter: blur(4px) saturate(0.95);
   font-weight: 500;
 }
 
@@ -527,7 +529,8 @@ body {
   gap: 12px;
   padding: 20px 25px;
   border-top: 1px solid var(--border-color);
-  background: var(--bg-secondary);
+  background: rgba(26,26,46,0.9); /* leve transparencia */
+  backdrop-filter: blur(6px) saturate(0.95);
   /* make the chat input area rounded at the bottom to match the header */
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
@@ -541,7 +544,7 @@ body {
   font-size: 16px;
   outline: none;
   transition: all 0.3s ease;
-  background: var(--bg-chat);
+  background: rgba(13,13,35,0.9); /* ligeramente translúcido */
   color: var(--text-primary);
 }
 
@@ -727,9 +730,9 @@ body {
 }
 
 @keyframes markerPop {
-  0% { transform: scale(0) translateY(-30px); opacity: 0; }
+  0% { transform: scale(0) translateY(-30px); }
   60% { transform: scale(1.2) translateY(5px); }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
+  100% { transform: scale(1) translateY(0); }
 }
 
 /* ========== MAP POPUP ========== */
@@ -1259,11 +1262,9 @@ body {
 
 @keyframes cardSlideIn {
   from {
-    opacity: 0;
     transform: translateY(20px) scale(0.95);
   }
   to {
-    opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
@@ -1442,11 +1443,9 @@ body {
 
 @keyframes slideUp {
   from {
-    opacity: 0;
     transform: translateY(30px) scale(0.95);
   }
   to {
-    opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
@@ -1695,7 +1694,7 @@ body {
 .bg-slideshow {
   position: fixed;
   inset: 0;
-  z-index: 0; /* detrás de .App (que tiene z-index:1) */
+  z-index: -1; /* detrás de toda la app */
   pointer-events: none;
   overflow: hidden;
 }
@@ -1706,11 +1705,10 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0;
+  opacity: 0; /* default hidden, animation controls visibility */
   /* Más blur y menor saturación, y todavía más oscuro para garantizar contraste */
-  filter: blur(8px) saturate(0.65) contrast(0.82) brightness(0.45);
+  filter: blur(4px) saturate(0.78) contrast(0.88) brightness(0.56);
   transform: scale(1.03);
-  transition: opacity 1s ease;
   mix-blend-mode: normal;
 }
 
@@ -1729,9 +1727,9 @@ body {
 /* Animación de crossfade: cada slide dura ~10s visibles, ciclo total 50s */
 @keyframes slideFade {
   0% { opacity: 0; }
-  4% { opacity: 0.95; }
-  24% { opacity: 0.95; }
-  28% { opacity: 0; }
+  2% { opacity: 0.95; }
+  20% { opacity: 0.95; }
+  22% { opacity: 0; }
   100% { opacity: 0; }
 }
 
@@ -1744,5 +1742,5 @@ body {
 
 /* Afinar: menor opacidad en móviles para no competir con legibilidad */
 @media (max-width: 800px) {
-  .bg-slide { filter: blur(8px) saturate(0.85) contrast(0.9); }
+  .bg-slide { filter: blur(4px) saturate(0.9) contrast(0.92); }
 }

@@ -749,7 +749,7 @@ function App() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Preguntame sobre restaurantes en Neuquén..."
+            placeholder="Preguntame sobre restaurantes, bares, heladerías, etc. en Neuquén y alrededores"
             disabled={loading || apiStatus !== 'connected'}
             className="message-input"
           />
