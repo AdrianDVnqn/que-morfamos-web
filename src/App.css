@@ -253,7 +253,7 @@ body {
   border-left: 1px solid var(--border-color);
   border-right: 1px solid var(--border-color);
   min-height: 400px;
-  max-height: 500px;
+  max-height: 700px;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(6px) saturate(0.95);
   border-bottom-left-radius: 20px;
