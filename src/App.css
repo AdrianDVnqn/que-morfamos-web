@@ -1753,6 +1753,22 @@ body {
   transform: scale(1) !important;
 }
 
+/* Contenedores por capa para permitir transiciones al cambiar background */
+.bg-slideshow .bg-layer { position: absolute; inset: 0; }
+.bg-slideshow .bg-layer.prev { z-index: 2; }
+.bg-slideshow .bg-layer.base { z-index: 0; }
+
+/* Fading a previous layer out over the base layer */
+.bg-slideshow .bg-layer.prev .bg-slide {
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1), transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: none !important;
+  opacity: 1;
+}
+.bg-slideshow.is-transitioning .bg-layer.prev .bg-slide {
+  opacity: 0;
+  transform: scale(1.02);
+}
+
 /* ligera superposición de color para integrar con tema */
 .bg-slide::after {
   content: '';

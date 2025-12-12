@@ -291,6 +291,8 @@ function App() {
   const [currentTopic, setCurrentTopic] = useState(''); // Última búsqueda o tópico que escribió el usuario
   const [restaurantCards, setRestaurantCards] = useState([]);
     const [bgImages, setBgImages] = useState(BACKGROUND_IMAGES);
+    const [prevBgImages, setPrevBgImages] = useState(null);
+    const [isBgTransitioning, setIsBgTransitioning] = useState(false);
   const [cardsMode, setCardsMode] = useState('rag'); // 'rag' = completas, 'estadisticas' = minimalistas
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'reviews', 'name'
   const [sidebarMode, setSidebarMode] = useState(false); // Chat en sidebar después del primer mensaje
@@ -389,8 +391,24 @@ function App() {
   };
 
   useEffect(() => {
-    const images = getBackgroundImagesForTopic(currentTopic || conversationContext?.topic || '');
-    setBgImages(images);
+    const newImages = getBackgroundImagesForTopic(currentTopic || conversationContext?.topic || '');
+    // simple compare: if first image is same and lengths same, ignore
+    const equal = (a, b) => {
+      if (!a || !b) return false;
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+      return true;
+    }
+    if (equal(newImages, bgImages)) return;
+    // Start transition
+    setPrevBgImages(bgImages);
+    setBgImages(newImages);
+    setIsBgTransitioning(true);
+    const t = setTimeout(() => {
+      setPrevBgImages(null);
+      setIsBgTransitioning(false);
+    }, 700);
+    return () => clearTimeout(t);
   }, [currentTopic, conversationContext]);
 
   // Pre-cargar detalles de restaurantes cuando llegan las tarjetas
@@ -725,14 +743,27 @@ function App() {
   return (
     <div className={`App ${sidebarMode ? 'sidebar-layout' : ''}`}>
       {/* Fondo slideshow detrás del contenido */}
-      <div className={`bg-slideshow ${bgImages.length === 1 ? 'single' : ''}`} aria-hidden>
-        {bgImages.map((src, i) => (
-          <div
-            key={i}
-            className={`bg-slide bg-slide-${i}`}
-            style={{ backgroundImage: `url(${src})` }}
-          />
-        ))}
+      <div className={`bg-slideshow ${bgImages.length === 1 ? 'single' : ''} ${isBgTransitioning ? 'is-transitioning' : ''}`} aria-hidden>
+        <div className="bg-layer base">
+          {bgImages.map((src, i) => (
+            <div
+              key={`base-${i}`}
+              className={`bg-slide bg-slide-${i}`}
+              style={{ backgroundImage: `url(${src})` }}
+            />
+          ))}
+        </div>
+        {prevBgImages && (
+          <div className="bg-layer prev">
+            {prevBgImages.map((src, i) => (
+              <div
+                key={`prev-${i}`}
+                className={`bg-slide bg-slide-${i}`}
+                style={{ backgroundImage: `url(${src})` }}
+              />
+            ))}
+          </div>
+        )}
       </div>
       <header className="app-header">
         <h1 
