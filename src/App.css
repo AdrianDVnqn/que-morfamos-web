@@ -471,12 +471,47 @@ body {
 }
 
 .messages-container::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: #ffc0da; /* light pink */
   border-radius: 3px;
 }
 
 .messages-container::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-primary);
+  background: #ff7aa6; /* darker pink on hover */
+}
+
+/* Firefox scrollbar color */
+.messages-container {
+  scrollbar-color: #ffc0da transparent;
+}
+
+/* Reviews lists inside modals (restaurant detail and generic) */
+.detail-reviews .reviews-list,
+.reviews-list {
+  scrollbar-width: thin;
+  scrollbar-color: #ffc0da transparent;
+}
+
+.detail-reviews .reviews-list::-webkit-scrollbar,
+.reviews-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.detail-reviews .reviews-list::-webkit-scrollbar-track,
+.reviews-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.detail-reviews .reviews-list::-webkit-scrollbar-thumb,
+.reviews-list::-webkit-scrollbar-thumb {
+  background: #ffd6e6; /* slightly lighter pink for review lists */
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.detail-reviews .reviews-list::-webkit-scrollbar-thumb:hover,
+.reviews-list::-webkit-scrollbar-thumb:hover {
+  background: #ff7aa6;
 }
 
 /* ========== MESSAGES ========== */
