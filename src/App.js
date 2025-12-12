@@ -334,6 +334,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'reviews', 'name'
   const [sidebarMode, setSidebarMode] = useState(false); // Chat en sidebar después del primer mensaje
   const [hoveredRestaurant, setHoveredRestaurant] = useState(null);
+  const [chipsExpanded, setChipsExpanded] = useState(false);
   const cardsPositionsRef = useRef(null);
 
   // Capture current cards positions (before changing the DOM order)
@@ -1040,13 +1041,28 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
           </div>
         )}
 
-        {/* Mobile sticky chips bar (visible on small screens only) */}
-        <div className="chip-bar-mobile">
-          {SAMPLE_CHIPS.map((c, i) => (
-            <button key={i} className="chip-btn" type="button" onClick={() => handleChipClick(c.query)}>
-              {c.label}
-            </button>
-          ))}
+        {/* Expandable chips bar with bubble trigger */}
+        <div 
+          className="chip-bar-mobile"
+          onMouseEnter={() => setChipsExpanded(true)}
+          onMouseLeave={() => setChipsExpanded(false)}
+        >
+          <button 
+            className="chip-bubble-btn" 
+            type="button"
+            onClick={() => setChipsExpanded(!chipsExpanded)}
+            aria-label="Mostrar ejemplos de búsqueda"
+          >
+            <span className="bubble-icon">💡</span>
+            <span className="bubble-text">Ejemplos</span>
+          </button>
+          <div className={`chips-expandable ${chipsExpanded ? 'expanded' : ''}`}>
+            {SAMPLE_CHIPS.map((c, i) => (
+              <button key={i} className="chip-btn" type="button" onClick={() => handleChipClick(c.query)}>
+                {c.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <form className="input-container" onSubmit={sendMessage}>

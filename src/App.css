@@ -1287,12 +1287,62 @@ body {
   box-shadow: 0 2px 8px rgba(233, 69, 96, 0.3);
 }
 
-/* Mobile sticky chip bar */
+/* Mobile sticky chip bar with expandable chips */
 .chip-bar-mobile {
   display: none;
   position: relative;
   z-index: 60;
   pointer-events: auto;
+  align-items: center;
+}
+
+.chip-bubble-btn {
+  background: rgba(255,255,255,0.95);
+  color: var(--bg-primary);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.chip-bubble-btn:hover {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(233, 69, 96, 0.5);
+}
+
+.bubble-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.bubble-text {
+  font-size: 13px;
+}
+
+.chips-expandable {
+  display: flex;
+  gap: 8px;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-width 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms ease;
+  white-space: nowrap;
+}
+
+.chips-expandable.expanded {
+  max-width: 800px;
+  opacity: 1;
+  margin-left: 8px;
 }
 
 @media (max-width: 800px) {
@@ -1302,10 +1352,8 @@ body {
     left: 0;
     right: 0;
     bottom: 72px;
-    gap: 10px;
     padding: 12px 20px;
     overflow-x: auto;
-    align-items: center;
     z-index: 50;
     -webkit-overflow-scrolling: touch;
     background: linear-gradient(180deg, rgba(15,15,35,0.98), rgba(22,33,62,0.96));
@@ -1316,15 +1364,21 @@ body {
     white-space: nowrap;
     flex-shrink: 0;
   }
+  .bubble-text {
+    display: none;
+  }
 }
 
 @media (min-width: 801px) {
   .chip-bar-mobile {
     display: flex;
-    gap: 10px;
     padding: 12px 25px;
     background: transparent;
     border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .chips-expandable {
+    overflow-x: auto;
+    flex-wrap: nowrap;
   }
 }
 
