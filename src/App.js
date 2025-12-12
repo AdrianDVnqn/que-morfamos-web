@@ -86,8 +86,23 @@ function FitBounds({ locations, allViewRef }) {
       } else {
         // Calcular bounds y ajustar zoom para que entren todos los íconos
         const bounds = L.latLngBounds(locations.map(loc => [loc.lat, loc.lng]));
-        // fitBounds con padding y límite máximo de zoom para evitar un zoom excesivo
-        map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: 16 });
+        // Asegurar que el mapa calcula su tamaño antes de ajustar bounds (útil en móviles y cuando el layout cambia)
+        try {
+          map.invalidateSize();
+        } catch (e) {
+          // ignore
+        }
+
+        // Defer fitBounds para dejar tiempo a que el mapa renderice correctamente y calcule tiles
+        setTimeout(() => {
+          try {
+            map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: 16 });
+          } catch (e) {
+            console.warn('fitBounds failed on timeout, trying direct call:', e);
+            try { map.fitBounds(bounds); } catch (e2) { console.warn('fitBounds fallback failed:', e2); }
+          }
+        }, 250);
+
         // Guardar la vista que muestra todos los íconos después de permitir que Leaflet calcule zoom
         setTimeout(() => {
           try {
@@ -96,7 +111,7 @@ function FitBounds({ locations, allViewRef }) {
           } catch (e) {
             console.warn('No se pudo guardar allViewRef después de fitBounds (delayed):', e);
           }
-        }, 300);
+        }, 700);
       }
     } catch (e) {
       console.warn('FitBounds error:', e);
