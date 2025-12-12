@@ -258,6 +258,8 @@ const BG_VEGANO = 'https://images.unsplash.com/photo-1511690078903-71dc5a49f5e3?
 const BG_HELADOS = 'https://images.unsplash.com/photo-1567206563064-6f60f40a2b57?q=80&w=1548&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 const BG_HAMBURGUESA = 'https://images.unsplash.com/photo-1695606392809-0da228da6b83?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 const BG_SUSHI = 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+// Empanadas
+const BG_EMPANADAS = 'https://images.unsplash.com/photo-1619926096619-5956ab4dfb1b?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
 // Configurar axios: solo añadir header para localtunnel cuando se use
 const axiosConfig = {};
@@ -280,6 +282,7 @@ function App() {
       BG_BAKERY,
       BG_BARS,
       BG_PARRILLA,
+      BG_EMPANADAS,
       BG_VEGANO,
       BG_HELADOS,
       BG_HAMBURGUESA,
@@ -532,6 +535,8 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     if (t.includes('hamburg') || t.includes('burger')) return [BG_HAMBURGUESA];
     // Sushi / Japan / Asiática
     if (t.includes('sushi') || t.includes('japon') || t.includes('asiat')) return [BG_SUSHI];
+    // Empanadas / facturas saladas
+    if (t.includes('empanad')) return [BG_EMPANADAS];
     return BACKGROUND_IMAGES;
   };
 
