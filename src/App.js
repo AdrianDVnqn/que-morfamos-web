@@ -655,7 +655,7 @@ function App() {
           style={{ cursor: 'pointer' }}
           onClick={() => window.location.reload()}
         >🍽️ ¿Qué Morfamos?</h1>
-        <span className="header-subtitle">Tu IA gastronómica de Neuquén, by ADV</span>
+        <span className="header-subtitle">Tu IA gastronómica de Neuquén y alrededores</span>
         <div className={`status-indicator status-${apiStatus}`}>
           <span className="status-dot"></span>
           {apiStatus === 'connected' ? 'Conectado' : apiStatus === 'checking' ? 'Conectando...' : 'Sin conexión'}
@@ -1018,9 +1018,7 @@ function App() {
       </div>
       </div>{/* Fin main-content */}
 
-      <footer className="app-footer">
-        <p>💡 Ejemplos: "lugares veganos", "que opinan de Elvira", "cuantos lugares de pizza hay"</p>
-      </footer>
+      
 
       {/* Modal de detalle del restaurante */}
       {(selectedRestaurant || loadingDetail) && (
