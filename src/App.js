@@ -376,6 +376,11 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   // Compute popup position (fixed) so it doesn't get clipped. Mobile only by default
   const computeTonePopupPosition = () => {
     if (!toneToggleRef.current) return;
+    const isMobile = window.innerWidth <= 800;
+    if (!isMobile) {
+      setTonePopupStyle(null); // inline popup in desktop, no fixed pos
+      return;
+    }
     const el = toneToggleRef.current;
     const rect = el.getBoundingClientRect();
     // We'll position popup to the right of the toggle, vertically centered to the toggle
