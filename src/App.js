@@ -1065,6 +1065,15 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
           </div>
         )}
 
+        {/* Mobile sticky chips bar (visible on small screens only) */}
+        <div className="chip-bar-mobile">
+          {SAMPLE_CHIPS.map((c, i) => (
+            <button key={i} className="chip-btn" type="button" onClick={() => handleChipClick(c.query)}>
+              {c.label}
+            </button>
+          ))}
+        </div>
+
         <form className="input-container" onSubmit={sendMessage}>
           <input
             type="text"

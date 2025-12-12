@@ -1266,6 +1266,26 @@ body {
   outline: none;
 }
 .chip-btn:active { transform: translateY(0); }
+
+/* Mobile sticky chip bar */
+.chip-bar-mobile {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .chip-bar-mobile {
+    display: flex;
+    position: sticky;
+    bottom: 96px; /* above input (account for keyboard/toolbar) */
+    gap: 8px;
+    padding: 8px 20px;
+    overflow-x: auto;
+    align-items: center;
+    z-index: 40;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chip-bar-mobile .chip-btn { white-space: nowrap; }
+}
   font-weight: 500;
 }
 
