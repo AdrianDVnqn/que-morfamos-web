@@ -46,6 +46,8 @@ body {
   margin: 0 auto;
   padding: 20px;
   transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative; /* para que el slideshow fijo quede detrás */
+  z-index: 1;
 }
 
 /* Layout con sidebar activado */
@@ -1675,4 +1677,56 @@ body {
     margin-left: 0;
     width: 100%;
   }
+}
+
+/* ========== BACKGROUND SLIDESHOW ========== */
+.bg-slideshow {
+  position: fixed;
+  inset: 0;
+  z-index: 0; /* detrás de .App (que tiene z-index:1) */
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bg-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  filter: blur(6px) saturate(0.9) contrast(0.95);
+  transform: scale(1.02);
+  transition: opacity 1s ease;
+  mix-blend-mode: overlay;
+}
+
+/* ligera superposición de color para integrar con tema */
+.bg-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(13,13,13,0.35), rgba(21,21,34,0.45));
+  pointer-events: none;
+}
+
+/* Animación de crossfade. Duración total: N * 5s (ajustable) */
+@keyframes slideFade {
+  0% { opacity: 0; }
+  6% { opacity: 0.9; }
+  22% { opacity: 0.9; }
+  28% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* Aplicar animación con offsets para cada slide */
+.bg-slide-0 { animation: slideFade 25s linear infinite 0s; }
+.bg-slide-1 { animation: slideFade 25s linear infinite 5s; }
+.bg-slide-2 { animation: slideFade 25s linear infinite 10s; }
+.bg-slide-3 { animation: slideFade 25s linear infinite 15s; }
+.bg-slide-4 { animation: slideFade 25s linear infinite 20s; }
+
+/* Afinar: menor opacidad en móviles para no competir con legibilidad */
+@media (max-width: 800px) {
+  .bg-slide { filter: blur(8px) saturate(0.85) contrast(0.9); }
 }

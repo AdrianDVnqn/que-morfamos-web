@@ -225,6 +225,15 @@ const getBackendURL = () => {
 // URL del API - se adapta automáticamente o usa túnel
 const API_URL = getBackendURL();
 
+// Fondo slideshow (imágenes difuminadas y mezcladas con el tema)
+const BACKGROUND_IMAGES = [
+  'https://images.unsplash.com/photo-1762047314688-b59b04b5f5de?q=80&w=928&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  'https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  'https://plus.unsplash.com/premium_photo-1675252369719-dd52bc69c3df?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=820&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  'https://images.unsplash.com/photo-1592861956120-e524fc739696?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+];
+
 // Configurar axios: solo añadir header para localtunnel cuando se use
 const axiosConfig = {};
 if (process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_BACKEND_URL.includes('loca.lt')) {
@@ -656,6 +665,16 @@ function App() {
 
   return (
     <div className={`App ${sidebarMode ? 'sidebar-layout' : ''}`}>
+      {/* Fondo slideshow detrás del contenido */}
+      <div className="bg-slideshow" aria-hidden>
+        {BACKGROUND_IMAGES.map((src, i) => (
+          <div
+            key={i}
+            className={`bg-slide bg-slide-${i}`}
+            style={{ backgroundImage: `url(${src})` }}
+          />
+        ))}
+      </div>
       <header className="app-header">
         <h1 
           style={{ cursor: 'pointer' }}
