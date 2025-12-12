@@ -193,6 +193,9 @@ body {
   min-height: 400px;
   max-height: 500px;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  /* rounded bottom so the input/footer area looks like a single card */
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
 /* Chat en modo sidebar */
@@ -455,6 +458,9 @@ body {
   padding: 20px 25px;
   border-top: 1px solid var(--border-color);
   background: var(--bg-secondary);
+  /* make the chat input area rounded at the bottom to match the header */
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
 .message-input {
