@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
-import { lanzarLluviaTono } from './utils/emojiRain';
+import { lanzarLluviaTono } from './utils/emojiRain.js';
 
 // Componente para cambiar el TileLayer dinámicamente
 function ChangeMapStyle({ url, attribution }) {
@@ -73,17 +73,23 @@ function FitBounds({ locations, allViewRef }) {
 
     try {
       if (locations.length === 1) {
-        // Centrar en la única ubicación con zoom estándar
-        map.setView([locations[0].lat, locations[0].lng], DEFAULT_SINGLE_ZOOM);
-        // Guardar vista que muestra la ubicación única (después de corto delay para asegurar cálculo)
+        // Asegurar que el mapa haya recalculado su tamaño antes de centrar
+        try {
+          map.invalidateSize();
+        } catch (e) {
+          // ignore
+        }
+        // Centrar en la única ubicación con zoom estándar (defer para permitir layout)
         setTimeout(() => {
           try {
+            map.setView([locations[0].lat, locations[0].lng], DEFAULT_SINGLE_ZOOM);
+            // Guardar vista que muestra la ubicación única
             const c = map.getCenter();
             allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: map.getZoom() });
           } catch (e) {
-            console.warn('No se pudo guardar allViewRef para single marker (delayed):', e);
+            console.warn('Error centrando mapa para single marker:', e);
           }
-        }, 300);
+        }, 120);
       } else {
         // Calcular bounds y ajustar zoom para que entren todos los íconos
         const bounds = L.latLngBounds(locations.map(loc => [loc.lat, loc.lng]));
