@@ -1196,6 +1196,28 @@ body {
   gap: 6px;
 }
 
+/* Match the nice scroll style used in chat */
+.cards-list {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--border-color) transparent; /* Firefox */
+}
+.cards-list::-webkit-scrollbar {
+  width: 6px;
+}
+.cards-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cards-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+.cards-list::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+.cards-list {
+  -webkit-overflow-scrolling: touch;
+}
+
 .card-mini {
   display: flex;
   justify-content: space-between;
