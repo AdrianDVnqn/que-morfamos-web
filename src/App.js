@@ -1084,28 +1084,31 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         )}
 
         {/* Expandable chips bar with bubble trigger */}
-        <div 
-          className="chip-bar-mobile"
-          onMouseEnter={() => setChipsExpanded(true)}
-          onMouseLeave={() => setChipsExpanded(false)}
-        >
-          <button 
-            className={`chip-bubble-btn ${chipsExpanded ? 'expanded' : ''}`}
-            type="button"
-            onClick={() => setChipsExpanded(!chipsExpanded)}
-            aria-label="Mostrar ejemplos de búsqueda"
+        { /* Mostrar chips solo en la página inicial (sin interacciones y sin sidebar) */ }
+        {messages.length <= 1 && !sidebarMode && (
+          <div 
+            className="chip-bar-mobile"
+            onMouseEnter={() => setChipsExpanded(true)}
+            onMouseLeave={() => setChipsExpanded(false)}
           >
-            <span className="bubble-icon">💡</span>
-            <span className="bubble-text">Ejemplos</span>
-          </button>
-          <div className={`chips-expandable ${chipsExpanded ? 'expanded' : ''}`}>
-            {SAMPLE_CHIPS.map((c, i) => (
-              <button key={i} className="chip-btn" type="button" onClick={() => handleChipClick(c.query)}>
-                {c.label}
-              </button>
-            ))}
+            <button 
+              className={`chip-bubble-btn ${chipsExpanded ? 'expanded' : ''}`}
+              type="button"
+              onClick={() => setChipsExpanded(!chipsExpanded)}
+              aria-label="Mostrar ejemplos de búsqueda"
+            >
+              <span className="bubble-icon">💡</span>
+              <span className="bubble-text">Ejemplos</span>
+            </button>
+            <div className={`chips-expandable ${chipsExpanded ? 'expanded' : ''}`}>
+              {SAMPLE_CHIPS.map((c, i) => (
+                <button key={i} className="chip-btn" type="button" onClick={() => handleChipClick(c.query)}>
+                  {c.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <form className="input-container" onSubmit={sendMessage}>
           <input
