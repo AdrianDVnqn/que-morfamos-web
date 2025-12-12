@@ -1248,9 +1248,12 @@ body {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 60; /* ensure it's above overlays */
+  pointer-events: auto;
 }
 .chip-btn {
-  background: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.06);
   color: var(--text-primary);
   border: 1px solid rgba(255,255,255,0.04);
   padding: 6px 10px;
@@ -1270,13 +1273,18 @@ body {
 /* Mobile sticky chip bar */
 .chip-bar-mobile {
   display: none;
+  position: relative;
+  z-index: 60;
+  pointer-events: auto;
 }
 
 @media (max-width: 800px) {
   .chip-bar-mobile {
     display: flex;
-    position: sticky;
-    bottom: 96px; /* above input (account for keyboard/toolbar) */
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 84px; /* above input (account for keyboard/toolbar) */
     gap: 8px;
     padding: 8px 20px;
     overflow-x: auto;
