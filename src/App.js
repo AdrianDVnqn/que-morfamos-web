@@ -697,16 +697,6 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         setMapLocations([]);
       }
 
-      const sendMessage = async (e) => {
-        e.preventDefault();
-        await sendQuery(input);
-      }
-
-      const handleChipClick = async (q) => {
-        if (loading) return;
-        await sendQuery(q);
-      }
-
       // Siempre actualizar el modo de visualización
       if (response.data.mode) {
         console.log('[FRONTEND DEBUG] Modo:', response.data.mode);
@@ -779,6 +769,16 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       setLoading(false);
     }
   };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    await sendQuery(input);
+  }
+
+  const handleChipClick = async (q) => {
+    if (loading) return;
+    await sendQuery(q);
+  }
 
   // Seleccionar una opción pendiente (click en etiqueta)
   const selectPendingOption = async (index) => {
