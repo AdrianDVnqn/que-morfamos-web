@@ -1903,8 +1903,8 @@ body {
 @media (max-width: 768px) {
   .modal-close {
     position: fixed;
-    top: 12px;
-    right: 18px; /* un poco separado del borde derecho */
+    top: 15px;
+    right: 30px; /* un poco separado del borde derecho */
     z-index: 10010;
     background: rgba(0,0,0,0.7);
     color: #fff;
