@@ -957,25 +957,37 @@ body {
   }
 
   .tone-toggle {
-    flex-direction: column;
-    gap: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 6px;
     cursor: pointer;
     transition: all 300ms ease;
     position: relative;
   }
 
-  /* Popup expandido en mobile */
+  /* Popup expandido en mobile: .tone-popup es el contenedor absoluto */
   .tone-toggle.expanded {
+    position: relative;
+  }
+
+  .tone-popup {
+    display: none;
+  }
+
+  .tone-popup.expanded {
+    display: flex;
+    flex-direction: column;
     position: absolute;
-    top: 0;
-    right: 0;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    z-index: 100;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     padding: 8px;
+    z-index: 200;
   }
 
   /* Ocultar botones no activos cuando no está expandido */
@@ -1014,8 +1026,9 @@ body {
     color: var(--text-muted);
     background: rgba(255,255,255,0.05);
     border-radius: 6px;
-    padding: 6px 8px;
-    margin-top: 2px;
+    padding: 4px 6px;
+    margin-left: 8px;
+    margin-top: 0;
     animation: pulseIndicator 2s ease-in-out infinite;
   }
 
