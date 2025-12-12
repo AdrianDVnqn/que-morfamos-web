@@ -63,8 +63,8 @@ function MapResizer() {
 // Componente para ajustar el zoom para mostrar todos los marcadores
 function FitBounds({ locations, allViewRef }) {
   const map = useMap();
-  // Zoom por defecto cuando solo hay 1 marcador
-  const DEFAULT_SINGLE_ZOOM = 15;
+  // Zoom por defecto cuando solo hay 1 marcador (aumentado para acercar más)
+  const DEFAULT_SINGLE_ZOOM = 18;
   // Padding para asegurar que los íconos no queden pegados al borde
   const FIT_PADDING = [40, 40];
 
