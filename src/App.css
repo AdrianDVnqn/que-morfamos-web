@@ -1694,7 +1694,7 @@ body {
 .bg-slideshow {
   position: fixed;
   inset: 0;
-  z-index: -1; /* detrás de toda la app */
+  z-index: 0; /* detrás de toda la app (just above body background) */
   pointer-events: none;
   overflow: hidden;
 }
@@ -1718,7 +1718,8 @@ body {
   position: absolute;
   inset: 0;
   /* Gradiente aún más oscuro para atenuar las fotos y mejorar contraste */
-  background: linear-gradient(180deg, rgba(6,6,6,0.18), rgba(8,8,12,0.3));
+  /* Overlay: dark purple gradient (darker than UI) so slideshow is tinted purple, not black */
+  background: linear-gradient(180deg, rgba(22,33,62,0.86), rgba(12,12,24,0.94));
   pointer-events: none;
 }
 
