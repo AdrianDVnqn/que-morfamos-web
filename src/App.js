@@ -241,7 +241,7 @@ function App() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: '¿No sabés cuáles son los mejores lugares en Neuquén? Dejá que yo te diga la posta 🍽️\n\nPuedo:\n- Decirte dónde hay buena pizza.\n- Contarte qué opinan de un lugar en particular (ese al que van tus amigos).\n- Buscar cuántos locales ofrecen opciones para tu restricción alimentaria.\n\nEjemplos: "¿Dónde hay buena pizza?", "Qué opinan de Growler Bar?", "Cuántos restaurantes de sushi hay?", "Dónde hay opciones veganas?',
+      content: '¿No sabés cuáles son los mejores lugares en Neuquén? Dejá que yo te diga la posta 🍽️\n\nPuedo:\n- Decirte dónde hay buena pizza.\n- Contarte qué opinan de un lugar en particular (ese al que van tus amigos).\n- Buscar cuántos locales ofrecen opciones para tu restricción alimentaria.\n\nEjemplos: "¿Dónde hay buena pizza?", "Qué opinan de Growler Bar?", "Cuántos restaurantes de sushi hay?", "Dónde hay opciones veganas?"',
       mode: 'system'
     }
   ]);
@@ -609,20 +609,26 @@ function App() {
 
   const openRestaurantDetail = async (nombreRestaurante) => {
     // Usar cache si está disponible
-    if (detailsCache[nombreRestaurante]) {
-      setSelectedRestaurant(detailsCache[nombreRestaurante]);
+    const topic = conversationContext?.topic;
+    const cacheKey = topic ? `${nombreRestaurante}__${topic}` : nombreRestaurante;
+    if (detailsCache[cacheKey]) {
+      setSelectedRestaurant(detailsCache[cacheKey]);
       return;
     }
     
     // Si no está en cache, cargar normalmente
     setLoadingDetail(true);
     try {
-      const response = await axios.get(`${API_URL}/restaurant/${encodeURIComponent(nombreRestaurante)}`, axiosConfig);
+      // Si hay topic en el contexto, pasarlo como query param para obtener reseñas filtradas
+      const url = topic
+        ? `${API_URL}/restaurant/${encodeURIComponent(nombreRestaurante)}?topic=${encodeURIComponent(topic)}`
+        : `${API_URL}/restaurant/${encodeURIComponent(nombreRestaurante)}`;
+      const response = await axios.get(url, axiosConfig);
       setSelectedRestaurant(response.data);
-      // Guardar en cache para futuro uso
+      // Guardar en cache con key que incluye topic si aplica
       setDetailsCache(prev => ({
         ...prev,
-        [nombreRestaurante]: response.data
+        [cacheKey]: response.data
       }));
     } catch (error) {
       console.error('Error al obtener detalles:', error);
