@@ -10,9 +10,9 @@
 
 :root {
   --bg-primary: #0d0d0d;
-  --bg-secondary: rgba(26,26,46,0.62);
-  --bg-card: rgba(22,33,62,0.60);
-  --bg-chat: rgba(15,15,35,0.60);
+  --bg-secondary: rgba(26,26,46,0.55);
+  --bg-card: rgba(22,33,62,0.55);
+  --bg-chat: rgba(15,15,35,0.55);
   --accent-primary: #e94560;
   --accent-secondary: #ff6b6b;
   --accent-tertiary: #feca57;
@@ -418,7 +418,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
   display: inline-block;
-  background: rgba(0,0,0,0.56);
+  background: rgba(0,0,0,0.42);
   padding: 6px 10px;
   border-radius: 12px;
 }
@@ -440,7 +440,7 @@ body {
 
 .message-assistant .message-content {
   /* Leve transparencia para mostrar fondo sutilmente */
-  background: rgba(20,24,40,0.72);
+  background: rgba(20,24,40,0.64);
   color: #ffffff;
   border: 1px solid rgba(255,255,255,0.04);
   border-bottom-left-radius: 6px;
