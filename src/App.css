@@ -987,7 +987,7 @@ body {
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     padding: 8px;
-    z-index: 200;
+    z-index: 2100; /* ensure above other overlays */
     min-width: 64px;
     animation: popupIn 220ms cubic-bezier(0.2,1,0.2,1) forwards;
     opacity: 0;
