@@ -340,6 +340,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   const emojiRainTimeoutRef = useRef(null);
   const [emojiRainActive, setEmojiRainActive] = useState(false);
   const [emojiRainEmoji, setEmojiRainEmoji] = useState('😊');
+  const [tonePopupStyle, setTonePopupStyle] = useState(null);
 
   useEffect(() => {
     const handleDocumentClick = (e) => {
@@ -369,8 +370,28 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     if (emojiRainTimeoutRef.current) clearTimeout(emojiRainTimeoutRef.current);
     emojiRainTimeoutRef.current = setTimeout(() => {
       setEmojiRainActive(false);
-    }, 3000);
+    }, 2500); // faster
   };
+
+  // Compute popup position (fixed) so it doesn't get clipped. Mobile only by default
+  const computeTonePopupPosition = () => {
+    if (!toneToggleRef.current) return;
+    const el = toneToggleRef.current;
+    const rect = el.getBoundingClientRect();
+    // We'll position popup to the right of the toggle, vertically centered to the toggle
+    const left = Math.min(rect.right + 8, window.innerWidth - 80); // clamp
+    const top = rect.top + rect.height / 2;
+    setTonePopupStyle({ left: Math.round(left), top: Math.round(top) });
+  };
+
+  useEffect(() => {
+    if (tonesExpanded) computeTonePopupPosition();
+    const onResize = () => {
+      if (tonesExpanded) computeTonePopupPosition();
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [tonesExpanded]);
   const cardsPositionsRef = useRef(null);
 
   // Capture current cards positions (before changing the DOM order)
@@ -1001,7 +1022,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
               <span className="tone-icon">{tone === 'cordial' ? '😊' : tone === 'soberbio' ? '😏' : '😎'}</span>
             </button>
 
-            <div className={`tone-popup ${tonesExpanded ? 'expanded' : ''}`}>
+            <div className={`tone-popup ${tonesExpanded ? 'expanded' : ''}`} style={tonePopupStyle ? { position: 'fixed', left: tonePopupStyle.left, top: tonePopupStyle.top } : undefined}>
               {/* Render the other two tones inside popup */}
               {['cordial','soberbio','sassy'].filter(t => t !== tone).map((t) => (
                 <button

@@ -1104,9 +1104,9 @@ body {
   /* Variation utilities: apply different durations and delays to each sprite via inline styles. */
   .emoji-sprite.small { font-size: 18px; opacity: 0.2; }
   .emoji-sprite.large { font-size: 34px; opacity: 0.28; }
-  .emoji-sprite.slow { animation-duration: 3800ms; }
-  .emoji-sprite.fast { animation-duration: 2500ms; }
-  .emoji-sprite.slower { animation-duration: 4700ms; }
+  .emoji-sprite.slow { animation-duration: 2200ms; }
+  .emoji-sprite.fast { animation-duration: 1400ms; }
+  .emoji-sprite.slower { animation-duration: 2600ms; }
   .emoji-sprite.right-sway { transform: translateX(0); }
   .emoji-sprite.left-sway { transform: translateX(-20px); }
   .emoji-sprite.center-sway { transform: translateX(8px); }  
