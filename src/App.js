@@ -234,6 +234,13 @@ const BACKGROUND_IMAGES = [
   'https://images.unsplash.com/photo-1592861956120-e524fc739696?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
 ];
 
+// Imágenes específicas por categoría
+const BG_PIZZERIA = 'https://images.unsplash.com/photo-1593504049359-74330189a345?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+const BG_BAKERY = 'https://images.unsplash.com/photo-1568254183919-78a4f43a2877?q=80&w=1738&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+const BG_BARS = 'https://images.unsplash.com/photo-1569924995012-c4c706bfcd51?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+const BG_PARRILLA = 'https://images.unsplash.com/photo-1529694157872-4e0c0f3b238b?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+const BG_VEGANO = 'https://images.unsplash.com/photo-1511690078903-71dc5a49f5e3?q=80&w=928&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+
 // Configurar axios: solo añadir header para localtunnel cuando se use
 const axiosConfig = {};
 if (process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_BACKEND_URL.includes('loca.lt')) {
@@ -249,7 +256,15 @@ const MAP_STYLE = {
 function App() {
   // Preload background slideshow images early so they display quickly
   useEffect(() => {
-    BACKGROUND_IMAGES.forEach(src => {
+    const imagesToPreload = [
+      ...BACKGROUND_IMAGES,
+      BG_PIZZERIA,
+      BG_BAKERY,
+      BG_BARS,
+      BG_PARRILLA,
+      BG_VEGANO
+    ];
+    imagesToPreload.forEach(src => {
       const img = new Image();
       img.src = src;
     });
@@ -269,6 +284,7 @@ function App() {
   const [lastQuery, setLastQuery] = useState('');
   const [currentTopic, setCurrentTopic] = useState(''); // Última búsqueda o tópico que escribió el usuario
   const [restaurantCards, setRestaurantCards] = useState([]);
+    const [bgImages, setBgImages] = useState(BACKGROUND_IMAGES);
   const [cardsMode, setCardsMode] = useState('rag'); // 'rag' = completas, 'estadisticas' = minimalistas
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'reviews', 'name'
   const [sidebarMode, setSidebarMode] = useState(false); // Chat en sidebar después del primer mensaje
@@ -346,6 +362,24 @@ function App() {
       }
     }
   }, [hoveredRestaurant]);
+
+  // Determinar imágenes de fondo basadas en el tópico de búsqueda
+  const getBackgroundImagesForTopic = (topic) => {
+    if (!topic || typeof topic !== 'string') return BACKGROUND_IMAGES;
+    const t = topic.toLowerCase();
+    if (/^\d+$/.test(t.trim())) return BACKGROUND_IMAGES; // si es solo un número, fallback
+    if (t.includes('pizza') || t.includes('pizzer')) return [BG_PIZZERIA];
+    if (t.includes('pan') || t.includes('factur') || t.includes('medialun') || t.includes('panader')) return [BG_BAKERY];
+    if (t.includes('bar') || t.includes('cocktail') || t.includes('trago') || t.includes('cerveza') || t.includes('birra') || t.includes('pub')) return [BG_BARS];
+    if (t.includes('parrill') || t.includes('asado') || t.includes('carne') || t.includes('bife')) return [BG_PARRILLA];
+    if (t.includes('vegano') || t.includes('vegetar') || t.includes('vegan')) return [BG_VEGANO];
+    return BACKGROUND_IMAGES;
+  };
+
+  useEffect(() => {
+    const images = getBackgroundImagesForTopic(currentTopic || conversationContext?.topic || '');
+    setBgImages(images);
+  }, [currentTopic, conversationContext]);
 
   // Pre-cargar detalles de restaurantes cuando llegan las tarjetas
   useEffect(() => {
@@ -680,7 +714,7 @@ function App() {
     <div className={`App ${sidebarMode ? 'sidebar-layout' : ''}`}>
       {/* Fondo slideshow detrás del contenido */}
       <div className="bg-slideshow" aria-hidden>
-        {BACKGROUND_IMAGES.map((src, i) => (
+        {bgImages.map((src, i) => (
           <div
             key={i}
             className={`bg-slide bg-slide-${i}`}
