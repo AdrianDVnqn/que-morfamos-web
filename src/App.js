@@ -1044,13 +1044,13 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         {/* Expandable chips bar with bubble trigger */}
         <div 
           className="chip-bar-mobile"
+          onMouseEnter={() => setChipsExpanded(true)}
+          onMouseLeave={() => setChipsExpanded(false)}
         >
           <button 
             className={`chip-bubble-btn ${chipsExpanded ? 'expanded' : ''}`}
             type="button"
             onClick={() => setChipsExpanded(!chipsExpanded)}
-            onMouseEnter={() => setChipsExpanded(true)}
-            onMouseLeave={() => setChipsExpanded(false)}
             aria-label="Mostrar ejemplos de búsqueda"
           >
             <span className="bubble-icon">💡</span>
