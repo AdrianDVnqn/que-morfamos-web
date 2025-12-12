@@ -988,6 +988,7 @@ body {
     box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     padding: 8px;
     z-index: 200;
+    min-width: 64px;
   }
 
   /* Ocultar botones no activos cuando no está expandido */

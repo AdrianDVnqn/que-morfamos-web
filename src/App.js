@@ -952,40 +952,35 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
               aria-label="Tono de la IA"
               onClick={() => setTonesExpanded(!tonesExpanded)}
             >
+            {/* Active tone button (always visible when collapsed) */}
             <button
               type="button"
-              className={`tone-btn ${tone === 'cordial' ? 'active' : ''} ${!tonesExpanded && tone !== 'cordial' ? 'hidden' : ''}`}
-              title="Cordial"
-              aria-pressed={tone === 'cordial'}
-              data-tooltip="Amable y servicial"
-              aria-label="Cordial (amable y servicial)"
-              onClick={(e) => { e.stopPropagation(); setTone('cordial'); setConversationContext(prev => ({ ...prev, tone: 'cordial' })); setTonesExpanded(false); }}
+              className={`tone-btn ${"active"} active-tone`}
+              title={tone === 'cordial' ? 'Cordial' : tone === 'soberbio' ? 'Soberbio' : 'Irónico'}
+              aria-pressed={true}
+              data-tooltip={tone === 'cordial' ? 'Amable y servicial' : tone === 'soberbio' ? 'Soberbio y seguro' : 'Irónico y mordaz'}
+              aria-label={tone === 'cordial' ? 'Cordial' : tone === 'soberbio' ? 'Soberbio' : 'Irónico'}
+              onClick={(e) => { e.stopPropagation(); setTonesExpanded(!tonesExpanded); }}
             >
-              <span className="tone-icon">😊</span>
+              <span className="tone-icon">{tone === 'cordial' ? '😊' : tone === 'soberbio' ? '😏' : '😎'}</span>
             </button>
+
             <div className={`tone-popup ${tonesExpanded ? 'expanded' : ''}`}>
-              <button
-                type="button"
-                className={`tone-btn ${tone === 'soberbio' ? 'active' : ''} ${!tonesExpanded && tone !== 'soberbio' ? 'hidden' : ''}`}
-                title="Soberbio"
-                aria-pressed={tone === 'soberbio'}
-                data-tooltip="Soberbio y seguro"
-                aria-label="Soberbio (seguro y un poco pedante)"
-                onClick={(e) => { e.stopPropagation(); setTone('soberbio'); setConversationContext(prev => ({ ...prev, tone: 'soberbio' })); setTonesExpanded(false); }}
-              >
-                <span className="tone-icon">😏</span>
-              </button>
-              <button
-                type="button"
-                className={`tone-btn ${tone === 'sassy' ? 'active' : ''} ${!tonesExpanded && tone !== 'sassy' ? 'hidden' : ''}`}
-                title="Irónico"
-                aria-pressed={tone === 'sassy'}
-                data-tooltip="Irónico y mordaz"
-                aria-label="Irónico (humor mordaz)"
-                onClick={(e) => { e.stopPropagation(); setTone('sassy'); setConversationContext(prev => ({ ...prev, tone: 'sassy' })); setTonesExpanded(false); }}
-              >
-                <span className="tone-icon">😎</span>
-              </button>
+              {/* Render the other two tones inside popup */}
+              {['cordial','soberbio','sassy'].filter(t => t !== tone).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  className={`tone-btn ${tone === t ? 'active' : ''}`}
+                  title={t === 'cordial' ? 'Cordial' : t === 'soberbio' ? 'Soberbio' : 'Irónico'}
+                  aria-pressed={tone === t}
+                  data-tooltip={t === 'cordial' ? 'Amable y servicial' : t === 'soberbio' ? 'Soberbio y seguro' : 'Irónico y mordaz'}
+                  aria-label={t === 'cordial' ? 'Cordial' : t === 'soberbio' ? 'Soberbio' : 'Irónico'}
+                  onClick={(e) => { e.stopPropagation(); setTone(t); setConversationContext(prev => ({ ...prev, tone: t })); setTonesExpanded(false); }}
+                >
+                  <span className="tone-icon">{t === 'cordial' ? '😊' : t === 'soberbio' ? '😏' : '😎'}</span>
+                </button>
+              ))}
             </div>
             {!tonesExpanded && <span className="tone-expand-indicator">+</span>}
           </div>
