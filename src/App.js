@@ -310,6 +310,7 @@ function App() {
       if (name) rects[name] = node.getBoundingClientRect();
     });
     cardsPositionsRef.current = rects;
+    console.debug('[FLIP DEBUG] captureCardPositions, stored rects:', Object.keys(rects).length);
   };
 
   const handleSetSortBy = (newSort) => {
@@ -394,6 +395,7 @@ function App() {
       cardsPositionsRef.current = newRects;
       return;
     }
+    console.debug('[FLIP DEBUG] FLIP animate, prevRects:', Object.keys(prevRects).length, 'newRects:', Object.keys(newRects).length);
 
     // For each node, compute delta and apply inverse transform (FLIP)
     nodes.forEach(node => {
@@ -405,6 +407,7 @@ function App() {
         node.style.transition = 'none';
         node.style.transform = `translateY(${deltaY}px)`;
         node.style.willChange = 'transform';
+        console.debug('[FLIP DEBUG] apply inverse transform for', name, 'deltaY', deltaY);
       }
     });
 
