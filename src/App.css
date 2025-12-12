@@ -149,6 +149,30 @@ body {
   transform: translate(-50%, -50%) scale(1);
 }
 
+/* Animación sutil continua (muy leve pulso y desplazamiento del gradiente)
+   Se pausa al hacer hover para que el hover destaque por sí solo */
+@keyframes titlePulse {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-1px) scale(1.01); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes hueShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.app-header h1 {
+  /* hacer el gradiente animable */
+  background-size: 200% 200%;
+  animation: titlePulse 6s ease-in-out infinite, hueShift 12s linear infinite;
+}
+
+.app-header h1:hover {
+  animation-play-state: paused; /* pausa la animación continua al hover */
+}
+
 .header-subtitle {
   font-size: 13px;
   color: var(--text-muted);
