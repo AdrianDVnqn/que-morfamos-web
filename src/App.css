@@ -10,9 +10,9 @@
 
 :root {
   --bg-primary: #0d0d0d;
-  --bg-secondary: rgba(26,26,46,0.94);
-  --bg-card: rgba(22,33,62,0.88);
-  --bg-chat: rgba(15,15,35,0.92);
+  --bg-secondary: rgba(26,26,46,0.78);
+  --bg-card: rgba(22,33,62,0.78);
+  --bg-chat: rgba(15,15,35,0.78);
   --accent-primary: #e94560;
   --accent-secondary: #ff6b6b;
   --accent-tertiary: #feca57;
@@ -101,7 +101,7 @@ body {
 /* ========== HEADER ========== */
 .app-header {
   /* ligera transparencia para layer sobre el fondo */
-  background: rgba(18,20,36,0.88);
+  background: rgba(18,20,36,0.78);
   padding: 20px 30px;
   border-radius: 20px 20px 0 0;
   border: 1px solid rgba(255,255,255,0.03);
@@ -247,7 +247,7 @@ body {
 /* ========== CHAT CONTAINER ========== */
 .chat-container {
   /* Mantener color del chat con leve transparencia para mostrar el fondo */
-  background: rgba(15,15,35,0.92); /* levemente transparente */
+  background: rgba(15,15,35,0.78); /* levemente transparente */
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--border-color);
@@ -418,7 +418,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
   display: inline-block;
-  background: rgba(0,0,0,0.9);
+  background: rgba(0,0,0,0.75);
   padding: 6px 10px;
   border-radius: 12px;
 }
@@ -440,7 +440,7 @@ body {
 
 .message-assistant .message-content {
   /* Leve transparencia para mostrar fondo sutilmente */
-  background: rgba(20,24,40,0.96);
+  background: rgba(20,24,40,0.88);
   color: #ffffff;
   border: 1px solid rgba(255,255,255,0.04);
   border-bottom-left-radius: 6px;
@@ -529,7 +529,7 @@ body {
   gap: 12px;
   padding: 20px 25px;
   border-top: 1px solid var(--border-color);
-  background: rgba(26,26,46,0.9); /* leve transparencia */
+  background: rgba(26,26,46,0.78); /* leve transparencia */
   backdrop-filter: blur(6px) saturate(0.95);
   /* make the chat input area rounded at the bottom to match the header */
   border-bottom-left-radius: 20px;
