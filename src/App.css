@@ -1745,6 +1745,14 @@ body {
   mix-blend-mode: normal;
 }
 
+/* Cuando sólo hay una imagen en la lista, evitar que la animación haga fade-out
+   y forzar opacidad completa para mantener la imagen visible. */
+.bg-slideshow.single .bg-slide {
+  opacity: 1 !important;
+  animation: none !important;
+  transform: scale(1) !important;
+}
+
 /* ligera superposición de color para integrar con tema */
 .bg-slide::after {
   content: '';

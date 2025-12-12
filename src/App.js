@@ -713,7 +713,7 @@ function App() {
   return (
     <div className={`App ${sidebarMode ? 'sidebar-layout' : ''}`}>
       {/* Fondo slideshow detrás del contenido */}
-      <div className="bg-slideshow" aria-hidden>
+      <div className={`bg-slideshow ${bgImages.length === 1 ? 'single' : ''}`} aria-hidden>
         {bgImages.map((src, i) => (
           <div
             key={i}
