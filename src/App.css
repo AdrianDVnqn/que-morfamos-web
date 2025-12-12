@@ -2284,3 +2284,28 @@ body {
     opacity: 1 !important;
   }
 }
+
+/* Desktop final overrides to ensure tone popup is inline and not positioned absolute */
+@media (min-width: 769px) {
+  .header-controls .tone-toggle {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .header-controls .tone-popup {
+    display: flex !important;
+    position: static !important;
+    flex-direction: row !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    gap: 8px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+  }
+  .tone-btn.hidden { display: flex !important; }
+  .tone-expand-indicator { display: none !important; }
+}
