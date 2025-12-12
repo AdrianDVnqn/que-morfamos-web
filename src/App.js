@@ -1011,21 +1011,6 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
               )}
               <div className="message-content">
                 <ReactMarkdown>{message.content}</ReactMarkdown>
-                {/* Render example chips below the assistant welcome message */}
-                {message.mode === 'system' && index === 0 && (
-                  <div className="welcome-chips">
-                    {SAMPLE_CHIPS.map((c, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        className="chip-btn"
-                        onClick={() => handleChipClick(c.query)}
-                      >
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
           ))}

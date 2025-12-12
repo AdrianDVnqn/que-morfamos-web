@@ -1291,8 +1291,12 @@ body {
     align-items: center;
     z-index: 40;
     -webkit-overflow-scrolling: touch;
+    background: rgba(15,15,35,0.92);
+    border-top: 1px solid var(--border-color);
   }
   .chip-bar-mobile .chip-btn { white-space: nowrap; }
+  /* Hide top-level welcome chips on mobile to avoid duplication */
+  .welcome-chips:not(.chip-bar-mobile) { display: none !important; }
 }
   font-weight: 500;
 }
