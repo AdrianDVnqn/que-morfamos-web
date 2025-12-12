@@ -297,6 +297,7 @@ function App() {
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'reviews', 'name'
   const [sidebarMode, setSidebarMode] = useState(false); // Chat en sidebar después del primer mensaje
   const [hoveredRestaurant, setHoveredRestaurant] = useState(null);
+  const cardsPositionsRef = useRef(null);
   const [centerMapOn, setCenterMapOn] = useState(null); // Solo se activa desde tarjetas
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -348,6 +349,64 @@ function App() {
       }
     });
   }, [restaurantCards, sortBy, cardsMode]);
+
+  // FLIP animation: animate reordering of items in `cardsContainerRef` when `sortedCards` changes
+  useLayoutEffect(() => {
+    if (cardsMode !== 'estadisticas') {
+      // Reset stored positions when not in list mode
+      cardsPositionsRef.current = null;
+      return;
+    }
+
+    const container = cardsContainerRef.current;
+    if (!container) return;
+
+    // Build map of current rects
+    const nodes = Array.from(container.children);
+    const newRects = {};
+    nodes.forEach(node => {
+      const name = node.dataset.cardName;
+      if (name) newRects[name] = node.getBoundingClientRect();
+    });
+
+    const prevRects = cardsPositionsRef.current;
+    if (!prevRects) {
+      // store positions for future comparisons
+      cardsPositionsRef.current = newRects;
+      return;
+    }
+
+    // For each node, compute delta and apply inverse transform
+    nodes.forEach(node => {
+      const name = node.dataset.cardName;
+      if (!name || !prevRects[name] || !newRects[name]) return;
+      const deltaY = prevRects[name].top - newRects[name].top;
+      if (deltaY) {
+        node.style.transform = `translateY(${deltaY}px)`;
+        node.style.transition = 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)';
+        node.style.willChange = 'transform';
+      }
+    });
+
+    // Trigger reflow and animate to zero
+    requestAnimationFrame(() => {
+      nodes.forEach(node => {
+        node.style.transform = '';
+      });
+    });
+
+    const clearStyles = () => {
+      nodes.forEach(node => {
+        node.style.transition = '';
+        node.style.willChange = '';
+      });
+    };
+    // Clear after animation finishes
+    const t = setTimeout(clearStyles, 400);
+    // Store current for next comparison
+    cardsPositionsRef.current = newRects;
+    return () => clearTimeout(t);
+  }, [sortedCards, cardsMode]);
 
   // Efecto para sincronizar highlight del marcador cuando cambia hoveredRestaurant
   useEffect(() => {
@@ -976,6 +1035,7 @@ function App() {
                   {sortedCards.map((card, idx) => (
                     <div 
                       key={idx} 
+                      data-card-name={card.nombre}
                       ref={(el) => { if (el) cardRefs.current[card.nombre] = el; }}
                       className={`card-mini ${hoveredRestaurant === card.nombre ? 'card-highlighted' : ''}`}
                       onMouseEnter={() => { setHoveredRestaurant(card.nombre); if (!scrollingFromMap.current) setCenterMapOn(card.nombre); }}
@@ -996,9 +1056,10 @@ function App() {
             ) : (
               // Tarjetas completas para recomendaciones
               <div className="cards-grid" ref={cardsContainerRef}>
-                {restaurantCards.map((card, idx) => (
+                {sortedCards.map((card, idx) => (
                   <div 
                     key={idx} 
+                    data-card-name={card.nombre}
                     ref={(el) => { if (el) cardRefs.current[card.nombre] = el; }}
                     className={`restaurant-card ${hoveredRestaurant === card.nombre ? 'card-highlighted' : ''}`}
                     onMouseEnter={() => { setHoveredRestaurant(card.nombre); if (!scrollingFromMap.current) setCenterMapOn(card.nombre); }}
