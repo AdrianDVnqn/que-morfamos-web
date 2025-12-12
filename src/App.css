@@ -1340,12 +1340,25 @@ body {
   opacity: 0;
   transition: max-width 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms ease;
   white-space: nowrap;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--border-color) transparent; /* Firefox */
 }
 
 .chips-expandable::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  height: 6px;
+}
+
+.chips-expandable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chips-expandable::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.chips-expandable::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
 }
 
 .chips-expandable.expanded {
