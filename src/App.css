@@ -192,16 +192,79 @@ body {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  padding: 8px 16px;
-  border-radius: 25px;
+  padding: 8px;
+  border-radius: 50%;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  position: relative;
+  cursor: help;
+  transition: all 200ms ease;
+}
+
+.status-indicator:hover {
+  transform: scale(1.1);
+}
+
+/* Ocultar texto, solo mostrar punto */
+.status-text {
+  display: none;
+}
+
+/* Tooltip para el status (desktop y mobile) */
+.status-indicator::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  font-size: 11px;
+  white-space: nowrap;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.status-indicator::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  opacity: 0;
+  transition: opacity 200ms ease;
+  z-index: 99;
+}
+
+.status-indicator:hover::after,
+.status-indicator:active::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.status-indicator:hover::before,
+.status-indicator:active::before {
+  opacity: 1;
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
@@ -839,68 +902,6 @@ body {
     flex-direction: column;
     gap: 12px;
     border-radius: 15px 15px 0 0;
-  }
-
-  /* Status indicator: solo mostrar punto en mobile */
-  .status-indicator {
-    padding: 8px;
-    border-radius: 50%;
-    position: relative;
-  }
-
-  .status-text {
-    display: none;
-  }
-
-  /* Tooltip para el status en mobile */
-  .status-indicator::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    padding: 6px 12px;
-    font-size: 11px;
-    white-space: nowrap;
-    border-radius: 8px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 200ms ease, transform 200ms ease;
-    z-index: 100;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    text-transform: none;
-    letter-spacing: 0;
-    font-weight: 500;
-  }
-
-  .status-indicator::before {
-    content: '';
-    position: absolute;
-    bottom: calc(100% + 3px);
-    left: 50%;
-    transform: translateX(-50%) rotate(45deg);
-    width: 8px;
-    height: 8px;
-    background: var(--bg-primary);
-    border-right: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-    opacity: 0;
-    transition: opacity 200ms ease;
-    z-index: 99;
-  }
-
-  .status-indicator:hover::after,
-  .status-indicator:active::after {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-4px);
-  }
-
-  .status-indicator:hover::before,
-  .status-indicator:active::before {
-    opacity: 1;
   }
 
   /* Header top row: título + tonos en la misma línea */
