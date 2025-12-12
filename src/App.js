@@ -419,9 +419,32 @@ function App() {
     // Trigger animation to zero transform on next frame
     requestAnimationFrame(() => {
       nodes.forEach(node => {
-        // Re-enable transition and animate transform to 0
-        node.style.transition = 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)';
-        node.style.transform = '';
+        const style = window.getComputedStyle(node);
+        // Get delta from applied transform if present
+        // Use Web Animations API for more reliable animations
+        try {
+          const delta = node.style.transform || 'translateY(0px)';
+          const duration = 320;
+          const easing = 'cubic-bezier(0.22, 1, 0.36, 1)';
+          // Animate from current translated position back to 0
+          const anim = node.animate([
+            { transform: delta },
+            { transform: 'translateY(0px)' }
+          ], { duration, easing });
+          anim.onfinish = () => {
+            node.style.transform = '';
+            node.style.willChange = '';
+            node.style.transition = '';
+          };
+        } catch (e) {
+          // Fallback to CSS transition if WA API not supported
+          node.style.transition = 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)';
+          node.style.transform = '';
+          setTimeout(() => {
+            node.style.transition = '';
+            node.style.willChange = '';
+          }, 360);
+        }
       });
     });
 
