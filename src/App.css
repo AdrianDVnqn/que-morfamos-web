@@ -325,6 +325,23 @@ body {
   min-height: 400px;
 }
 
+/* Cuando el layout es sidebar (resultados mostrados), hacer los paneles levemente transparentes */
+.App.sidebar-layout .chat-container.chat-sidebar {
+  background: rgba(15,15,35,0.94); /* un pelín más transparente que el default para sensación de layered UI */
+}
+
+.App.sidebar-layout .cards-container {
+  background: rgba(10,10,18,0.10);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.App.sidebar-layout .map-container {
+  background: rgba(10,10,18,0.10);
+  border-radius: 12px;
+  padding: 6px;
+}
+
 /* Header del chat en sidebar */
 .chat-sidebar .chat-header {
   display: flex;
@@ -1703,20 +1720,22 @@ body {
 }
 
 /* Animación de crossfade. Duración total: N * 5s (ajustable) */
+
+/* Animación de crossfade: cada slide dura ~10s visibles, ciclo total 50s */
 @keyframes slideFade {
   0% { opacity: 0; }
-  6% { opacity: 0.9; }
-  22% { opacity: 0.9; }
+  4% { opacity: 0.95; }
+  24% { opacity: 0.95; }
   28% { opacity: 0; }
   100% { opacity: 0; }
 }
 
-/* Aplicar animación con offsets para cada slide */
-.bg-slide-0 { animation: slideFade 25s linear infinite 0s; }
-.bg-slide-1 { animation: slideFade 25s linear infinite 5s; }
-.bg-slide-2 { animation: slideFade 25s linear infinite 10s; }
-.bg-slide-3 { animation: slideFade 25s linear infinite 15s; }
-.bg-slide-4 { animation: slideFade 25s linear infinite 20s; }
+/* Aplicar animación con offsets para cada slide: delay de 10s entre slides */
+.bg-slide-0 { animation: slideFade 50s linear infinite 0s; }
+.bg-slide-1 { animation: slideFade 50s linear infinite 10s; }
+.bg-slide-2 { animation: slideFade 50s linear infinite 20s; }
+.bg-slide-3 { animation: slideFade 50s linear infinite 30s; }
+.bg-slide-4 { animation: slideFade 50s linear infinite 40s; }
 
 /* Afinar: menor opacidad en móviles para no competir con legibilidad */
 @media (max-width: 800px) {
