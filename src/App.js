@@ -963,45 +963,38 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
             <span className="header-subtitle">Tu IA gastronómica de Neuquén y alrededores</span>
           </div>
           <div className="header-controls">
-            <div 
+            <div
               ref={toneToggleRef}
               className={`tone-toggle ${tonesExpanded ? 'expanded' : ''}`}
-              role="tablist" 
+              role="tablist"
               aria-label="Tono de la IA"
               onClick={() => setTonesExpanded(!tonesExpanded)}
             >
-            {/* Active tone button (always visible when collapsed) */}
-            <button
-              type="button"
-              className={`tone-btn ${"active"} active-tone`}
-              title={tone === 'cordial' ? 'Cordial' : tone === 'soberbio' ? 'Soberbio' : 'Irónico'}
-              aria-pressed={true}
-              data-tooltip={tone === 'cordial' ? 'Amable y servicial' : tone === 'soberbio' ? 'Soberbio y seguro' : 'Irónico y mordaz'}
-              aria-label={tone === 'cordial' ? 'Cordial' : tone === 'soberbio' ? 'Soberbio' : 'Irónico'}
-              onClick={(e) => { e.stopPropagation(); setTonesExpanded(!tonesExpanded); }}
-            >
-              <span className="tone-icon">{tone === 'cordial' ? '😊' : tone === 'soberbio' ? '😏' : '😎'}</span>
-            </button>
-
-            <div className={`tone-popup ${tonesExpanded ? 'expanded' : ''}`}>
-              {/* Render the other two tones inside popup */}
-              {['cordial','soberbio','sassy'].filter(t => t !== tone).map((t) => (
+              {/* Render all 3 tone buttons always, but hide non-active ones in mobile unless expanded */}
+              {['cordial', 'soberbio', 'sassy'].map((t) => (
                 <button
                   key={t}
                   type="button"
-                  className={`tone-btn ${tone === t ? 'active' : ''}`}
+                  className={`tone-btn${tone === t ? ' active' : ''}${!tonesExpanded && tone !== t ? ' hidden' : ''}`}
                   title={t === 'cordial' ? 'Cordial' : t === 'soberbio' ? 'Soberbio' : 'Irónico'}
                   aria-pressed={tone === t}
                   data-tooltip={t === 'cordial' ? 'Amable y servicial' : t === 'soberbio' ? 'Soberbio y seguro' : 'Irónico y mordaz'}
                   aria-label={t === 'cordial' ? 'Cordial' : t === 'soberbio' ? 'Soberbio' : 'Irónico'}
-                  onClick={(e) => { e.stopPropagation(); setTone(t); setConversationContext(prev => ({ ...prev, tone: t })); setTonesExpanded(false); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (tone !== t) {
+                      setTone(t);
+                      setConversationContext(prev => ({ ...prev, tone: t }));
+                    }
+                    setTonesExpanded(false);
+                  }}
                 >
                   <span className="tone-icon">{t === 'cordial' ? '😊' : t === 'soberbio' ? '😏' : '😎'}</span>
                 </button>
               ))}
+              {/* Only show the + indicator in mobile when not expanded */}
+              {!tonesExpanded && <span className="tone-expand-indicator">+</span>}
             </div>
-            {!tonesExpanded && <span className="tone-expand-indicator">+</span>}
-          </div>
           <div 
             className={`status-indicator status-${apiStatus}`}
             data-tooltip={apiStatus === 'connected' ? 'Backend conectado' : apiStatus === 'checking' ? 'Conectando al backend...' : 'Sin conexión al backend'}
