@@ -436,10 +436,14 @@ body {
 }
 
 .message-assistant .message-content {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  /* Mayor opacidad y contraste para legibilidad sobre el slideshow */
+  background: rgba(20,24,40,0.98);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.04);
   border-bottom-left-radius: 6px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px) saturate(0.9);
+  font-weight: 500;
 }
 
 .message-content.loading {
@@ -1703,7 +1707,7 @@ body {
   background-repeat: no-repeat;
   opacity: 0;
   /* Más blur y menor saturación para un fondo más oscuro y suave */
-  filter: blur(8px) saturate(0.7) contrast(0.85);
+  filter: blur(8px) saturate(0.7) contrast(0.85) brightness(0.6);
   transform: scale(1.03);
   transition: opacity 1s ease;
   mix-blend-mode: normal;
