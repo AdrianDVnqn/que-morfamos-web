@@ -1048,7 +1048,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
           onMouseLeave={() => setChipsExpanded(false)}
         >
           <button 
-            className="chip-bubble-btn" 
+            className={`chip-bubble-btn ${chipsExpanded ? 'expanded' : ''}`}
             type="button"
             onClick={() => setChipsExpanded(!chipsExpanded)}
             aria-label="Mostrar ejemplos de búsqueda"
