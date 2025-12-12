@@ -985,6 +985,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
             >
               <span className="tone-icon">😎</span>
             </button>
+            {!tonesExpanded && <span className="tone-expand-indicator">+</span>}
           </div>
           <div 
             className={`status-indicator status-${apiStatus}`}

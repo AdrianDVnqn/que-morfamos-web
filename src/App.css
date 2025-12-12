@@ -990,6 +990,26 @@ body {
     padding: 8px;
   }
 
+  /* Indicador de expansión "+" */
+  .tone-expand-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-top: 2px;
+    animation: pulseIndicator 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseIndicator {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
   .message {
     max-width: 92%;
   }
