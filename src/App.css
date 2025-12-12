@@ -1707,8 +1707,8 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   opacity: 0;
-  /* Más blur y menor saturación para un fondo más oscuro y suave */
-  filter: blur(8px) saturate(0.7) contrast(0.85) brightness(0.6);
+  /* Más blur y menor saturación, y todavía más oscuro para garantizar contraste */
+  filter: blur(8px) saturate(0.65) contrast(0.82) brightness(0.45);
   transform: scale(1.03);
   transition: opacity 1s ease;
   mix-blend-mode: normal;
@@ -1719,8 +1719,8 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  /* Gradiente más oscuro para atenuar las fotos y mejorar contraste */
-  background: linear-gradient(180deg, rgba(7,7,7,0.7), rgba(12,12,20,0.8));
+  /* Gradiente aún más oscuro para atenuar las fotos y mejorar contraste */
+  background: linear-gradient(180deg, rgba(6,6,6,0.82), rgba(8,8,12,0.92));
   pointer-events: none;
 }
 
