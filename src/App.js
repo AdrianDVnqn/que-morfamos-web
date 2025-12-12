@@ -298,6 +298,24 @@ function App() {
   const [sidebarMode, setSidebarMode] = useState(false); // Chat en sidebar después del primer mensaje
   const [hoveredRestaurant, setHoveredRestaurant] = useState(null);
   const cardsPositionsRef = useRef(null);
+
+  // Capture current cards positions (before changing the DOM order)
+  const captureCardPositions = () => {
+    const container = cardsContainerRef.current;
+    if (!container) return;
+    const nodes = Array.from(container.children);
+    const rects = {};
+    nodes.forEach(node => {
+      const name = node.dataset.cardName;
+      if (name) rects[name] = node.getBoundingClientRect();
+    });
+    cardsPositionsRef.current = rects;
+  };
+
+  const handleSetSortBy = (newSort) => {
+    if (cardsMode === 'estadisticas') captureCardPositions();
+    setSortBy(newSort);
+  };
   const [centerMapOn, setCenterMapOn] = useState(null); // Solo se activa desde tarjetas
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -370,6 +388,7 @@ function App() {
     });
 
     const prevRects = cardsPositionsRef.current;
+    // If prevRects isn't available, maybe we didn't capture before sort - fallback to storing current
     if (!prevRects) {
       // store positions for future comparisons
       cardsPositionsRef.current = newRects;
@@ -1018,21 +1037,21 @@ function App() {
                 <div className="sort-buttons">
                   <button 
                     className={`sort-btn ${sortBy === 'rating' ? 'active' : ''}`}
-                    onClick={() => setSortBy('rating')}
+                    onClick={() => handleSetSortBy('rating')}
                     title="Ordenar por puntaje"
                   >
                     ⭐ Puntaje
                   </button>
                   <button 
                     className={`sort-btn ${sortBy === 'reviews' ? 'active' : ''}`}
-                    onClick={() => setSortBy('reviews')}
+                    onClick={() => handleSetSortBy('reviews')}
                     title="Ordenar por cantidad de reseñas"
                   >
                     💬 Reseñas
                   </button>
                   <button 
                     className={`sort-btn ${sortBy === 'name' ? 'active' : ''}`}
-                    onClick={() => setSortBy('name')}
+                    onClick={() => handleSetSortBy('name')}
                     title="Ordenar alfabéticamente"
                   >
                     🔤 A-Z
