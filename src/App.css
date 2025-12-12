@@ -1001,6 +1001,7 @@ body {
       top: auto !important;
       transform: none !important;
       flex-direction: row !important;
+      gap: 8px !important;
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;
@@ -1008,6 +1009,7 @@ body {
       min-width: auto !important;
       opacity: 1 !important;
     }
+    .tone-toggle { display:flex !important; align-items:center; gap:8px !important; }
     .tone-btn.hidden { display: flex !important; }
     .tone-expand-indicator { display: none !important; }
   }
