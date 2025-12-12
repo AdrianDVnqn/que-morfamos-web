@@ -980,16 +980,16 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
               <span className="tone-icon">😎</span>
             </button>
           </div>
+          <div 
+            className={`status-indicator status-${apiStatus}`}
+            data-tooltip={apiStatus === 'connected' ? 'Backend conectado' : apiStatus === 'checking' ? 'Conectando al backend...' : 'Sin conexión al backend'}
+          >
+            <span className="status-dot"></span>
+            <span className="status-text">
+              {apiStatus === 'connected' ? 'Conectado' : apiStatus === 'checking' ? 'Conectando...' : 'Sin conexión'}
+            </span>
+          </div>
         </div>
-        </div>
-        <div 
-          className={`status-indicator status-${apiStatus}`}
-          data-tooltip={apiStatus === 'connected' ? 'Backend conectado' : apiStatus === 'checking' ? 'Conectando al backend...' : 'Sin conexión al backend'}
-        >
-          <span className="status-dot"></span>
-          <span className="status-text">
-            {apiStatus === 'connected' ? 'Conectado' : apiStatus === 'checking' ? 'Conectando...' : 'Sin conexión'}
-          </span>
         </div>
       </header>
 

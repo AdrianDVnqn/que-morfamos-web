@@ -112,6 +112,27 @@ body {
   backdrop-filter: blur(8px) saturate(0.95);
 }
 
+/* Desktop layout */
+.header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.header-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
 .app-header h1 {
   font-size: 26px;
   font-weight: 700;
@@ -2102,12 +2123,6 @@ body {
   .bg-slide { filter: blur(4px) saturate(0.9) contrast(0.92); }
 }
 
-.header-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-left: auto;
-}
 .tone-toggle {
   display: flex;
   align-items: center;
