@@ -960,6 +960,30 @@ body {
     flex-direction: column;
     gap: 4px;
     padding: 6px;
+    cursor: pointer;
+    transition: all 300ms ease;
+  }
+
+  /* Ocultar botones no activos cuando no está expandido */
+  .tone-btn.hidden {
+    display: none;
+  }
+
+  /* Cuando está expandido, mostrar todos */
+  .tone-toggle.expanded .tone-btn.hidden {
+    display: flex;
+    animation: fadeInTone 200ms ease forwards;
+  }
+
+  @keyframes fadeInTone {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
   .tone-btn {
