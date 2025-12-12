@@ -981,7 +981,7 @@ body {
     position: absolute;
     left: calc(100% + 8px);
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(-50%) scale(0.98);
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 10px;
@@ -989,6 +989,14 @@ body {
     padding: 8px;
     z-index: 200;
     min-width: 64px;
+    animation: popupIn 220ms cubic-bezier(0.2,1,0.2,1) forwards;
+    opacity: 0;
+  }
+
+  @keyframes popupIn {
+    0% { opacity: 0; transform: translateY(-10px) scale(0.95); }
+    60% { opacity: 1; transform: translateY(2px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
   }
 
   /* Ocultar botones no activos cuando no está expandido */
@@ -1015,6 +1023,32 @@ body {
 
   .tone-btn {
     padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    transition: transform 140ms ease, box-shadow 140ms ease;
+  }
+  .tone-btn:active { transform: scale(0.95); }
+
+  .active-tone { box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+
+  /* Tooltip spacing */
+  .tone-expand-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding: 4px 6px;
+    margin-left: 8px;
+    margin-top: 0;
+    animation: pulseIndicator 2s ease-in-out infinite;
   }
 
   /* Indicador de expansión "+" */
@@ -1041,6 +1075,42 @@ body {
   .message {
     max-width: 92%;
   }
+
+  /* Emoji rain overlay - full screen decorative layer */
+  .emoji-rain-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none; /* non-intrusive */
+    overflow: hidden;
+  }
+
+  .emoji-sprite {
+    position: absolute;
+    font-size: 24px;
+    opacity: 0.25;
+    transform: translateY(-20px) rotate(0deg);
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
+    animation: emojiFall linear forwards;
+    will-change: transform, opacity;
+  }
+
+  @keyframes emojiFall {
+    0% { transform: translateY(-20px) translateX(0) rotate(0deg); opacity: 0.35; }
+    70% { opacity: 0.35; }
+    100% { transform: translateY(110vh) translateX(40px) rotate(420deg); opacity: 0; }
+  }
+
+  /* Variation utilities: apply different durations and delays to each sprite via inline styles. */
+  .emoji-sprite.small { font-size: 18px; opacity: 0.2; }
+  .emoji-sprite.large { font-size: 34px; opacity: 0.28; }
+  .emoji-sprite.slow { animation-duration: 3800ms; }
+  .emoji-sprite.fast { animation-duration: 2500ms; }
+  .emoji-sprite.slower { animation-duration: 4700ms; }
+  .emoji-sprite.right-sway { transform: translateX(0); }
+  .emoji-sprite.left-sway { transform: translateX(-20px); }
+  .emoji-sprite.center-sway { transform: translateX(8px); }  
+
 
   .message-content {
     font-size: 14px;

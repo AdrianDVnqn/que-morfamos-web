@@ -337,6 +337,9 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   const [chipsExpanded, setChipsExpanded] = useState(false);
   const [tonesExpanded, setTonesExpanded] = useState(false);
   const toneToggleRef = useRef(null);
+  const emojiRainTimeoutRef = useRef(null);
+  const [emojiRainActive, setEmojiRainActive] = useState(false);
+  const [emojiRainEmoji, setEmojiRainEmoji] = useState('😊');
 
   useEffect(() => {
     const handleDocumentClick = (e) => {
@@ -353,6 +356,21 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     document.addEventListener('mousedown', handleDocumentClick);
     return () => document.removeEventListener('mousedown', handleDocumentClick);
   }, [tonesExpanded]);
+
+  useEffect(() => {
+    return () => {
+      if (emojiRainTimeoutRef.current) clearTimeout(emojiRainTimeoutRef.current);
+    };
+  }, []);
+
+  const triggerEmojiRain = (emoji = '😊') => {
+    setEmojiRainEmoji(emoji);
+    setEmojiRainActive(true);
+    if (emojiRainTimeoutRef.current) clearTimeout(emojiRainTimeoutRef.current);
+    emojiRainTimeoutRef.current = setTimeout(() => {
+      setEmojiRainActive(false);
+    }, 3000);
+  };
   const cardsPositionsRef = useRef(null);
 
   // Capture current cards positions (before changing the DOM order)
@@ -994,7 +1012,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                   aria-pressed={tone === t}
                   data-tooltip={t === 'cordial' ? 'Amable y servicial' : t === 'soberbio' ? 'Soberbio y seguro' : 'Irónico y mordaz'}
                   aria-label={t === 'cordial' ? 'Cordial' : t === 'soberbio' ? 'Soberbio' : 'Irónico'}
-                  onClick={(e) => { e.stopPropagation(); setTone(t); setConversationContext(prev => ({ ...prev, tone: t })); setTonesExpanded(false); }}
+                  onClick={(e) => { e.stopPropagation(); setTone(t); setConversationContext(prev => ({ ...prev, tone: t })); setTonesExpanded(false); triggerEmojiRain(t === 'cordial' ? '😊' : t === 'soberbio' ? '😏' : '😎'); }}
                 >
                   <span className="tone-icon">{t === 'cordial' ? '😊' : t === 'soberbio' ? '😏' : '😎'}</span>
                 </button>
@@ -1016,6 +1034,25 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       </header>
 
       <div className="main-content">
+
+      {emojiRainActive && (
+        <div className="emoji-rain-overlay" aria-hidden>
+          {Array.from({ length: 16 }).map((_, i) => {
+            const left = Math.round(Math.random() * 100);
+            const sizeClass = i % 3 === 0 ? 'large' : i % 3 === 1 ? 'small' : '';
+            const speedClass = i % 4 === 0 ? 'fast' : i % 4 === 1 ? 'slow' : 'slower';
+            const sway = i % 2 === 0 ? 'right-sway' : 'left-sway';
+            const delay = Math.round(Math.random() * 600);
+            return (
+              <span
+                key={`emoji-rain-${i}`}
+                className={`emoji-sprite ${sizeClass} ${speedClass} ${sway}`}
+                style={{ left: `${left}%`, animationDelay: `${delay}ms` }}
+              >{emojiRainEmoji}</span>
+            );
+          })}
+        </div>
+      )}
       <div className={`chat-container ${sidebarMode ? 'chat-sidebar' : ''}`}>
         {sidebarMode && (
           <div className="chat-header">
