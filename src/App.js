@@ -395,7 +395,8 @@ function App() {
       cardsPositionsRef.current = newRects;
       return;
     }
-    console.debug('[FLIP DEBUG] FLIP animate, prevRects:', Object.keys(prevRects).length, 'newRects:', Object.keys(newRects).length);
+    console.debug('[FLIP DEBUG] FLIP animate, prevRects:', Object.keys(prevRects).length, 'newRects:', Object.keys(newRects).length,
+      'prevOrder:', Object.keys(prevRects).join(','), 'newOrder:', nodes.map(n => n.dataset.cardName).join(','));
 
     // For each node, compute delta and apply inverse transform (FLIP)
     nodes.forEach(node => {
