@@ -529,6 +529,66 @@ function App() {
     }
   };
 
+  // Seleccionar una opción pendiente (click en etiqueta)
+  const selectPendingOption = async (index) => {
+    if (loading) return;
+
+    const selectionStr = String(index + 1); // enviamos el número al backend
+    // Mostrar el mensaje del usuario en la UI
+    setMessages(prev => [...prev, { role: 'user', content: selectionStr }] );
+    setLoading(true);
+
+    try {
+      const response = await axios.post(`${API_URL}/chat`, {
+        query: selectionStr,
+        conversation_context: conversationContext
+      }, { timeout: 60000, ...axiosConfig });
+
+      // Actualizar contexto y UI igual que en sendMessage
+      setConversationContext(response.data.conversation_context || {});
+      setMessages(prev => [...prev, { role: 'assistant', content: response.data.response, mode: response.data.mode }]);
+
+      if (response.data.locations && response.data.locations.length > 0) {
+        setMapLocations(response.data.locations);
+        setLastQuery(selectionStr);
+      } else {
+        setMapLocations([]);
+      }
+
+      if (response.data.restaurant_cards && response.data.restaurant_cards.length > 0) {
+        setRestaurantCards(response.data.restaurant_cards);
+        setSidebarMode(true);
+      } else {
+        setRestaurantCards([]);
+      }
+
+      if (response.data.detail_content && response.data.mode === 'resumen') {
+        const card = response.data.restaurant_cards?.[0];
+        if (card) {
+          setInlineDetail({
+            nombre: card.nombre,
+            rating: card.rating,
+            total_reviews: card.total_reviews,
+            direccion: card.direccion,
+            barrio: card.barrio,
+            zona: card.zona,
+            resumen_general: response.data.detail_content
+          });
+        }
+      } else {
+        setInlineDetail(null);
+      }
+
+      setApiStatus('connected');
+    } catch (error) {
+      console.error('Error al seleccionar opción:', error);
+      setApiStatus('error');
+      setMessages(prev => [...prev, { role: 'assistant', content: '❌ Error al procesar la selección', mode: 'error' }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getModeIcon = (mode) => {
     switch (mode) {
       case 'estadisticas': return '📊';
@@ -637,6 +697,27 @@ function App() {
           )}
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Mostrar opciones pendientes si el backend las devolvió (labels opcionales) */}
+        {conversationContext && conversationContext.pending_options && (
+          <div className="pending-options">
+            <div className="pending-note">Elegí la opción que corresponda:</div>
+            <div className="pending-list">
+              {Array.isArray(conversationContext.pending_options)
+                ? conversationContext.pending_options.map((opt, i) => (
+                    <button key={i} className="pending-btn" onClick={() => selectPendingOption(i)}>
+                      {i+1}. {opt}
+                    </button>
+                  ))
+                : (conversationContext.pending_options.labels || []).map((lbl, i) => (
+                    <button key={i} className="pending-btn" onClick={() => selectPendingOption(i)}>
+                      {i+1}. {lbl}
+                    </button>
+                  ))
+              }
+            </div>
+          </div>
+        )}
 
         <form className="input-container" onSubmit={sendMessage}>
           <input
