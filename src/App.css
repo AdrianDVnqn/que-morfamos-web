@@ -993,6 +993,25 @@ body {
     opacity: 0;
   }
 
+  @media (min-width: 769px) {
+    .tone-popup {
+      display: flex !important;
+      position: static !important;
+      left: auto !important;
+      top: auto !important;
+      transform: none !important;
+      flex-direction: row !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      min-width: auto !important;
+      opacity: 1 !important;
+    }
+    .tone-btn.hidden { display: flex !important; }
+    .tone-expand-indicator { display: none !important; }
+  }
+
   @keyframes popupIn {
     0% { opacity: 0; transform: translateY(-10px) scale(0.95); }
     60% { opacity: 1; transform: translateY(2px) scale(1.02); }
@@ -1080,7 +1099,7 @@ body {
   .emoji-rain-overlay {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 9999; /* above all other layers */
     pointer-events: none; /* non-intrusive */
     overflow: hidden;
   }
