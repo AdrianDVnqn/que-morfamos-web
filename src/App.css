@@ -1855,9 +1855,48 @@ body {
   color: var(--text-primary);
   cursor: pointer;
   transition: background 150ms ease, transform 120ms ease;
+  position: relative;
 }
 .tone-btn .tone-icon { font-size: 18px; }
 .tone-btn .tone-name { font-size: 12px; color: var(--text-muted); }
 .tone-btn:hover { background: rgba(255,255,255,0.02); transform: translateY(-1px); }
 .tone-btn.active { background: var(--accent-primary); color: white; }
 .tone-btn.active .tone-name { color: rgba(255,255,255,0.9); }
+
+/* Tooltip styling for emoji buttons */
+.tone-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  bottom: calc(100% + 6px);
+  background: rgba(0,0,0,0.82);
+  color: #ffffff;
+  padding: 6px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+  z-index: 10;
+}
+.tone-btn::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  bottom: calc(100% + 2px);
+  width: 8px;
+  height: 8px;
+  background: rgba(0,0,0,0.82);
+  transform-origin: center;
+  rotate: 45deg;
+  opacity: 0;
+  transition: opacity 160ms ease;
+  z-index: 10;
+}
+.tone-btn:hover::after,
+.tone-btn:hover::before,
+.tone-btn:focus::after,
+.tone-btn:focus::before { opacity: 1; transform: translateX(-50%) translateY(0); }

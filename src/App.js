@@ -929,30 +929,33 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
               className={`tone-btn ${tone === 'cordial' ? 'active' : ''}`}
               title="Cordial"
               aria-pressed={tone === 'cordial'}
+              data-tooltip="Amable y servicial"
+              aria-label="Cordial (amable y servicial)"
               onClick={() => { setTone('cordial'); setConversationContext(prev => ({ ...prev, tone: 'cordial' })); }}
             >
               <span className="tone-icon">😊</span>
-              <span className="tone-name">Cordial</span>
             </button>
             <button
               type="button"
               className={`tone-btn ${tone === 'soberbio' ? 'active' : ''}`}
               title="Soberbio"
               aria-pressed={tone === 'soberbio'}
+              data-tooltip="Soberbio y seguro"
+              aria-label="Soberbio (seguro y un poco pedante)"
               onClick={() => { setTone('soberbio'); setConversationContext(prev => ({ ...prev, tone: 'soberbio' })); }}
             >
               <span className="tone-icon">😏</span>
-              <span className="tone-name">Soberbio</span>
             </button>
             <button
               type="button"
               className={`tone-btn ${tone === 'sassy' ? 'active' : ''}`}
               title="Irónico"
               aria-pressed={tone === 'sassy'}
+              data-tooltip="Irónico y mordaz"
+              aria-label="Irónico (humor mordaz)"
               onClick={() => { setTone('sassy'); setConversationContext(prev => ({ ...prev, tone: 'sassy' })); }}
             >
               <span className="tone-icon">😎</span>
-              <span className="tone-name">Irónico</span>
             </button>
           </div>
         </div>
