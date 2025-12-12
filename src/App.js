@@ -247,6 +247,13 @@ const MAP_STYLE = {
 };
 
 function App() {
+  // Preload background slideshow images early so they display quickly
+  useEffect(() => {
+    BACKGROUND_IMAGES.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
