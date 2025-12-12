@@ -313,6 +313,11 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       mode: 'system'
     }
   ]);
+  const SAMPLE_CHIPS = [
+    { label: '🍕 Mejores Pizzas', query: 'Mejores pizzas' },
+    { label: '🥗 Opciones Veganas', query: 'Opciones veganas' },
+    { label: '🍺 Mejores cervecerías', query: 'Mejores cervecerías' }
+  ];
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState('checking');
@@ -655,17 +660,15 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     }
   };
 
-  const sendMessage = async (e) => {
-    e.preventDefault();
-    if (!input.trim() || loading) return;
-
-    const userMessage = input.trim();
+  const sendQuery = async (userMessage) => {
+    if (!userMessage || !userMessage.trim() || loading) return;
+    const um = userMessage.trim();
     // Guardar la última búsqueda antes de limpiar input
-    setCurrentTopic(userMessage);
+    setCurrentTopic(um);
     setInput('');
 
     // Agregar mensaje del usuario
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setMessages(prev => [...prev, { role: 'user', content: um }]);
     setLoading(true);
 
     console.log('[FRONTEND DEBUG] Enviando query:', userMessage);
@@ -674,7 +677,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     try {
       // Enviar el tono como parte del request para que el backend lo tome en cuenta
       const response = await axios.post(`${API_URL}/chat`, {
-        query: userMessage,
+        query: um,
         conversation_context: { ...conversationContext, tone },
         tone
       }, { timeout: 60000, ...axiosConfig }); // 60 segundos para respuestas del LLM
@@ -692,6 +695,16 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         setLastQuery(userMessage); // Guardar query solo cuando hay ubicaciones
       } else {
         setMapLocations([]);
+      }
+
+      const sendMessage = async (e) => {
+        e.preventDefault();
+        await sendQuery(input);
+      }
+
+      const handleChipClick = async (q) => {
+        if (loading) return;
+        await sendQuery(q);
       }
 
       // Siempre actualizar el modo de visualización
@@ -988,6 +1001,21 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
               )}
               <div className="message-content">
                 <ReactMarkdown>{message.content}</ReactMarkdown>
+                {/* Render example chips below the assistant welcome message */}
+                {message.mode === 'system' && index === 0 && (
+                  <div className="welcome-chips">
+                    {SAMPLE_CHIPS.map((c, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className="chip-btn"
+                        onClick={() => handleChipClick(c.query)}
+                      >
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}

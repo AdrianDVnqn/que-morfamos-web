@@ -1243,6 +1243,29 @@ body {
 .card-mini-name {
   color: var(--text-primary);
   font-size: 14px;
+.welcome-chips {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chip-btn {
+  background: rgba(255,255,255,0.03);
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.04);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 160ms ease, transform 120ms ease, color 160ms ease;
+}
+.chip-btn:hover, .chip-btn:focus {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  transform: translateY(-2px);
+  outline: none;
+}
+.chip-btn:active { transform: translateY(0); }
   font-weight: 500;
 }
 
