@@ -1253,22 +1253,29 @@ body {
   pointer-events: auto;
 }
 .chip-btn {
-  background: rgba(255,255,255,0.06);
+  background: rgba(233, 69, 96, 0.12);
   color: var(--text-primary);
-  border: 1px solid rgba(255,255,255,0.04);
-  padding: 6px 10px;
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  padding: 10px 18px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 160ms ease, transform 120ms ease, color 160ms ease;
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .chip-btn:hover, .chip-btn:focus {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   color: white;
   transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(233, 69, 96, 0.4);
+  border-color: transparent;
   outline: none;
 }
-.chip-btn:active { transform: translateY(0); }
+.chip-btn:active { 
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(233, 69, 96, 0.3);
+}
 
 /* Mobile sticky chip bar */
 .chip-bar-mobile {
@@ -1284,19 +1291,31 @@ body {
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 84px; /* above input (account for keyboard/toolbar) */
-    gap: 8px;
-    padding: 8px 20px;
+    bottom: 72px;
+    gap: 10px;
+    padding: 12px 20px;
     overflow-x: auto;
     align-items: center;
-    z-index: 40;
+    z-index: 50;
     -webkit-overflow-scrolling: touch;
-    background: rgba(15,15,35,0.92);
-    border-top: 1px solid var(--border-color);
+    background: linear-gradient(180deg, rgba(15,15,35,0.98), rgba(22,33,62,0.96));
+    border-top: 1px solid rgba(233, 69, 96, 0.2);
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
   }
-  .chip-bar-mobile .chip-btn { white-space: nowrap; }
-  /* Hide top-level welcome chips on mobile to avoid duplication */
-  .welcome-chips:not(.chip-bar-mobile) { display: none !important; }
+  .chip-bar-mobile .chip-btn { 
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+@media (min-width: 801px) {
+  .chip-bar-mobile {
+    display: flex;
+    gap: 10px;
+    padding: 12px 25px;
+    background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
 }
   font-weight: 500;
 }

@@ -991,16 +991,6 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
             <span className="chat-badge">En vivo</span>
           </div>
         )}
-        {/* Top-level chips to ensure visibility (also rendered inside the welcome bubble) */}
-        {messages && messages.length > 0 && messages[0].mode === 'system' && (
-          <div className="welcome-chips" style={{ margin: '14px 25px 0 25px' }}>
-            {SAMPLE_CHIPS.map((c, i) => (
-              <button key={i} className="chip-btn" type="button" onClick={() => handleChipClick(c.query)}>
-                {c.label}
-              </button>
-            ))}
-          </div>
-        )}
         <div className="messages-container">
           {messages.map((message, index) => (
             <div key={index} className={`message message-${message.role}`}>
