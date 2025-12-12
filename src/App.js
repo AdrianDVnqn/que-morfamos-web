@@ -376,21 +376,28 @@ function App() {
       return;
     }
 
-    // For each node, compute delta and apply inverse transform
+    // For each node, compute delta and apply inverse transform (FLIP)
     nodes.forEach(node => {
       const name = node.dataset.cardName;
       if (!name || !prevRects[name] || !newRects[name]) return;
       const deltaY = prevRects[name].top - newRects[name].top;
       if (deltaY) {
+        // Temporarily disable transition so the transform is applied instantly
+        node.style.transition = 'none';
         node.style.transform = `translateY(${deltaY}px)`;
-        node.style.transition = 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)';
         node.style.willChange = 'transform';
       }
     });
 
-    // Trigger reflow and animate to zero
+    // Force reflow to ensure the browser sees the starting transform
+    // eslint-disable-next-line no-unused-expressions
+    container && container.offsetHeight;
+
+    // Trigger animation to zero transform on next frame
     requestAnimationFrame(() => {
       nodes.forEach(node => {
+        // Re-enable transition and animate transform to 0
+        node.style.transition = 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)';
         node.style.transform = '';
       });
     });
