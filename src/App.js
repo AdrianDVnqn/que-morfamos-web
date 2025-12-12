@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -1039,7 +1040,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
 
       <div className="main-content">
 
-      {emojiRainActive && (
+      {emojiRainActive && createPortal(
         <div className="emoji-rain-overlay" aria-hidden>
           {Array.from({ length: 16 }).map((_, i) => {
             const left = Math.round(Math.random() * 100);
@@ -1055,7 +1056,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
               >{emojiRainEmoji}</span>
             );
           })}
-        </div>
+        </div>, document.body
       )}
       <div className={`chat-container ${sidebarMode ? 'chat-sidebar' : ''}`}>
         {sidebarMode && (
