@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useMemo, useLayoutEffect } from 'react';
-import { createPortal } from 'react-dom';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -338,10 +337,6 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   const [chipsExpanded, setChipsExpanded] = useState(false);
   const [tonesExpanded, setTonesExpanded] = useState(false);
   const toneToggleRef = useRef(null);
-  const emojiRainTimeoutRef = useRef(null);
-  const [emojiRainActive, setEmojiRainActive] = useState(false);
-  const [emojiRainEmoji, setEmojiRainEmoji] = useState('😊');
-
 
   useEffect(() => {
     const handleDocumentClick = (e) => {
@@ -358,24 +353,6 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     document.addEventListener('mousedown', handleDocumentClick);
     return () => document.removeEventListener('mousedown', handleDocumentClick);
   }, [tonesExpanded]);
-
-  useEffect(() => {
-    return () => {
-      if (emojiRainTimeoutRef.current) clearTimeout(emojiRainTimeoutRef.current);
-    };
-  }, []);
-
-  const triggerEmojiRain = (emoji = '😊') => {
-    setEmojiRainEmoji(emoji);
-    setEmojiRainActive(true);
-    if (emojiRainTimeoutRef.current) clearTimeout(emojiRainTimeoutRef.current);
-    emojiRainTimeoutRef.current = setTimeout(() => {
-      setEmojiRainActive(false);
-    }, 2500); // faster
-  };
-
-  // Compute popup position (fixed) so it doesn't get clipped. Mobile only by default
-
   const cardsPositionsRef = useRef(null);
 
   // Capture current cards positions (before changing the DOM order)
@@ -1017,7 +994,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                   aria-pressed={tone === t}
                   data-tooltip={t === 'cordial' ? 'Amable y servicial' : t === 'soberbio' ? 'Soberbio y seguro' : 'Irónico y mordaz'}
                   aria-label={t === 'cordial' ? 'Cordial' : t === 'soberbio' ? 'Soberbio' : 'Irónico'}
-                  onClick={(e) => { e.stopPropagation(); setTone(t); setConversationContext(prev => ({ ...prev, tone: t })); setTonesExpanded(false); triggerEmojiRain(t === 'cordial' ? '😊' : t === 'soberbio' ? '😏' : '😎'); }}
+                  onClick={(e) => { e.stopPropagation(); setTone(t); setConversationContext(prev => ({ ...prev, tone: t })); setTonesExpanded(false); }}
                 >
                   <span className="tone-icon">{t === 'cordial' ? '😊' : t === 'soberbio' ? '😏' : '😎'}</span>
                 </button>
@@ -1039,25 +1016,6 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       </header>
 
       <div className="main-content">
-
-      {emojiRainActive && createPortal(
-        <div className="emoji-rain-overlay" aria-hidden>
-          {Array.from({ length: 16 }).map((_, i) => {
-            const left = Math.round(Math.random() * 100);
-            const sizeClass = i % 3 === 0 ? 'large' : i % 3 === 1 ? 'small' : '';
-            const speedClass = i % 4 === 0 ? 'fast' : i % 4 === 1 ? 'slow' : 'slower';
-            const sway = i % 2 === 0 ? 'right-sway' : 'left-sway';
-            const delay = Math.round(Math.random() * 600);
-            return (
-              <span
-                key={`emoji-rain-${i}`}
-                className={`emoji-sprite ${sizeClass} ${speedClass} ${sway}`}
-                style={{ left: `${left}%`, animationDelay: `${delay}ms` }}
-              >{emojiRainEmoji}</span>
-            );
-          })}
-        </div>, document.body
-      )}
       <div className={`chat-container ${sidebarMode ? 'chat-sidebar' : ''}`}>
         {sidebarMode && (
           <div className="chat-header">

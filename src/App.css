@@ -981,43 +981,14 @@ body {
     position: absolute;
     left: calc(100% + 8px);
     top: 50%;
-    transform: translateY(-50%) scale(0.98);
+    transform: translateY(-50%);
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     padding: 8px;
-    z-index: 2100; /* ensure above other overlays */
+    z-index: 200;
     min-width: 64px;
-    animation: popupIn 220ms cubic-bezier(0.2,1,0.2,1) forwards;
-    opacity: 0;
-  }
-
-  @media (min-width: 769px) {
-    .tone-popup {
-      display: flex !important;
-      position: static !important;
-      left: auto !important;
-      top: auto !important;
-      transform: none !important;
-      flex-direction: row !important;
-      gap: 8px !important;
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-      min-width: auto !important;
-      opacity: 1 !important;
-    }
-    .tone-toggle { display:flex !important; align-items:center; gap:8px !important; }
-    .tone-btn.hidden { display: flex !important; }
-    .tone-expand-indicator { display: none !important; }
-  }
-
-  @keyframes popupIn {
-    0% { opacity: 0; transform: translateY(-10px) scale(0.95); }
-    60% { opacity: 1; transform: translateY(2px) scale(1.02); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
   }
 
   /* Ocultar botones no activos cuando no está expandido */
@@ -1044,32 +1015,6 @@ body {
 
   .tone-btn {
     padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    transition: transform 140ms ease, box-shadow 140ms ease;
-  }
-  .tone-btn:active { transform: scale(0.95); }
-
-  .active-tone { box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
-
-  /* Tooltip spacing */
-  .tone-expand-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-muted);
-    background: rgba(255,255,255,0.05);
-    border-radius: 6px;
-    padding: 4px 6px;
-    margin-left: 8px;
-    margin-top: 0;
-    animation: pulseIndicator 2s ease-in-out infinite;
   }
 
   /* Indicador de expansión "+" */
@@ -1096,43 +1041,6 @@ body {
   .message {
     max-width: 92%;
   }
-
-  /* Emoji rain overlay - full screen decorative layer */
-  .emoji-rain-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999; /* above all other layers */
-    pointer-events: none; /* non-intrusive */
-    overflow: hidden;
-  }
-
-  .emoji-sprite {
-    position: absolute;
-    font-size: 24px;
-    opacity: 0;
-    transform: translateY(-120vh) rotate(0deg);
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
-    animation: emojiFall linear forwards;
-    will-change: transform, opacity;
-  }
-
-  @keyframes emojiFall {
-    0% { transform: translateY(-120vh) translateX(0) rotate(0deg); opacity: 0; }
-    8% { opacity: 0.32; }
-    70% { opacity: 0.32; }
-    100% { transform: translateY(110vh) translateX(40px) rotate(420deg); opacity: 0; }
-  }
-
-  /* Variation utilities: apply different durations and delays to each sprite via inline styles. */
-  .emoji-sprite.small { font-size: 18px; opacity: 0.2; }
-  .emoji-sprite.large { font-size: 34px; opacity: 0.28; }
-  .emoji-sprite.slow { animation-duration: 2200ms; }
-  .emoji-sprite.fast { animation-duration: 1400ms; }
-  .emoji-sprite.slower { animation-duration: 2600ms; }
-  .emoji-sprite.right-sway { transform: translateX(0); }
-  .emoji-sprite.left-sway { transform: translateX(-20px); }
-  .emoji-sprite.center-sway { transform: translateX(8px); }  
-
 
   .message-content {
     font-size: 14px;
