@@ -293,7 +293,20 @@ function App() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: '¿No sabés cuáles son los mejores lugares en Neuquén? Dejá que yo te diga la posta 🍽️\n\nPuedo:\n- Decirte dónde hay buena pizza.\n- Contarte qué opinan de un lugar en particular (ese al que van tus amigos).\n- Buscar cuántos locales ofrecen opciones para tu restricción alimentaria.\n\nEjemplos: "¿Dónde hay buena pizza?", "Qué opinan de Growler Bar?", "Cuántos restaurantes de sushi hay?", "Dónde hay opciones veganas?"',
+      content: `¿Indeciso? Te ahorro la búsqueda y te tiro la data justa 🍷
+
+Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Preguntame:
+
+🍕 Recomendaciones: "¿Dónde explota la pizza?"
+
+🧐 La verdad de la milanesa: "¿Qué onda Growler Bar? ¿Está bueno?"
+
+🎯 A medida: "Lugares veganos" o "Restaurantes aptos celíacos".
+
+🌟 Datazo: "Lugares románticos" o "Lugares para ir en familia."
+
+¡Dale! Decime qué querés y arrancamos.
+`,
       mode: 'system'
     }
   ]);
