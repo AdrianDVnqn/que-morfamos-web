@@ -1334,18 +1334,22 @@ body {
 }
 
 .card-quote {
+  position: relative;
   background: rgba(233, 69, 96, 0.08);
   border-left: 3px solid var(--accent-primary);
-  padding: 10px 12px;
+  padding: 14px 16px;
   border-radius: 0 8px 8px 0;
+  overflow: hidden;
 }
 
 .card-quote p {
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 14px;
   font-style: italic;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  position: relative;
+  z-index: 2;
 }
 
 .quote-author {
@@ -1354,6 +1358,35 @@ body {
   font-size: 12px;
   margin-top: 6px;
   text-align: right;
+}
+
+/* Comillas decorativas grandes */
+.card-quote::before {
+  content: '“';
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 56px;
+  color: rgba(233, 69, 96, 0.12);
+  line-height: 1;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.card-quote::after {
+  content: '”';
+  position: absolute;
+  bottom: -8px;
+  right: 10px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 44px;
+  color: rgba(233, 69, 96, 0.12);
+  line-height: 1;
+  z-index: 1;
+  pointer-events: none;
 }
 
 /* Responsive cards */
