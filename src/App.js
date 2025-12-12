@@ -267,6 +267,7 @@ function App() {
   const [conversationContext, setConversationContext] = useState({});
   const [mapLocations, setMapLocations] = useState([]);
   const [lastQuery, setLastQuery] = useState('');
+  const [currentTopic, setCurrentTopic] = useState(''); // Última búsqueda o tópico que escribió el usuario
   const [restaurantCards, setRestaurantCards] = useState([]);
   const [cardsMode, setCardsMode] = useState('rag'); // 'rag' = completas, 'estadisticas' = minimalistas
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'reviews', 'name'
@@ -442,6 +443,8 @@ function App() {
     if (!input.trim() || loading) return;
 
     const userMessage = input.trim();
+    // Guardar la última búsqueda antes de limpiar input
+    setCurrentTopic(userMessage);
     setInput('');
 
     // Agregar mensaje del usuario
@@ -550,6 +553,8 @@ function App() {
     if (loading) return;
 
     const selectionStr = String(index + 1); // enviamos el número al backend
+    // Guardar la selección como último tópico (para usar en detalles)
+    setCurrentTopic(selectionStr);
     // Mostrar el mensaje del usuario en la UI
     setMessages(prev => [...prev, { role: 'user', content: selectionStr }] );
     setLoading(true);
@@ -625,7 +630,8 @@ function App() {
 
   const openRestaurantDetail = async (nombreRestaurante) => {
     // Usar cache si está disponible
-    const topic = conversationContext?.topic;
+    // Priorizar currentTopic (última búsqueda del usuario), si existe
+    const topic = currentTopic && currentTopic.length > 0 ? currentTopic : conversationContext?.topic;
     const cacheKey = topic ? `${nombreRestaurante}__${topic}` : nombreRestaurante;
     if (detailsCache[cacheKey]) {
       setSelectedRestaurant(detailsCache[cacheKey]);
