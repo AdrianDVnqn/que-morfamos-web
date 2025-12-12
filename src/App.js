@@ -936,13 +936,16 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         )}
       </div>
       <header className="app-header">
-        <h1 
-          style={{ cursor: 'pointer' }}
-          onClick={() => window.location.reload()}
-        >🍽️ ¿Qué Morfamos?</h1>
-        <span className="header-subtitle">Tu IA gastronómica de Neuquén y alrededores</span>
-        <div className="header-controls">
-          <div className="tone-toggle" role="tablist" aria-label="Tono de la IA">
+        <div className="header-top-row">
+          <div className="header-title-group">
+            <h1 
+              style={{ cursor: 'pointer' }}
+              onClick={() => window.location.reload()}
+            >🍽️ ¿Qué Morfamos?</h1>
+            <span className="header-subtitle">Tu IA gastronómica de Neuquén y alrededores</span>
+          </div>
+          <div className="header-controls">
+            <div className="tone-toggle" role="tablist" aria-label="Tono de la IA">
             <button
               type="button"
               className={`tone-btn ${tone === 'cordial' ? 'active' : ''}`}
@@ -977,6 +980,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
               <span className="tone-icon">😎</span>
             </button>
           </div>
+        </div>
         </div>
         <div className={`status-indicator status-${apiStatus}`}>
           <span className="status-dot"></span>

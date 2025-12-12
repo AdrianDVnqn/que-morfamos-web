@@ -841,8 +841,45 @@ body {
     border-radius: 15px 15px 0 0;
   }
 
+  /* Header top row: título + tonos en la misma línea */
+  .header-top-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .header-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
   .app-header h1 {
     font-size: 20px;
+    margin: 0;
+  }
+
+  .header-subtitle {
+    display: block;
+  }
+
+  /* Tonos verticales en mobile */
+  .header-controls {
+    margin-left: 0;
+    flex-shrink: 0;
+  }
+
+  .tone-toggle {
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .tone-btn {
+    padding: 8px;
   }
 
   .message {
