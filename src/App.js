@@ -951,7 +951,7 @@ function App() {
                     )}
                     {card.frase_destacada && (
                       <div className="card-quote">
-                        <p>"{card.frase_destacada}"</p>
+                        <p>{card.frase_destacada}</p>
                         {card.autor_reseña && <span className="quote-author">— {card.autor_reseña}</span>}
                       </div>
                     )}
