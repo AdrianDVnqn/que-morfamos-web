@@ -243,7 +243,8 @@ body {
 
 /* ========== CHAT CONTAINER ========== */
 .chat-container {
-  background: var(--bg-chat);
+  /* Mantener color sólido del chat pero con ligera transparencia (mejor legibilidad) */
+  background: rgba(15,15,35,0.96); /* casi opaco */
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--border-color);
@@ -383,17 +384,6 @@ body {
   flex-direction: column;
   max-width: 85%;
   animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 .message-user {
@@ -1695,10 +1685,11 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   opacity: 0;
-  filter: blur(6px) saturate(0.9) contrast(0.95);
-  transform: scale(1.02);
+  /* Más blur y menor saturación para un fondo más oscuro y suave */
+  filter: blur(8px) saturate(0.7) contrast(0.85);
+  transform: scale(1.03);
   transition: opacity 1s ease;
-  mix-blend-mode: overlay;
+  mix-blend-mode: normal;
 }
 
 /* ligera superposición de color para integrar con tema */
@@ -1706,7 +1697,8 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(13,13,13,0.35), rgba(21,21,34,0.45));
+  /* Gradiente más oscuro para atenuar las fotos y mejorar contraste */
+  background: linear-gradient(180deg, rgba(7,7,7,0.7), rgba(12,12,20,0.8));
   pointer-events: none;
 }
 
