@@ -1902,8 +1902,11 @@ body {
   box-shadow: 0 6px 18px rgba(0,0,0,0.35);
 }
 .tone-btn:hover::after,
+.tone-btn:focus::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 .tone-btn:hover::before,
-.tone-btn:focus::after,
 .tone-btn:focus::before {
   opacity: 1;
   transform: translateX(-50%) translateY(0) rotate(45deg);
@@ -1917,7 +1920,7 @@ body {
   .tone-btn:focus::after,
   .tone-btn:focus::before {
     transition: none !important;
-    transform: translateX(-50%) translateY(0) rotate(45deg) !important;
+    transform: translateX(-50%) translateY(0) !important;
     opacity: 1 !important;
   }
 }
