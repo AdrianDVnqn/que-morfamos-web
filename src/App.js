@@ -241,7 +241,7 @@ function App() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: '¡Hola! Soy tu asistente gastronómico de Neuquén 🍽️\n\nPodés preguntarme:\n- "¿Dónde hay buena pizza?"\n- "Qué opinan de Growler Bar?"\n- "Cuántos restaurantes de sushi hay?"',
+      content: '¿No sabés cuáles son los mejores lugares en Neuquén? Dejá que yo te diga la posta 🍽️\n\nPuedo:\n- Decirte dónde hay buena pizza.\n- Contarte qué opinan de un lugar en particular (ese al que van tus amigos).\n- Buscar cuántos locales ofrecen opciones para tu restricción alimentaria.\n\nEjemplos: "¿Dónde hay buena pizza?", "Qué opinan de Growler Bar?", "Cuántos restaurantes de sushi hay?", "Dónde hay opciones veganas?',
       mode: 'system'
     }
   ]);
@@ -655,7 +655,7 @@ function App() {
           style={{ cursor: 'pointer' }}
           onClick={() => window.location.reload()}
         >🍽️ ¿Qué Morfamos?</h1>
-        <span className="header-subtitle">Tu guía gastronómica de Neuquén</span>
+        <span className="header-subtitle">Tu IA gastronómica de Neuquén, by ADV</span>
         <div className={`status-indicator status-${apiStatus}`}>
           <span className="status-dot"></span>
           {apiStatus === 'connected' ? 'Conectado' : apiStatus === 'checking' ? 'Conectando...' : 'Sin conexión'}
