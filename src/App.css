@@ -1832,18 +1832,32 @@ body {
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   margin-left: auto;
 }
-.tone-label {
-  color: var(--text-muted);
-  font-size: 12px;
-}
-.tone-select {
-  background: rgba(255,255,255,0.03);
-  color: var(--text-primary);
+.tone-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.02);
   border: 1px solid var(--border-color);
   padding: 6px 8px;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 10px;
 }
+.tone-btn {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 150ms ease, transform 120ms ease;
+}
+.tone-btn .tone-icon { font-size: 18px; }
+.tone-btn .tone-name { font-size: 12px; color: var(--text-muted); }
+.tone-btn:hover { background: rgba(255,255,255,0.02); transform: translateY(-1px); }
+.tone-btn.active { background: var(--accent-primary); color: white; }
+.tone-btn.active .tone-name { color: rgba(255,255,255,0.9); }

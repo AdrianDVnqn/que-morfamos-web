@@ -923,12 +923,38 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         >🍽️ ¿Qué Morfamos?</h1>
         <span className="header-subtitle">Tu IA gastronómica de Neuquén y alrededores</span>
         <div className="header-controls">
-          <label htmlFor="tone-select" className="tone-label">Tono</label>
-          <select id="tone-select" className="tone-select" value={tone} onChange={(e) => { const newTone = e.target.value; setTone(newTone); setConversationContext(prev => ({ ...prev, tone: newTone })); }}>
-            <option value="cordial">Cordial</option>
-            <option value="soberbio">Soberbio</option>
-            <option value="sassy">Irónico</option>
-          </select>
+          <div className="tone-toggle" role="tablist" aria-label="Tono de la IA">
+            <button
+              type="button"
+              className={`tone-btn ${tone === 'cordial' ? 'active' : ''}`}
+              title="Cordial"
+              aria-pressed={tone === 'cordial'}
+              onClick={() => { setTone('cordial'); setConversationContext(prev => ({ ...prev, tone: 'cordial' })); }}
+            >
+              <span className="tone-icon">😊</span>
+              <span className="tone-name">Cordial</span>
+            </button>
+            <button
+              type="button"
+              className={`tone-btn ${tone === 'soberbio' ? 'active' : ''}`}
+              title="Soberbio"
+              aria-pressed={tone === 'soberbio'}
+              onClick={() => { setTone('soberbio'); setConversationContext(prev => ({ ...prev, tone: 'soberbio' })); }}
+            >
+              <span className="tone-icon">😏</span>
+              <span className="tone-name">Soberbio</span>
+            </button>
+            <button
+              type="button"
+              className={`tone-btn ${tone === 'sassy' ? 'active' : ''}`}
+              title="Irónico"
+              aria-pressed={tone === 'sassy'}
+              onClick={() => { setTone('sassy'); setConversationContext(prev => ({ ...prev, tone: 'sassy' })); }}
+            >
+              <span className="tone-icon">😎</span>
+              <span className="tone-name">Irónico</span>
+            </button>
+          </div>
         </div>
         <div className={`status-indicator status-${apiStatus}`}>
           <span className="status-dot"></span>
