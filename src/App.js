@@ -982,9 +982,14 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
           </div>
         </div>
         </div>
-        <div className={`status-indicator status-${apiStatus}`}>
+        <div 
+          className={`status-indicator status-${apiStatus}`}
+          data-tooltip={apiStatus === 'connected' ? 'Backend conectado' : apiStatus === 'checking' ? 'Conectando al backend...' : 'Sin conexión al backend'}
+        >
           <span className="status-dot"></span>
-          {apiStatus === 'connected' ? 'Conectado' : apiStatus === 'checking' ? 'Conectando...' : 'Sin conexión'}
+          <span className="status-text">
+            {apiStatus === 'connected' ? 'Conectado' : apiStatus === 'checking' ? 'Conectando...' : 'Sin conexión'}
+          </span>
         </div>
       </header>
 
