@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
+import { lanzarLluviaTono } from './utils/emojiRain';
 
 // Componente para cambiar el TileLayer dinámicamente
 function ChangeMapStyle({ url, attribution }) {
@@ -985,6 +986,17 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                     if (tone !== t) {
                       setTone(t);
                       setConversationContext(prev => ({ ...prev, tone: t }));
+                      // Map internal tone keys to emojirain keys
+                      const mapToneForRain = (tt) => {
+                        if (tt === 'cordial') return 'amable';
+                        if (tt === 'sassy') return 'ironico';
+                        return tt; // 'soberbio' stays the same
+                      };
+                      try {
+                        lanzarLluviaTono(mapToneForRain(t));
+                      } catch (err) {
+                        console.warn('Error lanzando lluvia de emojis:', err);
+                      }
                     }
                     setTonesExpanded(false);
                   }}
