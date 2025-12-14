@@ -1017,6 +1017,27 @@ body {
     padding: 8px;
   }
 
+  /* Mobile: make chat and results full height */
+  .chat-container {
+    max-height: none;
+    height: 100%;
+    min-height: 100%;
+  }
+
+  .results-area {
+    height: 100%;
+    min-height: 100%;
+  }
+
+  .map-container {
+    height: calc(100vh - 200px) !important;
+    margin-top: 0;
+  }
+
+  .map-container .leaflet-container {
+    height: 100% !important;
+  }
+
   /* Mobile tab bar (chat / lugares / mapa) */
   .mobile-tab-bar {
     position: fixed;
