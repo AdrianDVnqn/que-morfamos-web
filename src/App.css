@@ -1049,8 +1049,11 @@ body {
     padding: 20px;
   }
 
-  .map-inner > .leaflet-container {
+  .map-inner > .leaflet-container,
+  .map-inner .leaflet-container {
     height: 100% !important;
+    display: block !important;
+    min-height: 120px; /* fallback for very small viewports */
   }
 
   /* Mobile tab bar (chat / lugares / mapa) */

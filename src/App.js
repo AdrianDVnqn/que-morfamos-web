@@ -131,6 +131,9 @@ function FitBounds({ locations, allViewRef }) {
 // Componente para centrar el mapa en el restaurante hovereado (solo desde tarjetas)
 function CenterOnHover({ centerOn, locations, allViewRef }) {
   const map = useMap();
+  
+  // existing logic... (unchanged)
+
   // Zoom del hover: valor positivo -> más cercano (más zoom in)
   const HOVER_ZOOM_DELTA = 2; // aumentar en 2 niveles respecto a la vista de todos los iconos
   const DEFAULT_HOVER_ZOOM = 16;
@@ -159,6 +162,20 @@ function CenterOnHover({ centerOn, locations, allViewRef }) {
     }
   }, [centerOn, locations, map, allViewRef]);
 
+  return null;
+}
+
+// Small helper component: when `visible` becomes true, call invalidateSize on the map ref a couple of times
+function MapKick({ visible, mapRef }) {
+  useEffect(() => {
+    if (!visible || !mapRef?.current) return;
+    console.log('[MapKick] kicking map invalidates');
+    // multiple calls over short time help Leaflet recalc when container was hidden
+    const timers = [60, 180, 420, 900].map((ms) => setTimeout(() => {
+      try { mapRef.current.invalidateSize(); } catch (e) { console.warn('[MapKick] invalidate failed', e); }
+    }, ms));
+    return () => timers.forEach(t => clearTimeout(t));
+  }, [visible, mapRef]);
   return null;
 }
 
@@ -449,6 +466,17 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   const cardsContainerRef = useRef(null); // Ref del contenedor de tarjetas
   const scrollingFromMap = useRef(false); // Flag para evitar centrar mapa cuando scroll es desde marcador
   const allViewRef = useRef({ center: null, zoom: null }); // Guarda la vista que muestra todos los iconos
+  const mapRef = useRef(null); // Ref al objeto Leaflet map (usado para invalidateSize)
+
+  // Ensure map invalidation when mobile tab is shown
+  useEffect(() => {
+    if (mobileTab === 'map' && mapRef.current) {
+      console.log('[MAP] mobile tab shown - invalidating size');
+      [100, 300, 600].forEach(ms => setTimeout(() => {
+        try { mapRef.current.invalidateSize(); } catch (e) { console.warn('invalidateSize failed', e); }
+      }, ms));
+    }
+  }, [mobileTab]);
 
   // Función para scroll a una tarjeta específica (solo dentro del contenedor)
   const scrollToCard = (nombre, fromMap = false) => {
@@ -1395,6 +1423,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                 </div>
                 <MapContainer
                   key={mapLocations.map(l => l.nombre).join('-')}
+                  whenCreated={(m) => { mapRef.current = m; console.log('[MAP] created', m); }}
                   center={[mapLocations[0].lat, mapLocations[0].lng]}
                   zoom={13}
                   preferCanvas={true}
@@ -1413,6 +1442,9 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                     locations={mapLocations} 
                     allViewRef={allViewRef}
                   />
+                  {/** small hack: kick-map-invalidates after mount */}
+                  <MapKick visible={mobileTab === 'map'} mapRef={mapRef} />
+                  {/* Force a couple invalidateSize calls after mount to avoid blank map when container was hidden */}
                   {mapLocations.map((loc, idx) => (
                     <Marker 
                       key={loc.nombre} 
