@@ -343,6 +343,10 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   const [hoveredRestaurant, setHoveredRestaurant] = useState(null);
   const [chipsExpanded, setChipsExpanded] = useState(false);
   const [tonesExpanded, setTonesExpanded] = useState(false);
+  
+  // === NUEVO ESTADO PARA PESTAÑAS MÓVILES ===
+  const [mobileTab, setMobileTab] = useState('chat'); // 'chat' | 'results'
+
   const toneToggleRef = useRef(null);
 
   useEffect(() => {
@@ -416,7 +420,9 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       if (countdownInterval) clearInterval(countdownInterval);
     };
   }, [apiStatus, messages]);
-  const messagesEndRef = useRef(null);
+  
+  // === NUEVO REF PARA CONTENEDOR DE MENSAJES ===
+  const messagesContainerRef = useRef(null);
   const markerRefs = useRef({});
   const cardRefs = useRef({}); // Refs para scroll a tarjetas
   const cardsContainerRef = useRef(null); // Ref del contenedor de tarjetas
@@ -693,10 +699,16 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-scroll al último mensaje
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  // === SCROLL MEJORADO: Usar el contenedor del chat en lugar de scrollIntoView ===
+  useLayoutEffect(() => {
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [messages, loading]);
 
   const checkBackendHealth = async () => {
     try {
@@ -718,6 +730,9 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     // Guardar la última búsqueda antes de limpiar input
     setCurrentTopic(um);
     setInput('');
+    
+    // === MOBILE: Forzar pestaña de chat al enviar mensaje ===
+    setMobileTab('chat');
 
     // Agregar mensaje del usuario
     setMessages(prev => [...prev, { role: 'user', content: um }]);
@@ -839,6 +854,10 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     const selectionStr = String(index + 1); // enviamos el número al backend
     // Guardar la selección como último tópico (para usar en detalles)
     setCurrentTopic(selectionStr);
+    
+    // === MOBILE: Forzar chat ===
+    setMobileTab('chat');
+
     // Mostrar el mensaje del usuario en la UI
     setMessages(prev => [...prev, { role: 'user', content: selectionStr }] );
     setLoading(true);
@@ -1053,14 +1072,15 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       </header>
 
       <div className="main-content">
-      <div className={`chat-container ${sidebarMode ? 'chat-sidebar' : ''}`}>
+      {/* CONTENEDOR DEL CHAT: oculto en mobile si mobileTab no es 'chat' */}
+      <div className={`chat-container ${sidebarMode ? 'chat-sidebar' : ''} ${mobileTab === 'results' ? 'mobile-hidden' : ''}`}>
         {sidebarMode && (
           <div className="chat-header">
             <h4>💬 Chat</h4>
             <span className="chat-badge">En vivo</span>
           </div>
         )}
-        <div className="messages-container">
+        <div className="messages-container" ref={messagesContainerRef}>
           {messages.map((message, index) => (
             <div key={index} className={`message message-${message.role}`}>
               {message.role === 'assistant' && message.mode && (
@@ -1085,7 +1105,6 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
         </div>
 
         {/* Mostrar opciones pendientes si el backend las devolvió (labels opcionales) */}
@@ -1141,7 +1160,8 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Preguntame sobre restaurantes, bares, heladerías, etc. en Neuquén y alrededores"
+            onFocus={() => setMobileTab('chat')}
+            placeholder="¿Qué tenés ganas de comer hoy?"
             disabled={loading || apiStatus !== 'connected'}
             className="message-input"
           />
@@ -1155,8 +1175,8 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         </form>
       </div>
 
-      {/* Área de resultados (cards + mapa) */}
-      <div className={sidebarMode ? 'results-area' : 'results-area-hidden'}>
+      {/* Área de resultados (cards + mapa): oculta en mobile si mobileTab no es 'results' */}
+      <div className={`${sidebarMode ? 'results-area' : 'results-area-hidden'} ${mobileTab === 'chat' ? 'mobile-hidden' : ''}`}>
         
         {/* Panel de detalle inline para modo resumen */}
         {cardsMode === 'resumen' && (loadingInlineDetail || inlineDetail) && (
@@ -1437,7 +1457,23 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       </div>
       </div>{/* Fin main-content */}
 
-      
+      {/* BARRA DE NAVEGACIÓN MÓVIL (Solo visible si sidebarMode es true) */}
+      {sidebarMode && (
+        <div className="mobile-tab-bar">
+          <button 
+            className={`mobile-tab-btn ${mobileTab === 'chat' ? 'active' : ''}`}
+            onClick={() => setMobileTab('chat')}
+          >
+            💬 Chat
+          </button>
+          <button 
+            className={`mobile-tab-btn ${mobileTab === 'results' ? 'active' : ''}`}
+            onClick={() => setMobileTab('results')}
+          >
+            📍 Resultados {restaurantCards.length > 0 && `(${restaurantCards.length})`}
+          </button>
+        </div>
+      )}
 
       {/* Modal backend inactivo por inactividad */}
       {showBackendInactiveModal && (
