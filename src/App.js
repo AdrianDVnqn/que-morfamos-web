@@ -347,6 +347,8 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   // === NUEVO ESTADO PARA PESTAÑAS MÓVILES ===
   const [mobileTab, setMobileTab] = useState('chat'); // 'chat' | 'results' | 'map'
 
+  const isMobile = window.innerWidth <= 768;
+
   const toneToggleRef = useRef(null);
 
 
@@ -1397,7 +1399,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                 preferCanvas={true}
                 zoomAnimation={true}
                 fadeAnimation={true}
-                style={{ height: '300px', width: '100%', borderRadius: '12px' }}
+                style={{ height: isMobile ? '100%' : '300px', width: '100%', borderRadius: '12px' }}
               >
                 <MapResizer />
                 <FitBounds locations={mapLocations} allViewRef={allViewRef} />
