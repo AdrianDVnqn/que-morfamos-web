@@ -1002,7 +1002,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   };
 
   return (
-    <div className={`App ${sidebarMode ? 'sidebar-layout' : ''}`}>
+    <div className={`App ${sidebarMode ? 'sidebar-layout' : ''}`} data-mobile-tab={mobileTab}>
       {/* Fondo slideshow detrás del contenido */}
       <div className={`bg-slideshow ${bgImages.length === 1 ? 'single' : ''} ${isBgTransitioning ? 'is-transitioning' : ''}`} aria-hidden>
         <div className="bg-layer base">
@@ -1387,7 +1387,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         
         {/* Mapa de ubicaciones (pestaña mobile 'map') */}
         <div className={`map-container ${mobileTab !== 'map' ? 'mobile-hidden' : ''}`}>
-          {mapLocations.length > 0 && (
+          {mapLocations.length > 0 ? (
             <div className={`map-inner`}>
               <div className="map-header">
                 <h3>📍 {mapLocations.length === 1 ? 'Ubicación' : 'Ubicaciones'}</h3>
@@ -1473,6 +1473,10 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                   </Marker>
                 ))}
               </MapContainer>
+            </div>
+          ) : (
+            <div className="map-inner" style={{height: isMobile ? '100%' : '300px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              <span style={{color: '#fff', fontSize: 18}}>No hay ubicaciones para mostrar.</span>
             </div>
           )}
         </div>
