@@ -390,6 +390,32 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   };
   const [inlineDetail, setInlineDetail] = useState(null); // Para modo resumen
   const [loadingInlineDetail, setLoadingInlineDetail] = useState(false);
+  // Modal backend inactivo
+  const [showBackendInactiveModal, setShowBackendInactiveModal] = useState(false);
+  const [backendCountdown, setBackendCountdown] = useState(60);
+  // Mostrar modal solo si apiStatus === 'error' y es la página inicial (solo mensaje de bienvenida)
+  useEffect(() => {
+    let countdownInterval;
+    const isInitialPage = messages.length === 1 && messages[0]?.role === 'assistant';
+    if (apiStatus === 'error' && isInitialPage) {
+      setShowBackendInactiveModal(true);
+      setBackendCountdown(60);
+      countdownInterval = setInterval(() => {
+        setBackendCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      setShowBackendInactiveModal(false);
+    }
+    return () => {
+      if (countdownInterval) clearInterval(countdownInterval);
+    };
+  }, [apiStatus, messages]);
   const messagesEndRef = useRef(null);
   const markerRefs = useRef({});
   const cardRefs = useRef({}); // Refs para scroll a tarjetas
@@ -1413,12 +1439,58 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
 
       
 
+      {/* Modal backend inactivo por inactividad */}
+      {showBackendInactiveModal && (
+        <div className="modal-overlay" style={{
+          zIndex: 9999,
+          background: 'rgba(10, 20, 40, 0.55)', // azul oscuro, menos opaco
+          backdropFilter: 'blur(2px)'
+        }}>
+          <div className="modal-content" style={{
+            maxWidth: 400,
+            textAlign: 'center',
+            background: 'rgba(20, 30, 60, 0.98)',
+            borderRadius: 14,
+            color: '#fff',
+            boxShadow: '0 4px 32px 0 rgba(0,0,0,0.25)',
+            border: '1.5px solid #2a4a7a',
+            padding: 24
+          }}>
+            <img src="https://bvtelevision.wordpress.com/wp-content/uploads/2015/04/technical.jpg?w=300" alt="Backend inactivo" style={{width: '100%', maxWidth: 250, borderRadius: 8, marginBottom: 18, border: '2px solid #2a4a7a'}} />
+            <h2
+              className="modal-title-gradient"
+              style={{
+                marginBottom: 16,
+                fontWeight: 700,
+                letterSpacing: 0.5,
+                fontSize: '2rem',
+                background: 'var(--accent-gradient)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 2px 8px rgba(0,0,0,0.18), 0 1px 0 #fff2',
+                backgroundSize: '200% 200%',
+                animation: 'gradient-move 6s ease-in-out infinite',
+              }}
+            >Backend inactivo... Reconectando</h2>
+            <p style={{marginBottom: 14, fontSize: 17, color: '#fff', lineHeight: 1.5}}>
+              El backend fue desactivado por inactividad prolongada.<br/>
+              <span style={{color: '#6ec1ff'}}>Intentando reactivar en <b>{backendCountdown}</b> segundos.</span>
+            </p>
+            <div style={{fontSize: 32, margin: '12px 0'}}>
+              <span role="img" aria-label="reloj">⏳</span>
+            </div>
+            <p style={{fontSize: 14, color: '#b3d8ff', marginTop: 10}}>La página intentará reconectar automáticamente.</p>
+          </div>
+        </div>
+      )}
+
       {/* Modal de detalle del restaurante */}
       {(selectedRestaurant || loadingDetail) && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={closeModal}>✕</button>
-            
             {loadingDetail ? (
               <div className="modal-loading">
                 <div className="typing-indicator">
