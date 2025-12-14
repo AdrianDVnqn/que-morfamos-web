@@ -345,9 +345,28 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   const [tonesExpanded, setTonesExpanded] = useState(false);
   
   // === NUEVO ESTADO PARA PESTAÑAS MÓVILES ===
-  const [mobileTab, setMobileTab] = useState('chat'); // 'chat' | 'results'
+  const [mobileTab, setMobileTab] = useState('chat'); // 'chat' | 'results' | 'map'
 
   const toneToggleRef = useRef(null);
+
+
+  const hasResults =
+    restaurantCards.length > 0 || mapLocations.length > 0;
+
+  // Cuando el usuario selecciona la pestaña Chat en mobile, asegurar scroll al final
+  useEffect(() => {
+    if (mobileTab === 'chat' && messagesContainerRef.current) {
+      // Defer para permitir layout si el contenedor venía oculto
+      setTimeout(() => {
+        try {
+          const container = messagesContainerRef.current;
+          container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        } catch (e) {
+          // ignore
+        }
+      }, 120);
+    }
+  }, [mobileTab]);
 
   useEffect(() => {
     const handleDocumentClick = (e) => {
@@ -1073,7 +1092,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
 
       <div className="main-content">
       {/* CONTENEDOR DEL CHAT: oculto en mobile si mobileTab no es 'chat' */}
-      <div className={`chat-container ${sidebarMode ? 'chat-sidebar' : ''} ${mobileTab === 'results' ? 'mobile-hidden' : ''}`}>
+      <div className={`chat-container ${sidebarMode ? 'chat-sidebar' : ''} ${mobileTab !== 'chat' ? 'mobile-hidden' : ''}`}>
         {sidebarMode && (
           <div className="chat-header">
             <h4>💬 Chat</h4>
@@ -1176,7 +1195,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       </div>
 
       {/* Área de resultados (cards + mapa): oculta en mobile si mobileTab no es 'results' */}
-      <div className={`${sidebarMode ? 'results-area' : 'results-area-hidden'} ${mobileTab === 'chat' ? 'mobile-hidden' : ''}`}>
+      <div className={`${sidebarMode ? 'results-area' : 'results-area-hidden'} ${mobileTab !== 'results' ? 'mobile-hidden' : ''}`}>
         
         {/* Panel de detalle inline para modo resumen */}
         {cardsMode === 'resumen' && (loadingInlineDetail || inlineDetail) && (
@@ -1363,114 +1382,130 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
           </div>
         )}
 
-        {/* Mapa de ubicaciones */}
-        {mapLocations.length > 0 && (
-          <div className="map-container">
-            <div className="map-header">
-              <h3>📍 {mapLocations.length === 1 ? 'Ubicación' : 'Ubicaciones'}</h3>
+        
+        {/* Mapa de ubicaciones (pestaña mobile 'map') */}
+        <div className={`map-container ${mobileTab !== 'map' ? 'mobile-hidden' : ''}`}>
+          {mapLocations.length > 0 && (
+            <div className={`map-inner`}>
+              <div className="map-header">
+                <h3>📍 {mapLocations.length === 1 ? 'Ubicación' : 'Ubicaciones'}</h3>
+              </div>
+              <MapContainer
+                key={mapLocations.map(l => l.nombre).join('-')}
+                center={[mapLocations[0].lat, mapLocations[0].lng]}
+                zoom={13}
+                preferCanvas={true}
+                zoomAnimation={true}
+                fadeAnimation={true}
+                style={{ height: '300px', width: '100%', borderRadius: '12px' }}
+              >
+                <MapResizer />
+                <FitBounds locations={mapLocations} allViewRef={allViewRef} />
+                <ChangeMapStyle 
+                  url={MAP_STYLE.url} 
+                  attribution={MAP_STYLE.attribution} 
+                />
+                <CenterOnHover 
+                  centerOn={centerMapOn} 
+                  locations={mapLocations} 
+                  allViewRef={allViewRef}
+                />
+                {mapLocations.map((loc, idx) => (
+                  <Marker 
+                    key={loc.nombre} 
+                    position={[loc.lat, loc.lng]} 
+                    icon={currentIcon}
+                    ref={(ref) => { if (ref) markerRefs.current[loc.nombre] = ref; }}
+                    eventHandlers={{
+                      mouseover: () => {
+                        setHoveredRestaurant(loc.nombre);
+                        scrollToCard(loc.nombre, true);
+                      },
+                      mouseout: () => setHoveredRestaurant(null),
+                      click: () => scrollToCard(loc.nombre, true)
+                    }}
+                  >
+                    <Popup>
+                      <div className="map-popup">
+                        <strong>{loc.nombre}</strong>
+                        {(() => {
+                          const card = restaurantCards.find(c => 
+                            c.nombre.toLowerCase() === loc.nombre.toLowerCase()
+                          );
+                          if (card && (card.rating > 0 || card.total_reviews > 0)) {
+                            return (
+                              <div className="popup-stats">
+                                {card.rating > 0 && (
+                                  <span className="popup-rating">⭐ {card.rating.toFixed(1)}</span>
+                                )}
+                                {card.total_reviews > 0 && (
+                                  <span className="popup-reviews">({card.total_reviews} reseñas)</span>
+                                )}
+                              </div>
+                            );
+                          }
+                          if (loc.rating > 0) {
+                            return (
+                              <div className="popup-stats">
+                                <span className="popup-rating">⭐ {loc.rating.toFixed(1)}</span>
+                                {loc.total_reviews > 0 && (
+                                  <span className="popup-reviews">({loc.total_reviews} reseñas)</span>
+                                )}
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+                        {loc.direccion && <p className="popup-address">{loc.direccion}</p>}
+                        <button 
+                          className="popup-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openRestaurantDetail(loc.nombre);
+                          }}
+                        >
+                          + Info
+                        </button>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
             </div>
-            <MapContainer
-              key={mapLocations.map(l => l.nombre).join('-')}
-              center={[mapLocations[0].lat, mapLocations[0].lng]}
-              zoom={13}
-              preferCanvas={true}
-              zoomAnimation={true}
-              fadeAnimation={true}
-              style={{ height: '300px', width: '100%', borderRadius: '12px' }}
-            >
-              <MapResizer />
-              <FitBounds locations={mapLocations} allViewRef={allViewRef} />
-              <ChangeMapStyle 
-                url={MAP_STYLE.url} 
-                attribution={MAP_STYLE.attribution} 
-              />
-              <CenterOnHover 
-                centerOn={centerMapOn} 
-                locations={mapLocations} 
-                allViewRef={allViewRef}
-              />
-              {mapLocations.map((loc, idx) => (
-                <Marker 
-                  key={loc.nombre} 
-                  position={[loc.lat, loc.lng]} 
-                  icon={currentIcon}
-                  ref={(ref) => { if (ref) markerRefs.current[loc.nombre] = ref; }}
-                  eventHandlers={{
-                    mouseover: () => {
-                      setHoveredRestaurant(loc.nombre);
-                      scrollToCard(loc.nombre, true);
-                    },
-                    mouseout: () => setHoveredRestaurant(null),
-                    click: () => scrollToCard(loc.nombre, true)
-                  }}
-                >
-                  <Popup>
-                    <div className="map-popup">
-                      <strong>{loc.nombre}</strong>
-                      {(() => {
-                        // Buscar card con matching case-insensitive
-                        const card = restaurantCards.find(c => 
-                          c.nombre.toLowerCase() === loc.nombre.toLowerCase()
-                        );
-                        if (card && (card.rating > 0 || card.total_reviews > 0)) {
-                          return (
-                            <div className="popup-stats">
-                              {card.rating > 0 && (
-                                <span className="popup-rating">⭐ {card.rating.toFixed(1)}</span>
-                              )}
-                              {card.total_reviews > 0 && (
-                                <span className="popup-reviews">({card.total_reviews} reseñas)</span>
-                              )}
-                            </div>
-                          );
-                        }
-                        // Fallback: mostrar rating de loc si existe
-                        if (loc.rating > 0) {
-                          return (
-                            <div className="popup-stats">
-                              <span className="popup-rating">⭐ {loc.rating.toFixed(1)}</span>
-                              {loc.total_reviews > 0 && (
-                                <span className="popup-reviews">({loc.total_reviews} reseñas)</span>
-                              )}
-                            </div>
-                          );
-                        }
-                        return null;
-                      })()}
-                      {loc.direccion && <p className="popup-address">{loc.direccion}</p>}
-                      <button 
-                        className="popup-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openRestaurantDetail(loc.nombre);
-                        }}
-                      >
-                        + Info
-                      </button>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+
+      </div>{/* Fin results-area */}
       </div>{/* Fin main-content */}
 
       {/* BARRA DE NAVEGACIÓN MÓVIL (Solo visible si sidebarMode es true) */}
       {sidebarMode && (
-        <div className="mobile-tab-bar">
-          <button 
+        <div className="mobile-tab-bar" role="tablist">
+          <button
             className={`mobile-tab-btn ${mobileTab === 'chat' ? 'active' : ''}`}
             onClick={() => setMobileTab('chat')}
+            role="tab"
+            aria-selected={mobileTab === 'chat'}
           >
             💬 Chat
           </button>
-          <button 
+          <button
             className={`mobile-tab-btn ${mobileTab === 'results' ? 'active' : ''}`}
             onClick={() => setMobileTab('results')}
+            role="tab"
+            aria-selected={mobileTab === 'results'}
           >
-            📍 Resultados {restaurantCards.length > 0 && `(${restaurantCards.length})`}
+            🍽️ Lugares {restaurantCards.length > 0 && `(${restaurantCards.length})`}
+          </button>
+          <button
+            className={`mobile-tab-btn ${mobileTab === 'map' ? 'active' : ''} ${mapLocations.length === 0 ? 'disabled' : ''}`}
+            onClick={() => { if (mapLocations.length > 0) setMobileTab('map'); }}
+            role="tab"
+            aria-selected={mobileTab === 'map'}
+            disabled={mapLocations.length === 0}
+            title={mapLocations.length === 0 ? 'Sin ubicaciones disponibles' : 'Ver mapa'}
+          >
+            🗺️ Mapa {mapLocations.length > 0 ? `(${mapLocations.length})` : ''}
           </button>
         </div>
       )}

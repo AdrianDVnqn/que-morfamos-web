@@ -1017,6 +1017,57 @@ body {
     padding: 8px;
   }
 
+  /* Mobile tab bar (chat / lugares / mapa) */
+  .mobile-tab-bar {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    background: rgba(10,12,26,0.7);
+    border: 1px solid rgba(255,255,255,0.04);
+    padding: 8px;
+    border-radius: 14px;
+    z-index: 220;
+    align-items: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+  }
+
+  .mobile-tab-btn {
+    flex: 1 1 auto;
+    background: transparent;
+    color: var(--text-primary);
+    border: none;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 180ms ease;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .mobile-tab-btn:hover { transform: translateY(-2px); }
+
+  .mobile-tab-btn.active {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: #fff;
+    box-shadow: var(--accent-glow);
+  }
+
+  .mobile-tab-btn.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /* Hide anything marked mobile-hidden on small screens */
+  .mobile-hidden { display: none !important; }
+
+  /* Evitar que la UI principal quede tapada por la barra de tabs */
+  .App { padding-bottom: 96px; }
+
   /* Indicador de expansión "+" */
   .tone-expand-indicator {
     display: flex;
