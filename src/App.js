@@ -1388,91 +1388,93 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         {/* Mapa de ubicaciones (pestaña mobile 'map') */}
         <div className={`map-container ${mobileTab !== 'map' ? 'mobile-hidden' : ''}`}>
           {mapLocations.length > 0 && (
-            <div className={`map-inner`}>
-              <div className="map-header">
-                <h3>📍 {mapLocations.length === 1 ? 'Ubicación' : 'Ubicaciones'}</h3>
+            <div className="map-wrapper">
+              <div className="map-inner">
+                <div className="map-header">
+                  <h3>📍 {mapLocations.length === 1 ? 'Ubicación' : 'Ubicaciones'}</h3>
+                </div>
+                <MapContainer
+                  key={mapLocations.map(l => l.nombre).join('-')}
+                  center={[mapLocations[0].lat, mapLocations[0].lng]}
+                  zoom={13}
+                  preferCanvas={true}
+                  zoomAnimation={true}
+                  fadeAnimation={true}
+                  style={{ height: '100%', width: '100%', borderRadius: '12px' }}
+                >
+                  <MapResizer />
+                  <FitBounds locations={mapLocations} allViewRef={allViewRef} />
+                  <ChangeMapStyle 
+                    url={MAP_STYLE.url} 
+                    attribution={MAP_STYLE.attribution} 
+                  />
+                  <CenterOnHover 
+                    centerOn={centerMapOn} 
+                    locations={mapLocations} 
+                    allViewRef={allViewRef}
+                  />
+                  {mapLocations.map((loc, idx) => (
+                    <Marker 
+                      key={loc.nombre} 
+                      position={[loc.lat, loc.lng]} 
+                      icon={currentIcon}
+                      ref={(ref) => { if (ref) markerRefs.current[loc.nombre] = ref; }}
+                      eventHandlers={{
+                        mouseover: () => {
+                          setHoveredRestaurant(loc.nombre);
+                          scrollToCard(loc.nombre, true);
+                        },
+                        mouseout: () => setHoveredRestaurant(null),
+                        click: () => scrollToCard(loc.nombre, true)
+                      }}
+                    >
+                      <Popup>
+                        <div className="map-popup">
+                          <strong>{loc.nombre}</strong>
+                          {(() => {
+                            const card = restaurantCards.find(c => 
+                              c.nombre.toLowerCase() === loc.nombre.toLowerCase()
+                            );
+                            if (card && (card.rating > 0 || card.total_reviews > 0)) {
+                              return (
+                                <div className="popup-stats">
+                                  {card.rating > 0 && (
+                                    <span className="popup-rating">⭐ {card.rating.toFixed(1)}</span>
+                                  )}
+                                  {card.total_reviews > 0 && (
+                                    <span className="popup-reviews">({card.total_reviews} reseñas)</span>
+                                  )}
+                                </div>
+                              );
+                            }
+                            if (loc.rating > 0) {
+                              return (
+                                <div className="popup-stats">
+                                  <span className="popup-rating">⭐ {loc.rating.toFixed(1)}</span>
+                                  {loc.total_reviews > 0 && (
+                                    <span className="popup-reviews">({loc.total_reviews} reseñas)</span>
+                                  )}
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                          {loc.direccion && <p className="popup-address">{loc.direccion}</p>}
+                          <button 
+                            className="popup-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openRestaurantDetail(loc.nombre);
+                            }}
+                          >
+                            + Info
+                          </button>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
               </div>
-              <MapContainer
-                key={mapLocations.map(l => l.nombre).join('-')}
-                center={[mapLocations[0].lat, mapLocations[0].lng]}
-                zoom={13}
-                preferCanvas={true}
-                zoomAnimation={true}
-                fadeAnimation={true}
-                style={{ height: isMobile ? '100%' : '300px', width: '100%', borderRadius: '12px' }}
-              >
-                <MapResizer />
-                <FitBounds locations={mapLocations} allViewRef={allViewRef} />
-                <ChangeMapStyle 
-                  url={MAP_STYLE.url} 
-                  attribution={MAP_STYLE.attribution} 
-                />
-                <CenterOnHover 
-                  centerOn={centerMapOn} 
-                  locations={mapLocations} 
-                  allViewRef={allViewRef}
-                />
-                {mapLocations.map((loc, idx) => (
-                  <Marker 
-                    key={loc.nombre} 
-                    position={[loc.lat, loc.lng]} 
-                    icon={currentIcon}
-                    ref={(ref) => { if (ref) markerRefs.current[loc.nombre] = ref; }}
-                    eventHandlers={{
-                      mouseover: () => {
-                        setHoveredRestaurant(loc.nombre);
-                        scrollToCard(loc.nombre, true);
-                      },
-                      mouseout: () => setHoveredRestaurant(null),
-                      click: () => scrollToCard(loc.nombre, true)
-                    }}
-                  >
-                    <Popup>
-                      <div className="map-popup">
-                        <strong>{loc.nombre}</strong>
-                        {(() => {
-                          const card = restaurantCards.find(c => 
-                            c.nombre.toLowerCase() === loc.nombre.toLowerCase()
-                          );
-                          if (card && (card.rating > 0 || card.total_reviews > 0)) {
-                            return (
-                              <div className="popup-stats">
-                                {card.rating > 0 && (
-                                  <span className="popup-rating">⭐ {card.rating.toFixed(1)}</span>
-                                )}
-                                {card.total_reviews > 0 && (
-                                  <span className="popup-reviews">({card.total_reviews} reseñas)</span>
-                                )}
-                              </div>
-                            );
-                          }
-                          if (loc.rating > 0) {
-                            return (
-                              <div className="popup-stats">
-                                <span className="popup-rating">⭐ {loc.rating.toFixed(1)}</span>
-                                {loc.total_reviews > 0 && (
-                                  <span className="popup-reviews">({loc.total_reviews} reseñas)</span>
-                                )}
-                              </div>
-                            );
-                          }
-                          return null;
-                        })()}
-                        {loc.direccion && <p className="popup-address">{loc.direccion}</p>}
-                        <button 
-                          className="popup-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openRestaurantDetail(loc.nombre);
-                          }}
-                        >
-                          + Info
-                        </button>
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
-              </MapContainer>
             </div>
           )}
         </div>
