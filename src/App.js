@@ -1224,8 +1224,8 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         </form>
       </div>
 
-      {/* Área de resultados (cards + mapa): oculta en mobile si mobileTab no es 'results' */}
-      <div className={`${sidebarMode ? 'results-area' : 'results-area-hidden'} ${mobileTab !== 'results' ? 'mobile-hidden' : ''}`}>
+      {/* Se muestra si es 'results' O 'map'. Si no, se oculta el padre entero */}
+      <div className={`${sidebarMode ? 'results-area' : 'results-area-hidden'} ${mobileTab !== 'results' && mobileTab !== 'map' ? 'mobile-hidden' : ''}`}>
         
         {/* Panel de detalle inline para modo resumen */}
         {cardsMode === 'resumen' && (loadingInlineDetail || inlineDetail) && (
@@ -1314,7 +1314,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
 
         {/* Tarjetas de restaurantes (solo si NO es modo resumen) */}
         {restaurantCards.length > 0 && cardsMode !== 'resumen' && (
-          <div className={`cards-container ${cardsMode === 'estadisticas' ? 'cards-compact' : ''}`}>
+          <div className={`cards-container ${cardsMode === 'estadisticas' ? 'cards-compact' : ''} ${mobileTab !== 'results' ? 'mobile-hidden' : ''}`}>
             <h3>{cardsMode === 'estadisticas' ? `📍 ${restaurantCards.length} lugares encontrados` : '🍽️ Lugares recomendados'}</h3>
           
             {cardsMode === 'estadisticas' ? (

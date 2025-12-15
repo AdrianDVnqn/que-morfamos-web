@@ -916,13 +916,19 @@ body {
 @media (max-width: 768px) {
   .App {
     padding: 10px;
-    height: 100vh;
+    height: 100dvh; /* <--- CAMBIAR vh por dvh */
     overflow: hidden;
+    padding-bottom: 96px; /* Espacio para el menú flotante inferior */
   }
 
   .main-content {
-    height: calc(100vh - 150px);
-    min-height: calc(100vh - 150px);
+    /* Usamos flex: 1 para que ocupe AUTOMÁTICAMENTE todo el espacio 
+       sobrante entre el header y el menú de abajo */
+    flex: 1;
+    height: auto; 
+    min-height: 0; /* Crucial para que el scroll interno funcione dentro de flex */
+    display: flex;
+    flex-direction: column;
   }
 
   .app-header {
@@ -1027,23 +1033,15 @@ body {
   /* Mobile: make chat and results full height */
   .chat-container {
     max-height: none;
-    height: calc(100vh - 70px - 64px); /* header + tab bar aprox */
-    min-height: calc(100vh - 70px - 64px);
+    height: 100%;
+    min-height: 100%;
     overflow: auto;
   }
 
   .results-area {
-    height: calc(100vh - 70px - 64px);
-    min-height: calc(100vh - 70px - 64px);
+    height: 100%;
+    min-height: 100%;
     overflow: auto;
-  }
-
-  .map-container {
-    height: calc(100vh - 70px - 64px) !important;
-    min-height: calc(100vh - 70px - 64px) !important;
-    max-height: none !important;
-    margin-top: 0;
-    padding: 0 !important;
   }
 
   .map-container {
@@ -1057,11 +1055,8 @@ body {
     padding: 20px;
   }
 
-  .map-inner > .leaflet-container,
-  .map-inner .leaflet-container {
+  .map-inner > .leaflet-container {
     height: 100% !important;
-    display: block !important;
-    min-height: 120px; /* fallback for very small viewports */
   }
 
   /* Mobile tab bar (chat / lugares / mapa) */
