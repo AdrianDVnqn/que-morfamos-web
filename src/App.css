@@ -471,8 +471,8 @@ body {
 }
 
 .messages-container::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
+  background: var(--accent-primary) !important; /* El rojo/rosa vibrante */
+  border: 1px solid rgba(0,0,0,0.1);
 }
 
 .messages-container::-webkit-scrollbar-thumb:hover {
