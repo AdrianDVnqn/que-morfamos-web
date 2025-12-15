@@ -61,7 +61,8 @@ function MapResizer() {
 }
 
 // Componente para ajustar el zoom para mostrar todos los marcadores
-function FitBounds({ locations, allViewRef }) {
+// Ahora recibe 'trigger' para saber cuándo recalcular (ej: al cambiar de tab)
+function FitBounds({ locations, allViewRef, trigger }) {
   const map = useMap();
   const DEFAULT_SINGLE_ZOOM = 18;
   const FIT_PADDING = [40, 40];
@@ -74,50 +75,43 @@ function FitBounds({ locations, allViewRef }) {
       try {
         const c = map.getCenter();
         const z = map.getZoom();
-        // Validar que no sean NaN antes de guardar
         if (!isNaN(c.lat) && !isNaN(c.lng) && !isNaN(z)) {
           allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: z });
         }
       } catch (e) { /* ignore */ }
     };
 
-    try {
-      // Invalidar tamaño siempre por si venía de estar oculto
-      map.invalidateSize();
+    // Forzar recalculo de tamaño antes de ajustar bounds
+    map.invalidateSize();
 
-      if (locations.length === 1) {
-        const timer = setTimeout(() => {
-          try {
-            const loc = locations[0];
-            // VALIDACIÓN CRÍTICA AQUÍ
-            if (loc && !isNaN(loc.lat) && !isNaN(loc.lng)) {
-              map.setView([loc.lat, loc.lng], DEFAULT_SINGLE_ZOOM);
+    // Damos un pequeño respiro para que el invalidateSize surta efecto
+    const timer = setTimeout(() => {
+      try {
+        if (locations.length === 1) {
+          const loc = locations[0];
+          if (loc && !isNaN(loc.lat) && !isNaN(loc.lng)) {
+            // Animación suave al centro
+            map.flyTo([loc.lat, loc.lng], DEFAULT_SINGLE_ZOOM, { duration: 0.8 });
+            saveSafeView();
+          }
+        } else {
+          const validLocs = locations.filter(l => !isNaN(l.lat) && !isNaN(l.lng));
+          if (validLocs.length > 0) {
+            const bounds = L.latLngBounds(validLocs.map(loc => [loc.lat, loc.lng]));
+            if (bounds.isValid()) {
+              // Usamos flyToBounds para una transición suave o fitBounds para instantánea
+              map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: 16, animate: true, duration: 0.8 });
               saveSafeView();
             }
-          } catch (e) { console.warn(e); }
-        }, 120);
-        return () => clearTimeout(timer);
-      } else {
-        // Filtrar coordenadas inválidas
-        const validLocs = locations.filter(l => !isNaN(l.lat) && !isNaN(l.lng));
-        if (validLocs.length === 0) return;
+          }
+        }
+      } catch (e) { console.warn('FitBounds error:', e); }
+    }, 150); // Delay aumentado ligeramente para asegurar que el mapa ya es visible
 
-        const bounds = L.latLngBounds(validLocs.map(loc => [loc.lat, loc.lng]));
-        
-        const timer1 = setTimeout(() => {
-          try {
-            if (bounds.isValid()) {
-              map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: 16 });
-            }
-          } catch (e) { console.warn(e); }
-        }, 250);
-
-        const timer2 = setTimeout(() => saveSafeView(), 700);
-        
-        return () => { clearTimeout(timer1); clearTimeout(timer2); };
-      }
-    } catch (e) { console.warn('FitBounds error:', e); }
-  }, [map, locations, allViewRef]);
+    return () => clearTimeout(timer);
+    
+    // AQUÍ ESTÁ LA CLAVE: Agregamos 'trigger' a las dependencias
+  }, [map, locations, allViewRef, trigger]); 
 
   return null;
 }
@@ -1431,7 +1425,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                   style={{ height: '100%', width: '100%', borderRadius: '12px' }}
                 >
                   <MapResizer />
-                  <FitBounds locations={mapLocations} allViewRef={allViewRef} />
+                  <FitBounds locations={mapLocations} allViewRef={allViewRef} trigger={mobileTab} />
                   <ChangeMapStyle 
                     url={MAP_STYLE.url} 
                     attribution={MAP_STYLE.attribution} 
