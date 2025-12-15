@@ -1027,15 +1027,23 @@ body {
   /* Mobile: make chat and results full height */
   .chat-container {
     max-height: none;
-    height: 100%;
-    min-height: 100%;
+    height: calc(100vh - 70px - 64px); /* header + tab bar aprox */
+    min-height: calc(100vh - 70px - 64px);
     overflow: auto;
   }
 
   .results-area {
-    height: 100%;
-    min-height: 100%;
+    height: calc(100vh - 70px - 64px);
+    min-height: calc(100vh - 70px - 64px);
     overflow: auto;
+  }
+
+  .map-container {
+    height: calc(100vh - 70px - 64px) !important;
+    min-height: calc(100vh - 70px - 64px) !important;
+    max-height: none !important;
+    margin-top: 0;
+    padding: 0 !important;
   }
 
   .map-container {
