@@ -2368,7 +2368,7 @@ body {
   background-repeat: no-repeat;
   opacity: 0; /* default hidden, animation controls visibility */
   /* Más blur y menor saturación, y todavía más oscuro para garantizar contraste */
-  filter: blur(3px) saturate(0.91) contrast(0.9) brightness(0.85);
+  filter: blur(2px) saturate(0.91) contrast(0.9) brightness(0.9);
   transform: scale(1.03);
   mix-blend-mode: normal;
 }
