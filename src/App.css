@@ -923,7 +923,7 @@ body {
     overflow: hidden; /* Evitamos scroll en el body */
     display: flex;
     flex-direction: column;
-    padding-bottom: 72px; /* Espacio reservado para la barra de tabs inferior */
+    padding-bottom: 0; /* En pantalla inicial va pegado abajo */
   }
 
   /* 2. Header: Fijo arriba */
@@ -1113,11 +1113,19 @@ body {
   /* Ajustes menores de input y botones */
   .input-container { 
     padding: 12px; 
-    border-radius: 20px; /* Más redondeado en mobile */
-    margin-bottom: 70px; /* <--- ESTO ES LA CLAVE: Espacio para el menú flotante */
-    background: rgba(20, 20, 40, 0.95); /* Fondo más sólido para que no se mezcle */
-    border: 1px solid var(--border-color);
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.2); /* Sombra para separarlo visualmente */
+    border-radius: 20px 20px 0 0; /* Redondeado arriba, pegado abajo */
+    margin-bottom: 0; /* Pegado al fondo por defecto */
+    background: rgba(20, 20, 40, 0.92);
+    border-top: 1px solid var(--border-color);
+    z-index: 50;
+  }
+
+  /* REGLA MAGICA: Solo levantamos el input si la App tiene sidebar-layout */
+  .sidebar-layout .input-container {
+    margin-bottom: 75px; /* Espacio para el menú flotante */
+    border-radius: 20px; /* Redondeado completo */
+    border: 1px solid var(--border-color); /* Borde completo */
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
   }
   .message-input { padding: 12px; }
   .send-button { width: 48px; height: 48px; }
