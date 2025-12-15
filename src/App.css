@@ -916,9 +916,12 @@ body {
 @media (max-width: 768px) {
   .App {
     padding: 10px;
-    height: 100dvh; /* <--- CAMBIAR vh por dvh */
+    height: 100dvh; /* Usa dvh para móviles modernos */
+    max-height: 100dvh;
     overflow: hidden;
-    padding-bottom: 96px; /* Espacio para el menú flotante inferior */
+    padding-bottom: 80px; /* Espacio para el menú flotante inferior */
+    display: flex;
+    flex-direction: column;
   }
 
   .main-content {
@@ -935,6 +938,7 @@ body {
     padding: 15px 20px;
     flex-direction: column;
     gap: 12px;
+    flex-shrink: 0; /* Que el header no se aplaste */
     border-radius: 15px 15px 0 0;
   }
 
@@ -1033,30 +1037,46 @@ body {
   /* Mobile: make chat and results full height */
   .chat-container {
     max-height: none;
-    height: 100%;
-    min-height: 100%;
-    overflow: auto;
+    max-height: none;
+    border-radius: 12px;
   }
 
   .results-area {
     height: 100%;
-    min-height: 100%;
-    overflow: auto;
+    overflow: hidden; /* El scroll lo manejan los hijos */
+    display: flex;
+    flex-direction: column;
   }
 
+/* Mapa full height */
   .map-container {
-    height: calc(100vh - 150px) !important;
+    height: 100% !important;
+    max-height: 100% !important;
     margin-top: 0;
     padding: 0 !important;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
   }
 
   .map-inner {
+    flex: 1;
     height: 100%;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .map-header {
+      padding: 10px;
+      background: var(--bg-card);
+      flex-shrink: 0;
   }
 
   .map-inner > .leaflet-container {
+    flex: 1;
     height: 100% !important;
+    min-height: 0 !important;
+    border-radius: 0 0 12px 12px;
   }
 
   /* Mobile tab bar (chat / lugares / mapa) */
