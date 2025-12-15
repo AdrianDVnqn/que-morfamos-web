@@ -1002,6 +1002,24 @@ body {
     flex-shrink: 0;
   }
 
+/* === ARREGLO PARA MODO RESUMEN (1 SOLO RESULTADO) === */
+  .detail-panel {
+    flex: 1;
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: auto; /* Habilita el scroll */
+    padding: 20px 20px 85px 20px; /* 85px abajo para que no lo tape el menú */
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    margin: 0;
+  }
+
+  /* Ajuste para que el mapa se comporte bien si está oculto/visible */
+  .detail-panel + .map-container {
+    flex: 1; /* Asegura que el mapa retome el espacio cuando el panel se oculta */
+  }
+
   /* Listas scrolleables */
   .cards-grid, 
   .cards-compact .cards-list,
@@ -1130,6 +1148,34 @@ body {
   .message-input { padding: 12px; }
   .send-button { width: 48px; height: 48px; }
   .tone-expand-indicator { display: none !important; }
+
+  /* === BARRAS DE SCROLL LLAMATIVAS (MOBILE) === */
+  
+  /* Aplicar a todos los elementos con scroll dentro del móvil */
+  ::-webkit-scrollbar {
+    width: 6px; /* Un poco más ancha para que se vea */
+    background: transparent;
+  }
+
+  /* El fondo de la barra (el carril) */
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05); /* Gris muy sutil */
+    border-radius: 3px;
+  }
+
+  /* La barra en sí (el pulgar) */
+  ::-webkit-scrollbar-thumb {
+    background: var(--accent-primary); /* ¡ROJO/ROSA VIBRANTE! */
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.3); /* Borde sutil para contraste */
+  }
+
+  /* Al tocar o arrastrar */
+  ::-webkit-scrollbar-thumb:active {
+    background: var(--accent-secondary); /* Color un poco más claro al tocar */
+  }
+
+
 }
 
   /* Evitar que la UI principal quede tapada por la barra de tabs */

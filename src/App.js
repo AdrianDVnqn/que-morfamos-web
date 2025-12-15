@@ -1222,7 +1222,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         
         {/* Panel de detalle inline para modo resumen */}
         {cardsMode === 'resumen' && (loadingInlineDetail || inlineDetail) && (
-          <div className="detail-panel">
+          <div className={`detail-panel ${mobileTab !== 'results' ? 'mobile-hidden' : ''}`}>
             {loadingInlineDetail ? (
               <div className="detail-loading">
                 <div className="typing-indicator">
