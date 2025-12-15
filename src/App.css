@@ -2368,7 +2368,7 @@ body {
   background-repeat: no-repeat;
   opacity: 0; /* default hidden, animation controls visibility */
   /* Más blur y menor saturación, y todavía más oscuro para garantizar contraste */
-  filter: blur(3px) saturate(0.88) contrast(0.9) brightness(0.72);
+  filter: blur(3px) saturate(0.88) contrast(0.9) brightness(0.8);
   transform: scale(1.03);
   mix-blend-mode: normal;
 }
@@ -2404,7 +2404,7 @@ body {
   inset: 0;
   /* Gradiente aún más oscuro para atenuar las fotos y mejorar contraste */
   /* Overlay: dark purple gradient (darker than UI) so slideshow is tinted purple, not black */
-  background: linear-gradient(180deg, rgba(22,33,62,0.86), rgba(12,12,24,0.94));
+  background: linear-gradient(180deg, rgba(22,33,62,0.8), rgba(12,12,24,0.94));
   pointer-events: none;
 }
 
