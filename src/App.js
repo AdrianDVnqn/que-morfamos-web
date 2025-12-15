@@ -63,67 +63,61 @@ function MapResizer() {
 // Componente para ajustar el zoom para mostrar todos los marcadores
 function FitBounds({ locations, allViewRef }) {
   const map = useMap();
-  // Zoom por defecto cuando solo hay 1 marcador (aumentado para acercar más)
   const DEFAULT_SINGLE_ZOOM = 18;
-  // Padding para asegurar que los íconos no queden pegados al borde
   const FIT_PADDING = [40, 40];
 
   useEffect(() => {
     if (!locations || locations.length === 0) return;
 
-    try {
-      if (locations.length === 1) {
-        // Asegurar que el mapa haya recalculado su tamaño antes de centrar
-        try {
-          map.invalidateSize();
-        } catch (e) {
-          // ignore
+    // Función segura para guardar la vista
+    const saveSafeView = () => {
+      try {
+        const c = map.getCenter();
+        const z = map.getZoom();
+        // Validar que no sean NaN antes de guardar
+        if (!isNaN(c.lat) && !isNaN(c.lng) && !isNaN(z)) {
+          allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: z });
         }
-        // Centrar en la única ubicación con zoom estándar (defer para permitir layout)
-        setTimeout(() => {
-          try {
-            map.setView([locations[0].lat, locations[0].lng], DEFAULT_SINGLE_ZOOM);
-            // Guardar vista que muestra la ubicación única
-            const c = map.getCenter();
-            allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: map.getZoom() });
-          } catch (e) {
-            console.warn('Error centrando mapa para single marker:', e);
-          }
-        }, 120);
-      } else {
-        // Calcular bounds y ajustar zoom para que entren todos los íconos
-        const bounds = L.latLngBounds(locations.map(loc => [loc.lat, loc.lng]));
-        // Asegurar que el mapa calcula su tamaño antes de ajustar bounds (útil en móviles y cuando el layout cambia)
-        try {
-          map.invalidateSize();
-        } catch (e) {
-          // ignore
-        }
+      } catch (e) { /* ignore */ }
+    };
 
-        // Defer fitBounds para dejar tiempo a que el mapa renderice correctamente y calcule tiles
-        setTimeout(() => {
+    try {
+      // Invalidar tamaño siempre por si venía de estar oculto
+      map.invalidateSize();
+
+      if (locations.length === 1) {
+        const timer = setTimeout(() => {
           try {
-            map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: 16 });
-          } catch (e) {
-            console.warn('fitBounds failed on timeout, trying direct call:', e);
-            try { map.fitBounds(bounds); } catch (e2) { console.warn('fitBounds fallback failed:', e2); }
-          }
+            const loc = locations[0];
+            // VALIDACIÓN CRÍTICA AQUÍ
+            if (loc && !isNaN(loc.lat) && !isNaN(loc.lng)) {
+              map.setView([loc.lat, loc.lng], DEFAULT_SINGLE_ZOOM);
+              saveSafeView();
+            }
+          } catch (e) { console.warn(e); }
+        }, 120);
+        return () => clearTimeout(timer);
+      } else {
+        // Filtrar coordenadas inválidas
+        const validLocs = locations.filter(l => !isNaN(l.lat) && !isNaN(l.lng));
+        if (validLocs.length === 0) return;
+
+        const bounds = L.latLngBounds(validLocs.map(loc => [loc.lat, loc.lng]));
+        
+        const timer1 = setTimeout(() => {
+          try {
+            if (bounds.isValid()) {
+              map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: 16 });
+            }
+          } catch (e) { console.warn(e); }
         }, 250);
 
-        // Guardar la vista que muestra todos los íconos después de permitir que Leaflet calcule zoom
-        setTimeout(() => {
-          try {
-            const c = map.getCenter();
-            allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: map.getZoom() });
-          } catch (e) {
-            console.warn('No se pudo guardar allViewRef después de fitBounds (delayed):', e);
-          }
-        }, 700);
+        const timer2 = setTimeout(() => saveSafeView(), 700);
+        
+        return () => { clearTimeout(timer1); clearTimeout(timer2); };
       }
-    } catch (e) {
-      console.warn('FitBounds error:', e);
-    }
-  }, [map, locations]);
+    } catch (e) { console.warn('FitBounds error:', e); }
+  }, [map, locations, allViewRef]);
 
   return null;
 }
@@ -131,32 +125,37 @@ function FitBounds({ locations, allViewRef }) {
 // Componente para centrar el mapa en el restaurante hovereado (solo desde tarjetas)
 function CenterOnHover({ centerOn, locations, allViewRef }) {
   const map = useMap();
-  
-  // existing logic... (unchanged)
-
-  // Zoom del hover: valor positivo -> más cercano (más zoom in)
-  const HOVER_ZOOM_DELTA = 2; // aumentar en 2 niveles respecto a la vista de todos los iconos
+  const HOVER_ZOOM_DELTA = 2;
   const DEFAULT_HOVER_ZOOM = 16;
 
   useEffect(() => {
+    // Caso 1: Centrar en un restaurante específico
     if (centerOn && locations.length > 0) {
       const loc = locations.find(l => l.nombre === centerOn);
-      if (loc) {
-        // Determinar zoom objetivo: basado en allViewRef si existe
+      // Validar coordenadas antes de volar
+      if (loc && !isNaN(loc.lat) && !isNaN(loc.lng)) {
         let hoverZoom = DEFAULT_HOVER_ZOOM;
-        if (allViewRef && allViewRef.current && allViewRef.current.zoom) {
-          hoverZoom = Math.max((allViewRef.current.zoom || DEFAULT_HOVER_ZOOM) + HOVER_ZOOM_DELTA, 3);
+        if (allViewRef && allViewRef.current && !isNaN(allViewRef.current.zoom)) {
+          hoverZoom = Math.max(allViewRef.current.zoom + HOVER_ZOOM_DELTA, 3);
         }
-
-        map.flyTo([loc.lat, loc.lng], hoverZoom, { duration: 0.5 });
-      }
-    } else {
-      // Restaurar la vista que muestra todos los íconos
-      if (allViewRef && allViewRef.current && allViewRef.current.center) {
         try {
-          map.flyTo(allViewRef.current.center, allViewRef.current.zoom || 13, { duration: 0.5 });
-        } catch (e) {
-          console.warn('No se pudo restaurar la vista allViewRef del mapa:', e);
+          map.flyTo([loc.lat, loc.lng], hoverZoom, { duration: 0.5 });
+        } catch(e) { console.warn("Error en flyTo", e); }
+      }
+    } 
+    // Caso 2: Restaurar vista general
+    else {
+      if (allViewRef && allViewRef.current && allViewRef.current.center) {
+        const [lat, lng] = allViewRef.current.center;
+        const zoom = allViewRef.current.zoom || 13;
+        
+        // VALIDACIÓN CRÍTICA PARA EVITAR ERROR (NaN, NaN)
+        if (!isNaN(lat) && !isNaN(lng) && !isNaN(zoom)) {
+          try {
+            map.flyTo([lat, lng], zoom, { duration: 0.5 });
+          } catch (e) {
+            console.warn('FlyTo preventivo evitado:', e);
+          }
         }
       }
     }
