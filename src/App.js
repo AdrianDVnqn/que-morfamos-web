@@ -767,7 +767,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   };
 
   // Shared function to handle streaming response
-  const streamChatResponse = async (payload, initialUserMessage = null) => {
+  const streamChatResponse = async (payload, initialUserMessage = null, startTime = null) => {
     // 1. Setup UI for streaming
     setLoading(true);
     setMobileTab('chat');
@@ -798,6 +798,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
       let buffer = "";
+      let firstTokenReceived = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -817,6 +818,11 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
             const event = JSON.parse(line);
 
             if (event.type === 'token') {
+              if (!firstTokenReceived && startTime) {
+                firstTokenReceived = true;
+                console.log(`[PERF] Time to First Token (TTFT): ${Date.now() - startTime}ms`);
+              }
+
               setMessages(prev => {
                 const newMsgs = [...prev];
                 const lastIndex = newMsgs.length - 1;
@@ -922,6 +928,9 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     const um = userMessage?.trim();
     if (!um || loading) return;
 
+    // Capture start time
+    const tStart = Date.now();
+
     setCurrentTopic(um);
     setInput('');
     setMobileTab('chat');
@@ -935,13 +944,14 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       tone
     };
 
-    await streamChatResponse(payload, um);
+    await streamChatResponse(payload, um, tStart);
   };
 
   // Seleccionar una opción pendiente (click en etiqueta)
   const selectPendingOption = async (index) => {
     if (loading) return;
 
+    const tStart = Date.now();
     const selectionStr = String(index + 1);
     setCurrentTopic(selectionStr);
     setMobileTab('chat');
@@ -957,7 +967,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       tone
     };
 
-    await streamChatResponse(payload, selectionStr);
+    await streamChatResponse(payload, selectionStr, tStart);
   };
 
   const sendMessage = async (e) => {
@@ -1353,7 +1363,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                   <div className="cards-list" ref={cardsContainerRef}>
                     {sortedCards.map((card, idx) => (
                       <div
-                        key={card.nombre}
+                        key={`${card.nombre}-${idx}`}
                         data-card-name={card.nombre}
                         ref={(el) => { if (el) cardRefs.current[card.nombre] = el; }}
                         className={`card-mini ${hoveredRestaurant === card.nombre ? 'card-highlighted' : ''}`}
@@ -1377,7 +1387,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                 <div className="cards-grid" ref={cardsContainerRef}>
                   {sortedCards.map((card, idx) => (
                     <div
-                      key={card.nombre}
+                      key={`${card.nombre}-${idx}`}
                       data-card-name={card.nombre}
                       ref={(el) => { if (el) cardRefs.current[card.nombre] = el; }}
                       className={`restaurant-card ${hoveredRestaurant === card.nombre ? 'card-highlighted' : ''}`}
@@ -1454,7 +1464,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                     {/* Force a couple invalidateSize calls after mount to avoid blank map when container was hidden */}
                     {mapLocations.map((loc, idx) => (
                       <Marker
-                        key={loc.nombre}
+                        key={`${loc.nombre}-${idx}`}
                         position={[loc.lat, loc.lng]}
                         icon={currentIcon}
                         ref={(ref) => { if (ref) markerRefs.current[loc.nombre] = ref; }}
