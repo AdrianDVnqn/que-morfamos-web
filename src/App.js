@@ -37,11 +37,11 @@ function MapResizer() {
       setTimeout(() => map.invalidateSize(), 500),
       setTimeout(() => map.invalidateSize(), 1000),
     ];
-    
+
     // También invalidar cuando la ventana cambia de tamaño
     const handleResize = () => map.invalidateSize();
     window.addEventListener('resize', handleResize);
-    
+
     // Observar cambios en el contenedor del mapa
     const container = map.getContainer().parentElement;
     const resizeObserver = new ResizeObserver(() => {
@@ -50,7 +50,7 @@ function MapResizer() {
     if (container) {
       resizeObserver.observe(container);
     }
-    
+
     return () => {
       timers.forEach(t => clearTimeout(t));
       window.removeEventListener('resize', handleResize);
@@ -109,9 +109,9 @@ function FitBounds({ locations, allViewRef, trigger }) {
     }, 150); // Delay aumentado ligeramente para asegurar que el mapa ya es visible
 
     return () => clearTimeout(timer);
-    
+
     // AQUÍ ESTÁ LA CLAVE: Agregamos 'trigger' a las dependencias
-  }, [map, locations, allViewRef, trigger]); 
+  }, [map, locations, allViewRef, trigger]);
 
   return null;
 }
@@ -134,15 +134,15 @@ function CenterOnHover({ centerOn, locations, allViewRef }) {
         }
         try {
           map.flyTo([loc.lat, loc.lng], hoverZoom, { duration: 0.5 });
-        } catch(e) { console.warn("Error en flyTo", e); }
+        } catch (e) { console.warn("Error en flyTo", e); }
       }
-    } 
+    }
     // Caso 2: Restaurar vista general
     else {
       if (allViewRef && allViewRef.current && allViewRef.current.center) {
         const [lat, lng] = allViewRef.current.center;
         const zoom = allViewRef.current.zoom || 13;
-        
+
         // VALIDACIÓN CRÍTICA PARA EVITAR ERROR (NaN, NaN)
         if (!isNaN(lat) && !isNaN(lng) && !isNaN(zoom)) {
           try {
@@ -192,49 +192,49 @@ const createFoodIcon = (emoji) => L.divIcon({
 // Detectar tipo de comida y devolver emoji correspondiente
 const detectFoodType = (query) => {
   const q = query.toLowerCase();
-  
+
   // Pizza
   if (q.includes('pizza') || q.includes('pizzer')) return '🍕';
-  
+
   // Hamburguesas
   if (q.includes('hamburguesa') || q.includes('burger') || q.includes('hamburgueseria')) return '🍔';
-  
+
   // Pasta
   if (q.includes('pasta') || q.includes('fideos') || q.includes('ravioles') || q.includes('ñoquis')) return '🍝';
-  
+
   // Sushi / Japonés
   if (q.includes('sushi') || q.includes('japon') || q.includes('rolls')) return '🍣';
-  
+
   // Tacos / Mexicano
   if (q.includes('taco') || q.includes('mexican') || q.includes('burrito')) return '🌮';
-  
+
   // Parrilla / Carne / Asado
   if (q.includes('parrilla') || q.includes('asado') || q.includes('carne') || q.includes('bife')) return '🥩';
-  
+
   // Facturas / Medialunas / Panadería
   if (q.includes('factura') || q.includes('medialuna') || q.includes('croissant') || q.includes('panader')) return '🥐';
-  
+
   // Café / Desayuno
   if (q.includes('cafe') || q.includes('café') || q.includes('desayuno') || q.includes('brunch')) return '☕';
-  
+
   // Helado
   if (q.includes('helado') || q.includes('heladeria')) return '🍦';
-  
+
   // Cervecería / Cerveza / Birra
   if (q.includes('cerveza') || q.includes('cerveceria') || q.includes('cervecería') || q.includes('birra') || q.includes('growler')) return '🍺';
-  
+
   // Bar / Cocktails
   if (q.includes('bar') || q.includes('cocktail') || q.includes('trago') || q.includes('drink')) return '🍸';
-  
+
   // Vegano / Vegetariano
   if (q.includes('vegano') || q.includes('vegetariano') || q.includes('ensalada')) return '🥗';
-  
+
   // Empanadas
   if (q.includes('empanada')) return '🥟';
-  
+
   // Postres / Dulce
   if (q.includes('postre') || q.includes('torta') || q.includes('dulce')) return '🍰';
-  
+
   // Por defecto: plato genérico
   return '🍽️';
 };
@@ -344,16 +344,16 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   const [lastQuery, setLastQuery] = useState('');
   const [currentTopic, setCurrentTopic] = useState(''); // Última búsqueda o tópico que escribió el usuario
   const [restaurantCards, setRestaurantCards] = useState([]);
-    const [bgImages, setBgImages] = useState(BACKGROUND_IMAGES);
-    const [prevBgImages, setPrevBgImages] = useState(null);
-    const [isBgTransitioning, setIsBgTransitioning] = useState(false);
+  const [bgImages, setBgImages] = useState(BACKGROUND_IMAGES);
+  const [prevBgImages, setPrevBgImages] = useState(null);
+  const [isBgTransitioning, setIsBgTransitioning] = useState(false);
   const [cardsMode, setCardsMode] = useState('rag'); // 'rag' = completas, 'estadisticas' = minimalistas
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'reviews', 'name'
   const [sidebarMode, setSidebarMode] = useState(false); // Chat en sidebar después del primer mensaje
   const [hoveredRestaurant, setHoveredRestaurant] = useState(null);
   const [chipsExpanded, setChipsExpanded] = useState(false);
   const [tonesExpanded, setTonesExpanded] = useState(false);
-  
+
   // === NUEVO ESTADO PARA PESTAÑAS MÓVILES ===
   const [mobileTab, setMobileTab] = useState('chat'); // 'chat' | 'results' | 'map'
 
@@ -451,7 +451,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       if (countdownInterval) clearInterval(countdownInterval);
     };
   }, [apiStatus, messages]);
-  
+
   // === NUEVO REF PARA CONTENEDOR DE MENSAJES ===
   const messagesContainerRef = useRef(null);
   const markerRefs = useRef({});
@@ -495,7 +495,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   // Ordenar tarjetas según criterio seleccionado
   const sortedCards = useMemo(() => {
     if (cardsMode !== 'estadisticas') return restaurantCards;
-    
+
     return [...restaurantCards].sort((a, b) => {
       switch (sortBy) {
         case 'rating':
@@ -611,7 +611,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         marker._icon.classList.remove('marker-highlighted');
       }
     });
-    
+
     // Agregar highlight al marcador hovered
     if (hoveredRestaurant && markerRefs.current[hoveredRestaurant]) {
       const marker = markerRefs.current[hoveredRestaurant];
@@ -673,7 +673,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       if (cardsMode === 'resumen' && restaurantCards.length === 1) {
         const nombre = restaurantCards[0].nombre;
         setLoadingInlineDetail(true);
-        
+
         // Usar cache si existe
         const inlineCacheKey = getDetailsCacheKey(nombre);
         if (detailsCache[inlineCacheKey]) {
@@ -692,30 +692,30 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       } else {
         // Limpiar detalles inline si no es modo resumen
         setInlineDetail(null);
-        
+
         // Cargar en background los detalles de cada restaurante
         restaurantCards.forEach(async (card) => {
           // Solo cargar si no está en cache
           const bgKey = getDetailsCacheKey(card.nombre);
           if (!detailsCache[bgKey]) {
-          try {
-            const response = await axios.get(`${API_URL}/restaurant/${encodeURIComponent(card.nombre)}?tone=${encodeURIComponent(tone)}`, axiosConfig);
-            setDetailsCache(prev => ({
-              ...prev,
-              [bgKey]: response.data
-            }));
-          } catch (error) {
-            console.error(`Error pre-cargando ${card.nombre}:`, error);
+            try {
+              const response = await axios.get(`${API_URL}/restaurant/${encodeURIComponent(card.nombre)}?tone=${encodeURIComponent(tone)}`, axiosConfig);
+              setDetailsCache(prev => ({
+                ...prev,
+                [bgKey]: response.data
+              }));
+            } catch (error) {
+              console.error(`Error pre-cargando ${card.nombre}:`, error);
+            }
           }
-        }
-      });
+        });
       }
     } else if (cardsMode === 'resumen' && mapLocations.length === 1) {
       // Fallback: si no hay cards pero hay una location en modo resumen, cargar detalles
       const nombre = mapLocations[0].nombre;
       console.log('[FRONTEND DEBUG] Cargando detalles desde location:', nombre);
       setLoadingInlineDetail(true);
-      
+
       const inlineCacheKey2 = getDetailsCacheKey(nombre);
       if (detailsCache[inlineCacheKey2]) {
         setInlineDetail(detailsCache[inlineCacheKey2]);
@@ -766,117 +766,198 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     }
   };
 
-  const sendQuery = async (userMessage) => {
-    if (!userMessage || !userMessage.trim() || loading) return;
-    const um = userMessage.trim();
-    // Guardar la última búsqueda antes de limpiar input
-    setCurrentTopic(um);
-    setInput('');
-    
-    // === MOBILE: Forzar pestaña de chat al enviar mensaje ===
+  // Shared function to handle streaming response
+  const streamChatResponse = async (payload, initialUserMessage = null) => {
+    // 1. Setup UI for streaming
+    setLoading(true);
     setMobileTab('chat');
 
-    // Agregar mensaje del usuario
-    setMessages(prev => [...prev, { role: 'user', content: um }]);
-    setLoading(true);
+    // If not triggered by a pending option click, user message is already added
+    // If we want to be safe, we can enforce adding it here, but `sendQuery` does it before.
 
-    console.log('[FRONTEND DEBUG] Enviando query:', userMessage);
-    console.log('[FRONTEND DEBUG] Contexto actual:', conversationContext);
+    // Add placeholder for assistant message
+    setMessages(prev => [...prev, { role: 'assistant', content: '', mode: 'general' }]);
+
+    // We need an index to update the LAST message
+    // Since state updates are async, we can't rely on messages.length immediately after setMessages
+    // So we will use a functional update pattern for every token append.
 
     try {
-      // Enviar el tono como parte del request para que el backend lo tome en cuenta
-      const response = await axios.post(`${API_URL}/chat`, {
-        query: um,
-        conversation_context: { ...conversationContext, tone },
-        tone
-      }, { timeout: 60000, ...axiosConfig }); // 60 segundos para respuestas del LLM
+      const response = await fetch(`${API_URL}/chat/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_BACKEND_URL.includes('loca.lt')
+            ? { 'bypass-tunnel-reminder': 'true' } : {})
+        },
+        body: JSON.stringify(payload)
+      });
 
-      console.log('[FRONTEND DEBUG] Respuesta recibida:', response.data);
-      console.log('[FRONTEND DEBUG] Nuevo contexto:', response.data.conversation_context);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      // Actualizar contexto de conversación
-      setConversationContext({ ...(response.data.conversation_context || {}), tone });
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
 
-      // Actualizar ubicaciones del mapa si hay
-      if (response.data.locations && response.data.locations.length > 0) {
-        console.log('[FRONTEND DEBUG] Locations recibidas:', response.data.locations);
-        setMapLocations(response.data.locations);
-        setLastQuery(userMessage); // Guardar query solo cuando hay ubicaciones
-      } else {
-        setMapLocations([]);
-      }
+      while (true) {
+        const { done, value } = await reader.read();
 
-      // Siempre actualizar el modo de visualización
-      if (response.data.mode) {
-        console.log('[FRONTEND DEBUG] Modo:', response.data.mode);
-        setCardsMode(response.data.mode);
-      }
-
-      // Actualizar tarjetas de restaurantes si hay
-      if (response.data.restaurant_cards && response.data.restaurant_cards.length > 0) {
-        console.log('[FRONTEND DEBUG] Cards recibidas:', response.data.restaurant_cards);
-        setRestaurantCards(response.data.restaurant_cards);
-        // Activar modo sidebar cuando hay resultados
-        setSidebarMode(true);
-      } else {
-        console.log('[FRONTEND DEBUG] No hay cards, pero modo es:', response.data.mode);
-        setRestaurantCards([]);
-        // Si es modo resumen y hay locations, activar sidebar igual
-        if (response.data.mode === 'resumen' && response.data.locations?.length > 0) {
-          setSidebarMode(true);
+        if (value) {
+          buffer += decoder.decode(value, { stream: true });
         }
-      }
 
-      // Si hay detail_content (modo resumen), mostrarlo en el panel
-      if (response.data.detail_content && response.data.mode === 'resumen') {
-        console.log('[FRONTEND DEBUG] Detail content recibido');
-        // Crear un objeto de detalle con el contenido
-        const card = response.data.restaurant_cards?.[0];
-        if (card) {
-          setInlineDetail({
-            nombre: card.nombre,
-            rating: card.rating,
-            total_reviews: card.total_reviews,
-            direccion: card.direccion,
-            barrio: card.barrio,
-            zona: card.zona,
-            resumen_general: response.data.detail_content
-          });
+        // Split by newlines to get NDJSON lines
+        let lines = buffer.split("\n");
+        // Keep the last part in buffer if it's incomplete (doesn't end with newline)
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const event = JSON.parse(line);
+
+            if (event.type === 'token') {
+              setMessages(prev => {
+                const newMsgs = [...prev];
+                const lastIndex = newMsgs.length - 1;
+                // Critical: Copy the object to avoid mutation in Strict Mode (which runs reducers twice)
+                const lastMsg = { ...newMsgs[lastIndex] };
+
+                if (lastMsg.role === 'assistant') {
+                  lastMsg.content += event.content;
+                  newMsgs[lastIndex] = lastMsg;
+                }
+                return newMsgs;
+              });
+            } else if (event.type === 'meta') {
+              // Update Metadata
+              if (event.mode) {
+                setCardsMode(event.mode);
+                // Update message mode tag
+                setMessages(prev => {
+                  const newMsgs = [...prev];
+                  const lastIndex = newMsgs.length - 1;
+                  const lastMsg = { ...newMsgs[lastIndex] };
+
+                  if (lastMsg.role === 'assistant') {
+                    lastMsg.mode = event.mode;
+                    newMsgs[lastIndex] = lastMsg;
+                  }
+                  return newMsgs;
+                });
+              }
+
+              if (event.cards) {
+                console.log('[STREAM] Cards received:', event.cards.length);
+                setRestaurantCards(event.cards);
+                if (event.cards.length > 0) setSidebarMode(true);
+              }
+
+              if (event.locs) {
+                setMapLocations(event.locs);
+                if (event.locs.length > 0 && initialUserMessage) setLastQuery(initialUserMessage);
+              }
+
+              // If pending options received in meta (e.g. numeric menu)
+              if (event.pending) {
+                setConversationContext(prev => ({ ...prev, pending_options: event.pending }));
+              }
+
+              // Handle detail_content update logic (for RESUMEN mode)
+              // If mode is 'resumen', we might want to populate inlineDetail from the text generated so far?
+              // Actually, the backend sends 'detail_content' in the legacy structure.
+              // In streaming, 'detail_content' is just the full text accumulated. 
+              // We don't get a separate 'detail_content' field in meta usually unless we change backend.
+              // But wait, the backend generator does logic to populate inline detail?
+              // Current backend gen logic:
+              // yield {"type": "meta", "mode": "resumen", "cards": cards, "locs": locs}
+              // It does NOT yield `detail_content`. The text IS the content.
+              // So checking for `detail_content` here is different.
+              // Strategy: if mode is resumen and we have 1 card, populate inlineDetail with the accumulating text?
+              // Maybe wait until stream ends or use effect.
+            } else if (event.type === 'context_update') {
+              if (event.context) setConversationContext(event.context);
+            } else if (event.type === 'error') {
+              console.error('Stream error event:', event.message);
+              // We could show error in UI but usually we just log
+            }
+
+          } catch (e) {
+            console.error('Error parsing NDJSON line:', e, line);
+          }
         }
-      } else {
-        setInlineDetail(null);
+
+        if (done) break;
       }
 
-      // Agregar respuesta del asistente
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: response.data.response,
-        mode: response.data.mode
-      }]);
-      
-      // Actualizar estado de conexión exitosa
+      // Post-stream logic check
       setApiStatus('connected');
+
+      // Trigger side-effects that depend on final state if needed
+      // (Most are handled reactively by useEffects on restaurantCards/mapLocations)
+
     } catch (error) {
-      console.error('Error:', error);
-      
-      // Actualizar estado de conexión
+      console.error('Stream fetch error:', error);
       setApiStatus('error');
-      
-      let errorMessage = '❌ Error al conectar con el servidor.';
-      if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
-        errorMessage = '❌ No puedo conectar con el backend. Asegurate de que esté corriendo en puerto 8000.';
-      } else if (error.code === 'ECONNABORTED') {
-        errorMessage = '⏱️ La consulta tardó demasiado. El backend puede estar ocupado.';
-      }
-      
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: errorMessage,
-        mode: 'error'
-      }]);
+      setMessages(prev => {
+        // If we started an assistant message, append error there or add new one?
+        const newMsgs = [...prev];
+        const lastMsg = newMsgs[newMsgs.length - 1];
+        // Only append if it looks like an error occurred before any content
+        if (lastMsg.role === 'assistant' && lastMsg.content === '') {
+          lastMsg.content = "❌ Error de conexión al stream.";
+          lastMsg.mode = 'error';
+        } else {
+          // Append as separate or just log? Let's just append warning
+          lastMsg.content += "\n\n(❌ Error de conexión)";
+        }
+        return newMsgs;
+      });
     } finally {
       setLoading(false);
     }
+  };
+
+  const sendQuery = async (userMessage) => {
+    const um = userMessage?.trim();
+    if (!um || loading) return;
+
+    setCurrentTopic(um);
+    setInput('');
+    setMobileTab('chat');
+
+    // Add User Message
+    setMessages(prev => [...prev, { role: 'user', content: um }]);
+
+    const payload = {
+      query: um,
+      conversation_context: { ...conversationContext, tone },
+      tone
+    };
+
+    await streamChatResponse(payload, um);
+  };
+
+  // Seleccionar una opción pendiente (click en etiqueta)
+  const selectPendingOption = async (index) => {
+    if (loading) return;
+
+    const selectionStr = String(index + 1);
+    setCurrentTopic(selectionStr);
+    setMobileTab('chat');
+
+    // Add User Message
+    setMessages(prev => [...prev, { role: 'user', content: selectionStr }]);
+
+    // Note: Pending options logic might clear pending_options in backend, 
+    // but we send current context.
+    const payload = {
+      query: selectionStr,
+      conversation_context: { ...conversationContext, tone },
+      tone
+    };
+
+    await streamChatResponse(payload, selectionStr);
   };
 
   const sendMessage = async (e) => {
@@ -888,73 +969,6 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     if (loading) return;
     await sendQuery(q);
   }
-
-  // Seleccionar una opción pendiente (click en etiqueta)
-  const selectPendingOption = async (index) => {
-    if (loading) return;
-
-    const selectionStr = String(index + 1); // enviamos el número al backend
-    // Guardar la selección como último tópico (para usar en detalles)
-    setCurrentTopic(selectionStr);
-    
-    // === MOBILE: Forzar chat ===
-    setMobileTab('chat');
-
-    // Mostrar el mensaje del usuario en la UI
-    setMessages(prev => [...prev, { role: 'user', content: selectionStr }] );
-    setLoading(true);
-
-    try {
-      const response = await axios.post(`${API_URL}/chat`, {
-        query: selectionStr,
-        conversation_context: { ...conversationContext, tone },
-        tone
-      }, { timeout: 60000, ...axiosConfig });
-
-      // Actualizar contexto y UI igual que en sendMessage
-      setConversationContext(response.data.conversation_context || {});
-      setMessages(prev => [...prev, { role: 'assistant', content: response.data.response, mode: response.data.mode }]);
-
-      if (response.data.locations && response.data.locations.length > 0) {
-        setMapLocations(response.data.locations);
-        setLastQuery(selectionStr);
-      } else {
-        setMapLocations([]);
-      }
-
-      if (response.data.restaurant_cards && response.data.restaurant_cards.length > 0) {
-        setRestaurantCards(response.data.restaurant_cards);
-        setSidebarMode(true);
-      } else {
-        setRestaurantCards([]);
-      }
-
-      if (response.data.detail_content && response.data.mode === 'resumen') {
-        const card = response.data.restaurant_cards?.[0];
-        if (card) {
-          setInlineDetail({
-            nombre: card.nombre,
-            rating: card.rating,
-            total_reviews: card.total_reviews,
-            direccion: card.direccion,
-            barrio: card.barrio,
-            zona: card.zona,
-            resumen_general: response.data.detail_content
-          });
-        }
-      } else {
-        setInlineDetail(null);
-      }
-
-      setApiStatus('connected');
-    } catch (error) {
-      console.error('Error al seleccionar opción:', error);
-      setApiStatus('error');
-      setMessages(prev => [...prev, { role: 'assistant', content: '❌ Error al procesar la selección', mode: 'error' }]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getModeIcon = (mode) => {
     switch (mode) {
@@ -983,7 +997,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       setSelectedRestaurant(detailsCache[cacheKey]);
       return;
     }
-    
+
     // Si no está en cache, cargar normalmente
     setLoadingDetail(true);
     try {
@@ -1050,7 +1064,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       <header className="app-header">
         <div className="header-top-row">
           <div className="header-title-group">
-            <h1 
+            <h1
               style={{ cursor: 'pointer' }}
               onClick={() => window.location.reload()}
             >🍽️ ¿Qué Morfamos?</h1>
@@ -1100,411 +1114,411 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
               {/* Only show the + indicator in mobile when not expanded */}
               {!tonesExpanded && <span className="tone-expand-indicator">+</span>}
             </div>
-          <div 
-            className={`status-indicator status-${apiStatus}`}
-            data-tooltip={apiStatus === 'connected' ? 'Backend conectado' : apiStatus === 'checking' ? 'Conectando al backend...' : 'Sin conexión al backend'}
-          >
-            <span className="status-dot"></span>
-            <span className="status-text">
-              {apiStatus === 'connected' ? 'Conectado' : apiStatus === 'checking' ? 'Conectando...' : 'Sin conexión'}
-            </span>
+            <div
+              className={`status-indicator status-${apiStatus}`}
+              data-tooltip={apiStatus === 'connected' ? 'Backend conectado' : apiStatus === 'checking' ? 'Conectando al backend...' : 'Sin conexión al backend'}
+            >
+              <span className="status-dot"></span>
+              <span className="status-text">
+                {apiStatus === 'connected' ? 'Conectado' : apiStatus === 'checking' ? 'Conectando...' : 'Sin conexión'}
+              </span>
+            </div>
           </div>
-        </div>
         </div>
       </header>
 
       <div className="main-content">
-      {/* CONTENEDOR DEL CHAT: oculto en mobile si mobileTab no es 'chat' */}
-      <div className={`chat-container ${sidebarMode ? 'chat-sidebar' : ''} ${mobileTab !== 'chat' ? 'mobile-hidden' : ''}`}>
-        {sidebarMode && (
-          <div className="chat-header">
-            <h4>💬 Chat</h4>
-            <span className="chat-badge">En vivo</span>
-          </div>
-        )}
-        <div className="messages-container" ref={messagesContainerRef}>
-          {messages.map((message, index) => (
-            <div key={index} className={`message message-${message.role}`}>
-              {message.role === 'assistant' && message.mode && (
-                <div className="message-mode">
-                  {getModeIcon(message.mode)} {getModeLabel(message.mode)}
-                </div>
-              )}
-              <div className="message-content">
-                <ReactMarkdown>{message.content}</ReactMarkdown>
-              </div>
+        {/* CONTENEDOR DEL CHAT: oculto en mobile si mobileTab no es 'chat' */}
+        <div className={`chat-container ${sidebarMode ? 'chat-sidebar' : ''} ${mobileTab !== 'chat' ? 'mobile-hidden' : ''}`}>
+          {sidebarMode && (
+            <div className="chat-header">
+              <h4>💬 Chat</h4>
+              <span className="chat-badge">En vivo</span>
             </div>
-          ))}
-          {loading && (
-            <div className="message message-assistant">
-              <div className="message-content loading">
-                <div className="typing-indicator">
-                  <span></span>
-                  <span></span>
-                  <span></span>
+          )}
+          <div className="messages-container" ref={messagesContainerRef}>
+            {messages.map((message, index) => (
+              <div key={index} className={`message message-${message.role}`}>
+                {message.role === 'assistant' && message.mode && (
+                  <div className="message-mode">
+                    {getModeIcon(message.mode)} {getModeLabel(message.mode)}
+                  </div>
+                )}
+                <div className="message-content">
+                  <ReactMarkdown>{message.content}</ReactMarkdown>
                 </div>
-                Pensando...
+              </div>
+            ))}
+            {loading && (
+              <div className="message message-assistant">
+                <div className="message-content loading">
+                  <div className="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  Pensando...
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Mostrar opciones pendientes si el backend las devolvió (labels opcionales) */}
+          {conversationContext && conversationContext.pending_options && (
+            <div className="pending-options">
+              <div className="pending-note">Elegí la opción que corresponda:</div>
+              <div className="pending-list">
+                {Array.isArray(conversationContext.pending_options)
+                  ? conversationContext.pending_options.map((opt, i) => (
+                    <button key={i} className="pending-btn" onClick={() => selectPendingOption(i)}>
+                      {i + 1}. {opt}
+                    </button>
+                  ))
+                  : (conversationContext.pending_options.labels || []).map((lbl, i) => (
+                    <button key={i} className="pending-btn" onClick={() => selectPendingOption(i)}>
+                      {i + 1}. {lbl}
+                    </button>
+                  ))
+                }
               </div>
             </div>
           )}
+
+          {/* Expandable chips bar with bubble trigger */}
+          { /* Mostrar chips solo en la página inicial (sin interacciones y sin sidebar) */}
+          {messages.length <= 1 && !sidebarMode && (
+            <div
+              className="chip-bar-mobile"
+              onMouseEnter={() => setChipsExpanded(true)}
+              onMouseLeave={() => setChipsExpanded(false)}
+            >
+              <button
+                className={`chip-bubble-btn ${chipsExpanded ? 'expanded' : ''}`}
+                type="button"
+                onClick={() => setChipsExpanded(!chipsExpanded)}
+                aria-label="Mostrar ejemplos de búsqueda"
+              >
+                <span className="bubble-icon">💡</span>
+                <span className="bubble-text">Ejemplos</span>
+              </button>
+              <div className={`chips-expandable ${chipsExpanded ? 'expanded' : ''}`}>
+                {SAMPLE_CHIPS.map((c, i) => (
+                  <button key={i} className="chip-btn" type="button" onClick={() => handleChipClick(c.query)}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <form className="input-container" onSubmit={sendMessage}>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onFocus={() => setMobileTab('chat')}
+              placeholder="¿Qué tenés ganas de comer hoy?"
+              disabled={loading || apiStatus !== 'connected'}
+              className="message-input"
+            />
+            <button
+              type="submit"
+              disabled={loading || !input.trim() || apiStatus !== 'connected'}
+              className="send-button"
+            >
+              {loading ? '⏳' : '📤'}
+            </button>
+          </form>
         </div>
 
-        {/* Mostrar opciones pendientes si el backend las devolvió (labels opcionales) */}
-        {conversationContext && conversationContext.pending_options && (
-          <div className="pending-options">
-            <div className="pending-note">Elegí la opción que corresponda:</div>
-            <div className="pending-list">
-              {Array.isArray(conversationContext.pending_options)
-                ? conversationContext.pending_options.map((opt, i) => (
-                    <button key={i} className="pending-btn" onClick={() => selectPendingOption(i)}>
-                      {i+1}. {opt}
-                    </button>
-                  ))
-                : (conversationContext.pending_options.labels || []).map((lbl, i) => (
-                    <button key={i} className="pending-btn" onClick={() => selectPendingOption(i)}>
-                      {i+1}. {lbl}
-                    </button>
-                  ))
-              }
-            </div>
-          </div>
-        )}
+        {/* Se muestra si es 'results' O 'map'. Si no, se oculta el padre entero */}
+        <div className={`${sidebarMode ? 'results-area' : 'results-area-hidden'} ${mobileTab !== 'results' && mobileTab !== 'map' ? 'mobile-hidden' : ''}`}>
 
-        {/* Expandable chips bar with bubble trigger */}
-        { /* Mostrar chips solo en la página inicial (sin interacciones y sin sidebar) */ }
-        {messages.length <= 1 && !sidebarMode && (
-          <div 
-            className="chip-bar-mobile"
-            onMouseEnter={() => setChipsExpanded(true)}
-            onMouseLeave={() => setChipsExpanded(false)}
-          >
-            <button 
-              className={`chip-bubble-btn ${chipsExpanded ? 'expanded' : ''}`}
-              type="button"
-              onClick={() => setChipsExpanded(!chipsExpanded)}
-              aria-label="Mostrar ejemplos de búsqueda"
-            >
-              <span className="bubble-icon">💡</span>
-              <span className="bubble-text">Ejemplos</span>
-            </button>
-            <div className={`chips-expandable ${chipsExpanded ? 'expanded' : ''}`}>
-              {SAMPLE_CHIPS.map((c, i) => (
-                <button key={i} className="chip-btn" type="button" onClick={() => handleChipClick(c.query)}>
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <form className="input-container" onSubmit={sendMessage}>
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onFocus={() => setMobileTab('chat')}
-            placeholder="¿Qué tenés ganas de comer hoy?"
-            disabled={loading || apiStatus !== 'connected'}
-            className="message-input"
-          />
-          <button
-            type="submit"
-            disabled={loading || !input.trim() || apiStatus !== 'connected'}
-            className="send-button"
-          >
-            {loading ? '⏳' : '📤'}
-          </button>
-        </form>
-      </div>
-
-      {/* Se muestra si es 'results' O 'map'. Si no, se oculta el padre entero */}
-      <div className={`${sidebarMode ? 'results-area' : 'results-area-hidden'} ${mobileTab !== 'results' && mobileTab !== 'map' ? 'mobile-hidden' : ''}`}>
-        
-        {/* Panel de detalle inline para modo resumen */}
-        {cardsMode === 'resumen' && (loadingInlineDetail || inlineDetail) && (
-          <div className={`detail-panel ${mobileTab !== 'results' ? 'mobile-hidden' : ''}`}>
-            {loadingInlineDetail ? (
-              <div className="detail-loading">
-                <div className="typing-indicator">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-                <p>Cargando información del restaurante...</p>
-              </div>
-            ) : inlineDetail && (
-              <>
-                <div className="detail-header">
-                  <h2>{inlineDetail.nombre}</h2>
-                  <div className="detail-rating">
-                    {renderStars(inlineDetail.rating)}
-                    <span className="rating-number">{inlineDetail.rating?.toFixed(1)}</span>
-                    <span className="rating-count">({inlineDetail.total_reviews} reseñas)</span>
+          {/* Panel de detalle inline para modo resumen */}
+          {cardsMode === 'resumen' && (loadingInlineDetail || inlineDetail) && (
+            <div className={`detail-panel ${mobileTab !== 'results' ? 'mobile-hidden' : ''}`}>
+              {loadingInlineDetail ? (
+                <div className="detail-loading">
+                  <div className="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                   </div>
+                  <p>Cargando información del restaurante...</p>
                 </div>
-
-                <div className="detail-location">
-                  <p>📍 {inlineDetail.direccion || 'Dirección no disponible'}</p>
-                  {(inlineDetail.barrio || inlineDetail.zona) && (
-                    <p className="location-zone">
-                      {inlineDetail.barrio}{inlineDetail.barrio && inlineDetail.zona ? ' • ' : ''}{inlineDetail.zona}
-                    </p>
-                  )}
-                </div>
-
-                {inlineDetail.resumen_general && (
-                  <div className="detail-summary">
-                    <ReactMarkdown>{inlineDetail.resumen_general}</ReactMarkdown>
+              ) : inlineDetail && (
+                <>
+                  <div className="detail-header">
+                    <h2>{inlineDetail.nombre}</h2>
+                    <div className="detail-rating">
+                      {renderStars(inlineDetail.rating)}
+                      <span className="rating-number">{inlineDetail.rating?.toFixed(1)}</span>
+                      <span className="rating-count">({inlineDetail.total_reviews} reseñas)</span>
+                    </div>
                   </div>
-                )}
 
-                <div className="detail-aspects">
-                  {inlineDetail.aspectos_positivos?.length > 0 && (
-                    <div className="aspects-positive">
-                      <h4>👍 Lo mejor</h4>
-                      <ul>
-                        {inlineDetail.aspectos_positivos.map((asp, i) => (
-                          <li key={i}>{asp}</li>
-                        ))}
-                      </ul>
+                  <div className="detail-location">
+                    <p>📍 {inlineDetail.direccion || 'Dirección no disponible'}</p>
+                    {(inlineDetail.barrio || inlineDetail.zona) && (
+                      <p className="location-zone">
+                        {inlineDetail.barrio}{inlineDetail.barrio && inlineDetail.zona ? ' • ' : ''}{inlineDetail.zona}
+                      </p>
+                    )}
+                  </div>
+
+                  {inlineDetail.resumen_general && (
+                    <div className="detail-summary">
+                      <ReactMarkdown>{inlineDetail.resumen_general}</ReactMarkdown>
                     </div>
                   )}
-                  {inlineDetail.aspectos_negativos?.length > 0 && (
-                    <div className="aspects-negative">
-                      <h4>👎 A mejorar</h4>
-                      <ul>
-                        {inlineDetail.aspectos_negativos.map((asp, i) => (
-                          <li key={i}>{asp}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
 
-                {inlineDetail.reviews?.length > 0 && (
-                  <div className="detail-reviews">
-                    <h3>💬 Reseñas de clientes</h3>
-                    <div className="reviews-list">
-                      {inlineDetail.reviews.map((review, idx) => (
-                        <div key={idx} className="review-item">
-                          <div className="review-header">
-                            <span className="review-author">{review.autor}</span>
-                            <span className="review-rating">
-                              {'⭐'.repeat(review.rating)}
-                            </span>
-                            {review.fecha && <span className="review-date">{review.fecha}</span>}
+                  <div className="detail-aspects">
+                    {inlineDetail.aspectos_positivos?.length > 0 && (
+                      <div className="aspects-positive">
+                        <h4>👍 Lo mejor</h4>
+                        <ul>
+                          {inlineDetail.aspectos_positivos.map((asp, i) => (
+                            <li key={i}>{asp}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {inlineDetail.aspectos_negativos?.length > 0 && (
+                      <div className="aspects-negative">
+                        <h4>👎 A mejorar</h4>
+                        <ul>
+                          {inlineDetail.aspectos_negativos.map((asp, i) => (
+                            <li key={i}>{asp}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  {inlineDetail.reviews?.length > 0 && (
+                    <div className="detail-reviews">
+                      <h3>💬 Reseñas de clientes</h3>
+                      <div className="reviews-list">
+                        {inlineDetail.reviews.map((review, idx) => (
+                          <div key={idx} className="review-item">
+                            <div className="review-header">
+                              <span className="review-author">{review.autor}</span>
+                              <span className="review-rating">
+                                {'⭐'.repeat(review.rating)}
+                              </span>
+                              {review.fecha && <span className="review-date">{review.fecha}</span>}
+                            </div>
+                            <p className="review-text">{review.texto}</p>
                           </div>
-                          <p className="review-text">{review.texto}</p>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
-        {/* Tarjetas de restaurantes (solo si NO es modo resumen) */}
-        {restaurantCards.length > 0 && cardsMode !== 'resumen' && (
-          <div className={`cards-container ${cardsMode === 'estadisticas' ? 'cards-compact' : ''} ${mobileTab !== 'results' ? 'mobile-hidden' : ''}`}>
-            <h3>{cardsMode === 'estadisticas' ? `📍 ${restaurantCards.length} lugares encontrados` : '🍽️ Lugares recomendados'}</h3>
-          
-            {cardsMode === 'estadisticas' ? (
-              // Tarjetas minimalistas para estadísticas
-              <>
-                <div className="sort-buttons">
-                  <button 
-                    className={`sort-btn ${sortBy === 'rating' ? 'active' : ''}`}
-                    onClick={() => handleSetSortBy('rating')}
-                    title="Ordenar por puntaje"
-                  >
-                    ⭐ Puntaje
-                  </button>
-                  <button 
-                    className={`sort-btn ${sortBy === 'reviews' ? 'active' : ''}`}
-                    onClick={() => handleSetSortBy('reviews')}
-                    title="Ordenar por cantidad de reseñas"
-                  >
-                    💬 Reseñas
-                  </button>
-                  <button 
-                    className={`sort-btn ${sortBy === 'name' ? 'active' : ''}`}
-                    onClick={() => handleSetSortBy('name')}
-                    title="Ordenar alfabéticamente"
-                  >
-                    🔤 A-Z
-                  </button>
-                </div>
-                <div className="cards-list" ref={cardsContainerRef}>
+          {/* Tarjetas de restaurantes (solo si NO es modo resumen) */}
+          {restaurantCards.length > 0 && cardsMode !== 'resumen' && (
+            <div className={`cards-container ${cardsMode === 'estadisticas' ? 'cards-compact' : ''} ${mobileTab !== 'results' ? 'mobile-hidden' : ''}`}>
+              <h3>{cardsMode === 'estadisticas' ? `📍 ${restaurantCards.length} lugares encontrados` : '🍽️ Lugares recomendados'}</h3>
+
+              {cardsMode === 'estadisticas' ? (
+                // Tarjetas minimalistas para estadísticas
+                <>
+                  <div className="sort-buttons">
+                    <button
+                      className={`sort-btn ${sortBy === 'rating' ? 'active' : ''}`}
+                      onClick={() => handleSetSortBy('rating')}
+                      title="Ordenar por puntaje"
+                    >
+                      ⭐ Puntaje
+                    </button>
+                    <button
+                      className={`sort-btn ${sortBy === 'reviews' ? 'active' : ''}`}
+                      onClick={() => handleSetSortBy('reviews')}
+                      title="Ordenar por cantidad de reseñas"
+                    >
+                      💬 Reseñas
+                    </button>
+                    <button
+                      className={`sort-btn ${sortBy === 'name' ? 'active' : ''}`}
+                      onClick={() => handleSetSortBy('name')}
+                      title="Ordenar alfabéticamente"
+                    >
+                      🔤 A-Z
+                    </button>
+                  </div>
+                  <div className="cards-list" ref={cardsContainerRef}>
+                    {sortedCards.map((card, idx) => (
+                      <div
+                        key={card.nombre}
+                        data-card-name={card.nombre}
+                        ref={(el) => { if (el) cardRefs.current[card.nombre] = el; }}
+                        className={`card-mini ${hoveredRestaurant === card.nombre ? 'card-highlighted' : ''}`}
+                        onMouseEnter={() => { setHoveredRestaurant(card.nombre); if (!scrollingFromMap.current) setCenterMapOn(card.nombre); }}
+                        onMouseLeave={() => { setHoveredRestaurant(null); setCenterMapOn(null); }}
+                        onClick={() => openRestaurantDetail(card.nombre)}
+                      >
+                        <span className="card-mini-name">{card.nombre}</span>
+                        <div className="card-mini-stats">
+                          <span className="card-mini-rating">⭐ {card.rating?.toFixed(1) || 'N/A'}</span>
+                          {card.total_reviews > 0 && (
+                            <span className="card-mini-reviews">({card.total_reviews})</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                // Tarjetas completas para recomendaciones
+                <div className="cards-grid" ref={cardsContainerRef}>
                   {sortedCards.map((card, idx) => (
-                    <div 
-                      key={card.nombre} 
+                    <div
+                      key={card.nombre}
                       data-card-name={card.nombre}
                       ref={(el) => { if (el) cardRefs.current[card.nombre] = el; }}
-                      className={`card-mini ${hoveredRestaurant === card.nombre ? 'card-highlighted' : ''}`}
+                      className={`restaurant-card ${hoveredRestaurant === card.nombre ? 'card-highlighted' : ''}`}
                       onMouseEnter={() => { setHoveredRestaurant(card.nombre); if (!scrollingFromMap.current) setCenterMapOn(card.nombre); }}
                       onMouseLeave={() => { setHoveredRestaurant(null); setCenterMapOn(null); }}
                       onClick={() => openRestaurantDetail(card.nombre)}
+                      style={{ cursor: 'pointer' }}
                     >
-                      <span className="card-mini-name">{card.nombre}</span>
-                      <div className="card-mini-stats">
-                        <span className="card-mini-rating">⭐ {card.rating?.toFixed(1) || 'N/A'}</span>
-                        {card.total_reviews > 0 && (
-                          <span className="card-mini-reviews">({card.total_reviews})</span>
+                      <div className="card-header">
+                        <h4>{card.nombre}</h4>
+                        <div className="card-rating">
+                          <span className="stars">⭐ {card.rating?.toFixed(1) || 'N/A'}</span>
+                          <span className="reviews">({card.total_reviews} reseñas)</span>
+                        </div>
+                      </div>
+                      <div className="card-location">
+                        {card.direccion && <p className="address">📍 {card.direccion}</p>}
+                        {(card.barrio || card.zona) && (
+                          <p className="zone">
+                            {card.barrio}{card.barrio && card.zona ? ' • ' : ''}{card.zona}
+                          </p>
                         )}
                       </div>
+                      {card.descripcion && (
+                        <div className="card-description">
+                          <p>{card.descripcion}</p>
+                        </div>
+                      )}
+                      {card.frase_destacada && (
+                        <div className="card-quote">
+                          <p>{card.frase_destacada}</p>
+                          {card.autor_reseña && <span className="quote-author">— {card.autor_reseña}</span>}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
-              </>
-            ) : (
-              // Tarjetas completas para recomendaciones
-              <div className="cards-grid" ref={cardsContainerRef}>
-                {sortedCards.map((card, idx) => (
-                  <div 
-                    key={card.nombre} 
-                    data-card-name={card.nombre}
-                    ref={(el) => { if (el) cardRefs.current[card.nombre] = el; }}
-                    className={`restaurant-card ${hoveredRestaurant === card.nombre ? 'card-highlighted' : ''}`}
-                    onMouseEnter={() => { setHoveredRestaurant(card.nombre); if (!scrollingFromMap.current) setCenterMapOn(card.nombre); }}
-                    onMouseLeave={() => { setHoveredRestaurant(null); setCenterMapOn(null); }}
-                    onClick={() => openRestaurantDetail(card.nombre)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className="card-header">
-                      <h4>{card.nombre}</h4>
-                      <div className="card-rating">
-                        <span className="stars">⭐ {card.rating?.toFixed(1) || 'N/A'}</span>
-                        <span className="reviews">({card.total_reviews} reseñas)</span>
-                      </div>
-                    </div>
-                    <div className="card-location">
-                      {card.direccion && <p className="address">📍 {card.direccion}</p>}
-                      {(card.barrio || card.zona) && (
-                        <p className="zone">
-                          {card.barrio}{card.barrio && card.zona ? ' • ' : ''}{card.zona}
-                        </p>
-                      )}
-                    </div>
-                    {card.descripcion && (
-                      <div className="card-description">
-                        <p>{card.descripcion}</p>
-                      </div>
-                    )}
-                    {card.frase_destacada && (
-                      <div className="card-quote">
-                        <p>{card.frase_destacada}</p>
-                        {card.autor_reseña && <span className="quote-author">— {card.autor_reseña}</span>}
-                      </div>
-                    )}
+              )}
+            </div>
+          )}
+
+
+          {/* Mapa de ubicaciones (pestaña mobile 'map') */}
+          <div className={`map-container ${mobileTab !== 'map' ? 'mobile-hidden' : ''}`}>
+            {mapLocations.length > 0 && (
+              <div className="map-wrapper">
+                <div className="map-inner">
+                  <div className="map-header">
+                    <h3>📍 {mapLocations.length === 1 ? 'Ubicación' : 'Ubicaciones'}</h3>
                   </div>
-                ))}
+                  <MapContainer
+                    key={mapLocations.map(l => l.nombre).join('-')}
+                    whenCreated={(m) => { mapRef.current = m; console.log('[MAP] created', m); }}
+                    center={[mapLocations[0].lat, mapLocations[0].lng]}
+                    zoom={13}
+                    preferCanvas={true}
+                    zoomAnimation={true}
+                    fadeAnimation={true}
+                    style={{ height: '100%', width: '100%', borderRadius: '12px' }}
+                  >
+                    <MapResizer />
+                    <FitBounds locations={mapLocations} allViewRef={allViewRef} trigger={mobileTab} />
+                    <ChangeMapStyle
+                      url={MAP_STYLE.url}
+                      attribution={MAP_STYLE.attribution}
+                    />
+                    <CenterOnHover
+                      centerOn={centerMapOn}
+                      locations={mapLocations}
+                      allViewRef={allViewRef}
+                    />
+                    {/** small hack: kick-map-invalidates after mount */}
+                    <MapKick visible={mobileTab === 'map'} mapRef={mapRef} />
+                    {/* Force a couple invalidateSize calls after mount to avoid blank map when container was hidden */}
+                    {mapLocations.map((loc, idx) => (
+                      <Marker
+                        key={loc.nombre}
+                        position={[loc.lat, loc.lng]}
+                        icon={currentIcon}
+                        ref={(ref) => { if (ref) markerRefs.current[loc.nombre] = ref; }}
+                        eventHandlers={{
+                          mouseover: () => {
+                            setHoveredRestaurant(loc.nombre);
+                            scrollToCard(loc.nombre, true);
+                          },
+                          mouseout: () => setHoveredRestaurant(null),
+                          click: () => scrollToCard(loc.nombre, true)
+                        }}
+                      >
+                        <Popup>
+                          <div className="map-popup">
+                            <strong>{loc.nombre}</strong>
+                            {(() => {
+                              const card = restaurantCards.find(c =>
+                                c.nombre.toLowerCase() === loc.nombre.toLowerCase()
+                              );
+                              if (card && (card.rating > 0 || card.total_reviews > 0)) {
+                                return (
+                                  <div className="popup-stats">
+                                    {card.rating > 0 && (
+                                      <span className="popup-rating">⭐ {card.rating.toFixed(1)}</span>
+                                    )}
+                                    {card.total_reviews > 0 && (
+                                      <span className="popup-reviews">({card.total_reviews} reseñas)</span>
+                                    )}
+                                  </div>
+                                );
+                              }
+                              if (loc.rating > 0) {
+                                return (
+                                  <div className="popup-stats">
+                                    <span className="popup-rating">⭐ {loc.rating.toFixed(1)}</span>
+                                    {loc.total_reviews > 0 && (
+                                      <span className="popup-reviews">({loc.total_reviews} reseñas)</span>
+                                    )}
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
+                            {loc.direccion && <p className="popup-address">{loc.direccion}</p>}
+                            <button
+                              className="popup-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openRestaurantDetail(loc.nombre);
+                              }}
+                            >
+                              + Info
+                            </button>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    ))}
+                  </MapContainer>
+                </div>
               </div>
             )}
           </div>
-        )}
 
-        
-        {/* Mapa de ubicaciones (pestaña mobile 'map') */}
-        <div className={`map-container ${mobileTab !== 'map' ? 'mobile-hidden' : ''}`}>
-          {mapLocations.length > 0 && (
-            <div className="map-wrapper">
-              <div className="map-inner">
-                <div className="map-header">
-                  <h3>📍 {mapLocations.length === 1 ? 'Ubicación' : 'Ubicaciones'}</h3>
-                </div>
-                <MapContainer
-                  key={mapLocations.map(l => l.nombre).join('-')}
-                  whenCreated={(m) => { mapRef.current = m; console.log('[MAP] created', m); }}
-                  center={[mapLocations[0].lat, mapLocations[0].lng]}
-                  zoom={13}
-                  preferCanvas={true}
-                  zoomAnimation={true}
-                  fadeAnimation={true}
-                  style={{ height: '100%', width: '100%', borderRadius: '12px' }}
-                >
-                  <MapResizer />
-                  <FitBounds locations={mapLocations} allViewRef={allViewRef} trigger={mobileTab} />
-                  <ChangeMapStyle 
-                    url={MAP_STYLE.url} 
-                    attribution={MAP_STYLE.attribution} 
-                  />
-                  <CenterOnHover 
-                    centerOn={centerMapOn} 
-                    locations={mapLocations} 
-                    allViewRef={allViewRef}
-                  />
-                  {/** small hack: kick-map-invalidates after mount */}
-                  <MapKick visible={mobileTab === 'map'} mapRef={mapRef} />
-                  {/* Force a couple invalidateSize calls after mount to avoid blank map when container was hidden */}
-                  {mapLocations.map((loc, idx) => (
-                    <Marker 
-                      key={loc.nombre} 
-                      position={[loc.lat, loc.lng]} 
-                      icon={currentIcon}
-                      ref={(ref) => { if (ref) markerRefs.current[loc.nombre] = ref; }}
-                      eventHandlers={{
-                        mouseover: () => {
-                          setHoveredRestaurant(loc.nombre);
-                          scrollToCard(loc.nombre, true);
-                        },
-                        mouseout: () => setHoveredRestaurant(null),
-                        click: () => scrollToCard(loc.nombre, true)
-                      }}
-                    >
-                      <Popup>
-                        <div className="map-popup">
-                          <strong>{loc.nombre}</strong>
-                          {(() => {
-                            const card = restaurantCards.find(c => 
-                              c.nombre.toLowerCase() === loc.nombre.toLowerCase()
-                            );
-                            if (card && (card.rating > 0 || card.total_reviews > 0)) {
-                              return (
-                                <div className="popup-stats">
-                                  {card.rating > 0 && (
-                                    <span className="popup-rating">⭐ {card.rating.toFixed(1)}</span>
-                                  )}
-                                  {card.total_reviews > 0 && (
-                                    <span className="popup-reviews">({card.total_reviews} reseñas)</span>
-                                  )}
-                                </div>
-                              );
-                            }
-                            if (loc.rating > 0) {
-                              return (
-                                <div className="popup-stats">
-                                  <span className="popup-rating">⭐ {loc.rating.toFixed(1)}</span>
-                                  {loc.total_reviews > 0 && (
-                                    <span className="popup-reviews">({loc.total_reviews} reseñas)</span>
-                                  )}
-                                </div>
-                              );
-                            }
-                            return null;
-                          })()}
-                          {loc.direccion && <p className="popup-address">{loc.direccion}</p>}
-                          <button 
-                            className="popup-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openRestaurantDetail(loc.nombre);
-                            }}
-                          >
-                            + Info
-                          </button>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
-              </div>
-            </div>
-          )}
-        </div>
-
-      </div>{/* Fin results-area */}
+        </div>{/* Fin results-area */}
       </div>{/* Fin main-content */}
 
       {/* BARRA DE NAVEGACIÓN MÓVIL (Solo visible si sidebarMode es true) */}
@@ -1556,7 +1570,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
             border: '1.5px solid #2a4a7a',
             padding: 24
           }}>
-            <img src="https://bvtelevision.wordpress.com/wp-content/uploads/2015/04/technical.jpg?w=300" alt="Backend inactivo" style={{width: '100%', maxWidth: 250, borderRadius: 8, marginBottom: 18, border: '2px solid #2a4a7a'}} />
+            <img src="https://bvtelevision.wordpress.com/wp-content/uploads/2015/04/technical.jpg?w=300" alt="Backend inactivo" style={{ width: '100%', maxWidth: 250, borderRadius: 8, marginBottom: 18, border: '2px solid #2a4a7a' }} />
             <h2
               className="modal-title-gradient"
               style={{
@@ -1574,14 +1588,14 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
                 animation: 'gradient-move 6s ease-in-out infinite',
               }}
             >Backend inactivo... Reconectando</h2>
-            <p style={{marginBottom: 14, fontSize: 17, color: '#fff', lineHeight: 1.5}}>
-              El backend fue desactivado por inactividad prolongada.<br/>
-              <span style={{color: '#6ec1ff'}}>Intentando reactivar en <b>{backendCountdown}</b> segundos.</span>
+            <p style={{ marginBottom: 14, fontSize: 17, color: '#fff', lineHeight: 1.5 }}>
+              El backend fue desactivado por inactividad prolongada.<br />
+              <span style={{ color: '#6ec1ff' }}>Intentando reactivar en <b>{backendCountdown}</b> segundos.</span>
             </p>
-            <div style={{fontSize: 32, margin: '12px 0'}}>
+            <div style={{ fontSize: 32, margin: '12px 0' }}>
               <span role="img" aria-label="reloj">⏳</span>
             </div>
-            <p style={{fontSize: 14, color: '#b3d8ff', marginTop: 10}}>La página intentará reconectar automáticamente.</p>
+            <p style={{ fontSize: 14, color: '#b3d8ff', marginTop: 10 }}>La página intentará reconectar automáticamente.</p>
           </div>
         </div>
       )}
