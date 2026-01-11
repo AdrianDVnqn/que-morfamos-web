@@ -735,9 +735,47 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   }, [restaurantCards, cardsMode, mapLocations]);
 
   // Verificar estado del backend al cargar y periódicamente
+  // Polling agresivo inicial (cold start puede tardar hasta 60s), luego más espaciado
   useEffect(() => {
-    checkBackendHealth();
-    const interval = setInterval(checkBackendHealth, 10000); // Cada 10 segundos
+    let interval;
+    let attempts = 0;
+    const maxRetries = 12; // 12 intentos x 5s = 60s de tolerancia para cold start
+
+    const warmupBackend = async () => {
+      attempts++;
+      console.log(`[Warmup] Intento ${attempts}/${maxRetries}...`);
+
+      try {
+        // Timeout largo para tolerar cold start de Fly.io
+        const response = await axios.get(`${API_URL}/health`, {
+          timeout: attempts <= 2 ? 15000 : 5000, // Primeros intentos con más paciencia
+          ...axiosConfig
+        });
+
+        if (response.data.status === 'healthy') {
+          console.log('[Warmup] ✅ Backend caliente!');
+          setApiStatus('connected');
+          // Una vez conectado, polling menos frecuente
+          clearInterval(interval);
+          interval = setInterval(checkBackendHealth, 30000); // Cada 30s cuando ya está activo
+        } else {
+          setApiStatus('error');
+        }
+      } catch (error) {
+        console.log(`[Warmup] Backend arrancando... (${error.message})`);
+        if (attempts >= maxRetries) {
+          setApiStatus('error');
+        } else {
+          setApiStatus('checking');
+        }
+      }
+    };
+
+    // Primer intento inmediato
+    warmupBackend();
+    // Polling cada 5 segundos hasta conectar
+    interval = setInterval(warmupBackend, 5000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -754,7 +792,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
 
   const checkBackendHealth = async () => {
     try {
-      const response = await axios.get(`${API_URL}/health`, { timeout: 3000, ...axiosConfig });
+      const response = await axios.get(`${API_URL}/health`, { timeout: 5000, ...axiosConfig });
       if (response.data.status === 'healthy') {
         setApiStatus('connected');
       } else {
