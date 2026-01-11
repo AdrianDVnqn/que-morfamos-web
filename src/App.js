@@ -638,6 +638,31 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     return BACKGROUND_IMAGES;
   };
 
+  // Emoji de carga basado en el tópico de búsqueda
+  const getLoadingEmoji = (topic) => {
+    if (!topic || typeof topic !== 'string') return '🍽️';
+    const t = topic.toLowerCase();
+    if (/^\d+$/.test(t.trim())) return '🍽️'; // si es solo un número, fallback
+    if (t.includes('pizza') || t.includes('pizzer')) return '🍕';
+    if (t.includes('pan') || t.includes('factur') || t.includes('medialun') || t.includes('panader')) return '🥐';
+    if (t.includes('bar') || t.includes('cocktail') || t.includes('trago') || t.includes('pub')) return '🍸';
+    if (t.includes('cerveza') || t.includes('birra')) return '🍺';
+    if (t.includes('parrill') || t.includes('asado') || t.includes('carne') || t.includes('bife')) return '🥩';
+    if (t.includes('vegano') || t.includes('vegetar') || t.includes('vegan') || t.includes('ensalad')) return '🥗';
+    if (t.includes('helado') || t.includes('helader')) return '🍦';
+    if (t.includes('hamburg') || t.includes('burger')) return '🍔';
+    if (t.includes('sushi') || t.includes('japon') || t.includes('asiat')) return '🍣';
+    if (t.includes('empanad')) return '🥟';
+    if (t.includes('cafe') || t.includes('café') || t.includes('cafeter')) return '☕';
+    if (t.includes('pasta') || t.includes('italian') || t.includes('tuco')) return '🍝';
+    if (t.includes('taco') || t.includes('mexican') || t.includes('burrito')) return '🌮';
+    if (t.includes('pollo') || t.includes('chicken')) return '🍗';
+    if (t.includes('postre') || t.includes('dulce') || t.includes('torta') || t.includes('pastel')) return '🍰';
+    if (t.includes('desayun') || t.includes('brunch')) return '🥞';
+    if (t.includes('milanesa') || t.includes('napolitana')) return '🍖';
+    return '🍽️';
+  };
+
   useEffect(() => {
     const newImages = getBackgroundImagesForTopic(currentTopic || conversationContext?.topic || '');
     // simple compare: if first image is same and lengths same, ignore
@@ -1201,9 +1226,9 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
               <div className="message message-assistant">
                 <div className="message-content loading">
                   <div className="typing-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                    <span>{getLoadingEmoji(currentTopic)}</span>
+                    <span>{getLoadingEmoji(currentTopic)}</span>
+                    <span>{getLoadingEmoji(currentTopic)}</span>
                   </div>
                   Pensando...
                 </div>

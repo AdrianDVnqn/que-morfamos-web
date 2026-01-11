@@ -627,15 +627,14 @@ body {
 
 .typing-indicator {
   display: flex;
-  gap: 5px;
+  gap: 6px;
 }
 
 .typing-indicator span {
-  width: 10px;
-  height: 10px;
-  background: var(--accent-primary);
-  border-radius: 50%;
-  animation: typing 1.4s infinite;
+  font-size: 18px;
+  line-height: 1;
+  animation: emojiTyping 1.4s infinite;
+  display: inline-block;
 }
 
 .typing-indicator span:nth-child(2) {
@@ -644,6 +643,21 @@ body {
 
 .typing-indicator span:nth-child(3) {
   animation-delay: 0.4s;
+}
+
+@keyframes emojiTyping {
+
+  0%,
+  60%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.5;
+  }
+
+  30% {
+    transform: translateY(-8px) scale(1.15);
+    opacity: 1;
+  }
 }
 
 @keyframes typing {
