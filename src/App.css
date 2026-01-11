@@ -2682,16 +2682,35 @@ body {
   z-index: 0;
 }
 
-/* Fading a previous layer out over the base layer */
+/* Transición crossfade: prev hace fade-out mientras base hace fade-in */
+
+/* Base layer: cuando hay transición, empezamos con opacidad baja */
+.bg-slideshow.is-transitioning .bg-layer.base .bg-slide {
+  animation: fadeInNewBg 1.8s ease-out forwards !important;
+}
+
+@keyframes fadeInNewBg {
+  0% {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+/* Prev layer: hace fade-out lento */
 .bg-slideshow .bg-layer.prev .bg-slide {
-  transition: opacity 1.5s ease-in-out, transform 2s ease-out;
+  transition: opacity 1.8s ease-in-out, transform 2.2s ease-out;
   animation: none !important;
   opacity: 1;
 }
 
 .bg-slideshow.is-transitioning .bg-layer.prev .bg-slide {
   opacity: 0;
-  transform: scale(1.04);
+  transform: scale(1.06);
 }
 
 /* ligera superposición de color para integrar con tema */
