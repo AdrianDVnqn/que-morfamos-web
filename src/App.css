@@ -203,7 +203,7 @@ body {
   object-fit: contain;
   /* "Elimina" el fondo negro haciendo blend con el fondo (Screen = negro es transparente) */
   mix-blend-mode: screen;
-
+  display: block;
   border-radius: 4px;
 }
 
