@@ -185,19 +185,23 @@ body {
   font-family: var(--font-heading);
   font-size: 28px;
   font-weight: 800;
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  background-size: 200% 200%;
+  color: #fff;
   letter-spacing: -0.5px;
   position: relative;
   display: inline-block;
   cursor: pointer;
-  /* Efecto neón: glow constante con respiración */
-  filter: drop-shadow(0 0 8px rgba(233, 69, 96, 0.6)) drop-shadow(0 0 20px rgba(233, 69, 96, 0.4)) drop-shadow(0 0 40px rgba(255, 107, 107, 0.3));
-  animation: neonBreathing 3s ease-in-out infinite, hueShift 8s linear infinite;
-  transition: filter 0.3s ease, transform 0.3s var(--transition-bounce);
+  /* Glow base del texto - efecto neón estilo CSS-Tricks */
+  text-shadow:
+    0 0 7px #fff,
+    0 0 10px #fff,
+    0 0 21px #fff,
+    0 0 42px var(--accent-primary),
+    0 0 82px var(--accent-primary),
+    0 0 92px var(--accent-primary),
+    0 0 102px var(--accent-primary),
+    0 0 151px var(--accent-primary);
+  animation: neonFlicker 4s infinite, neonBreathing 3s ease-in-out infinite;
+  transition: text-shadow 0.3s ease, transform 0.3s var(--transition-bounce);
 }
 
 /* Respiración del neón */
@@ -205,41 +209,71 @@ body {
 
   0%,
   100% {
-    filter: drop-shadow(0 0 8px rgba(233, 69, 96, 0.5)) drop-shadow(0 0 20px rgba(233, 69, 96, 0.3)) drop-shadow(0 0 40px rgba(255, 107, 107, 0.2));
+    text-shadow:
+      0 0 7px #fff,
+      0 0 10px #fff,
+      0 0 21px #fff,
+      0 0 42px var(--accent-primary),
+      0 0 82px var(--accent-primary),
+      0 0 92px var(--accent-primary);
   }
 
   50% {
-    filter: drop-shadow(0 0 12px rgba(233, 69, 96, 0.8)) drop-shadow(0 0 30px rgba(233, 69, 96, 0.5)) drop-shadow(0 0 60px rgba(255, 107, 107, 0.4)) drop-shadow(0 0 80px rgba(254, 202, 87, 0.2));
+    text-shadow:
+      0 0 10px #fff,
+      0 0 20px #fff,
+      0 0 30px #fff,
+      0 0 60px var(--accent-primary),
+      0 0 100px var(--accent-primary),
+      0 0 140px var(--accent-primary),
+      0 0 180px var(--accent-secondary);
+  }
+}
+
+/* Flickering sutil tipo neón real */
+@keyframes neonFlicker {
+
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    opacity: 1;
+  }
+
+  20%,
+  24%,
+  55% {
+    opacity: 0.85;
   }
 }
 
 /* Hover: intensifica el glow */
 .app-header h1:hover {
   transform: scale(1.05);
-  filter: drop-shadow(0 0 15px rgba(233, 69, 96, 1)) drop-shadow(0 0 35px rgba(233, 69, 96, 0.7)) drop-shadow(0 0 70px rgba(255, 107, 107, 0.5)) drop-shadow(0 0 100px rgba(254, 202, 87, 0.3));
+  text-shadow:
+    0 0 10px #fff,
+    0 0 20px #fff,
+    0 0 40px #fff,
+    0 0 80px var(--accent-primary),
+    0 0 120px var(--accent-primary),
+    0 0 180px var(--accent-secondary),
+    0 0 220px var(--accent-tertiary);
   animation: none;
-  /* Pausa la respiración en hover */
 }
 
-/* Click: flash de neón */
+/* Click: flash blanco brillante */
 .app-header h1:active {
   transform: scale(0.98);
-  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 40px rgba(233, 69, 96, 1)) drop-shadow(0 0 80px rgba(255, 107, 107, 0.8));
-}
-
-/* Gradiente animado del texto */
-@keyframes hueShift {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
+  text-shadow:
+    0 0 20px #fff,
+    0 0 40px #fff,
+    0 0 80px #fff,
+    0 0 120px var(--accent-primary),
+    0 0 160px var(--accent-secondary);
 }
 
 .header-subtitle {
