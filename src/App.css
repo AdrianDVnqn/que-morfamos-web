@@ -198,24 +198,26 @@ body {
 }
 
 .header-video {
-  height: 150px;
+  height: 160px;
   max-width: 100%;
   object-fit: contain;
   /* "Elimina" el fondo negro haciendo blend con el fondo (Screen = negro es transparente) */
   mix-blend-mode: screen;
   display: block;
   border-radius: 4px;
+  filter: contrast(89.5%) brightness(90%);
+
+  /* ... tus otros estilos ... */
+  border-radius: 50px;
+  /* Ajusta el valor a gusto */
+
+  /* A veces Chrome necesita esto para recortar bien el video: */
+  overflow: hidden;
+  mask-image: radial-gradient(white, black);
+  /* Truco de compatibilidad para Safari a veces */
 }
 
-.header-video-wrapper:hover {
-  transform: scale(1.05);
-}
 
-
-
-.header-video-wrapper:active {
-  transform: scale(0.95);
-}
 
 .header-subtitle {
   font-size: 13px;
