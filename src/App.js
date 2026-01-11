@@ -662,7 +662,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     const t = setTimeout(() => {
       setPrevBgImages(null);
       setIsBgTransitioning(false);
-    }, 700);
+    }, 1600); // Debe coincidir con la transición CSS de 1.5s
     return () => clearTimeout(t);
   }, [currentTopic, conversationContext]);
 
