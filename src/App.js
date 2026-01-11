@@ -312,20 +312,11 @@ function App() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `¿Indeciso? Te ahorro la búsqueda y te tiro la data justa 🍷
+      content: `¿No sabés dónde ir? Tranqui, me leí todas las reseñas de Neuquén para tirarte la posta. 🍷
 
-Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Preguntame:
+Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar por un **lugar específico** ('¿qué onda este bar?') o chusmear **stats** ('¿cuántas birrerías hay?').
 
-🍕 Recomendaciones: "¿Dónde explota la pizza?"
-
-🧐 La verdad de la milanesa: "¿Qué onda este bar que me dijo mi amigo? ¿Está bueno?"
-
-🎯 A medida: "Lugares veganos", "Restaurantes aptos celíacos", "Lugares románticos" o "Lugares para ir en familia."
-
-🤓 Dato nerd: "¿Cuántos lugares de sushi hay?"
-
-¡Dale! Decime qué querés y arrancamos.
-`,
+¡Decime qué te pinta hoy y arrancamos!`,
       mode: 'system'
     }
   ]);
@@ -1079,7 +1070,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       case 'estadisticas': return 'Estadísticas';
       case 'rag': return 'Recomendaciones';
       case 'resumen': return 'Resumen';
-      default: return 'Sistema';
+      default: return 'Morfi-Bot';
     }
   };
 
@@ -1286,7 +1277,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
           {/* Mostrar opciones pendientes si el backend las devolvió (labels opcionales) */}
           {conversationContext && conversationContext.pending_options && (
             <div className="pending-options">
-              <div className="pending-note">Elegí la opción que corresponda:</div>
+              {/* <div className="pending-note">Elegí la opción que corresponda:</div> */}
               <div className="pending-list">
                 {Array.isArray(conversationContext.pending_options)
                   ? conversationContext.pending_options.map((opt, i) => (

@@ -151,7 +151,7 @@ body {
 .app-header {
   /* ligera transparencia para layer sobre el fondo */
   background: rgba(18, 20, 36, 0.68);
-  padding: 20px 30px;
+  padding: 10px 30px;
   border-radius: 20px 20px 0 0;
   border: 1px solid rgba(255, 255, 255, 0.03);
   border-bottom: none;
@@ -192,7 +192,7 @@ body {
 .header-video-wrapper {
   display: inline-block;
   line-height: 0;
-  margin-bottom: 8px;
+  margin-bottom: 0px;
   cursor: pointer;
   transition: transform 0.3s var(--transition-bounce);
 }
@@ -205,7 +205,7 @@ body {
   mix-blend-mode: screen;
   display: block;
   border-radius: 4px;
-  filter: contrast(89.5%) brightness(90%);
+  filter: contrast(89.4%) brightness(99%);
 
   /* ... tus otros estilos ... */
   border-radius: 50px;
@@ -523,6 +523,8 @@ body {
   display: flex;
   flex-direction: column;
   max-width: 85%;
+  position: relative;
+  /* Para posicionar el tail */
 }
 
 .message-user {
@@ -536,40 +538,97 @@ body {
 .message-mode {
   font-size: 11px;
   color: var(--text-primary);
-  margin-bottom: 8px;
+  margin-bottom: 0;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
   display: inline-block;
   background: rgba(0, 0, 0, 0.42);
   padding: 6px 10px;
-  border-radius: 12px;
+  border-radius: 12px 12px 0 0;
 }
 
 .message-content {
-  padding: 16px 20px;
+  padding: 8px 16px;
   border-radius: 20px;
-  line-height: 1.7;
+  line-height: 1.5;
   word-wrap: break-word;
   font-size: 15px;
+}
+
+.message-content p {
+  margin: 10;
+}
+
+.message-content p:not(:last-child) {
+  margin-bottom: 20px;
 }
 
 .message-user .message-content {
   background: var(--accent-gradient);
   color: white;
+  border-top-right-radius: 0;
+  /* Esquina cuadrada arriba */
   border-bottom-right-radius: 6px;
+  /* Restaurar curvatura abajo */
   box-shadow: var(--accent-glow);
+  position: relative;
+  /* border-bottom-right-radius: 0; */
+  /* Opcional: para hacerlo más cuadrado en la esquina */
+}
+
+/* Tail para usuario (derecha) */
+/* Tail para usuario (derecha) - ARRIBA */
+.message-user .message-content::after {
+  content: "";
+  position: absolute;
+  top: 0px;
+  right: -15px;
+  /* Ajuste fino */
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 15px 15px;
+  /* Triángulo con borde izquierdo color, borde bottom transparente */
+  border-color: transparent transparent transparent #ff9a61;
+  transform: rotate(0deg);
 }
 
 .message-assistant .message-content {
-  /* Leve transparencia para mostrar fondo sutilmente */
-  background: rgba(20, 24, 40, 0.64);
+  /* Fondo sólido para evitar mismatch de color con el tail */
+  background: #23273a;
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: none;
+  /* Eliminado el borde para que coincida con el tail */
+  border-top-left-radius: 0;
+  border-top-right-radius: 6px;
+  /* Reducido para mejor conexión visual */
   border-bottom-left-radius: 6px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px) saturate(0.95);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  /* backdrop-filter eliminado para asegurar color exacto con el tail */
   font-weight: 500;
+  position: relative;
+}
+
+/* Tail para asistente (izquierda) - CORREGIDO */
+.message-assistant .message-content::after {
+  content: "";
+  position: absolute;
+  top: 0px;
+  /* Alineado con la parte superior recta */
+  left: -15px;
+  /* Exactamente el ancho del borde para pegar perfecto */
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 15px 15px 0;
+  /* Más grande */
+  border-color: transparent #23273a transparent transparent;
+  /* Mismo color sólido */
+  /* Sombra para el triangulito para que se una a la caja */
+  filter: drop-shadow(-2px 2px 2px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  /* Asegurar orden */
 }
 
 .message-content.loading {
@@ -1053,12 +1112,19 @@ body {
   }
 
   /* Ajustes del header */
+  .app-header {
+    padding: 0px 15px !important;
+    /* Más compacto en mobile */
+    min-height: auto;
+  }
+
   .header-top-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: 10px;
+    gap: 5px;
+    /* Menor gap */
   }
 
   .header-title-group {
@@ -1074,6 +1140,11 @@ body {
     text-overflow: ellipsis;
   }
 
+  .header-video {
+    height: 120px !important;
+    /* Altura más razonable para mobile */
+  }
+
   .header-subtitle {
     display: none;
   }
@@ -1081,6 +1152,8 @@ body {
   .header-controls {
     margin-left: 0;
     flex-shrink: 0;
+    gap: 10px;
+    /* Menor separación entre iconos */
   }
 
   /* 3. Área Principal: Se estira para ocupar TODO el espacio sobrante */
@@ -1129,10 +1202,11 @@ body {
 
   /* Aseguramos que el mensaje del asistente tenga contraste */
   .message-assistant .message-content {
-    background: rgba(15, 18, 35, 0.75) !important;
-    /* Burbuja más sólida */
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #23273a !important;
+    /* Burbuja sólida igual que desktop */
+    /* backdrop-filter: blur(10px); Eliminado por coherencia de color */
+    border: none !important;
+    border-top-right-radius: 6px !important;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
 
@@ -1211,7 +1285,46 @@ body {
     /* Restaurar grid para tarjetas grandes */
     grid-template-columns: 1fr;
     /* Una columna en mobile */
+    gap: 12px;
   }
+
+  /* Estilos para cards completas en mobile (Lista de Lugares) */
+  .restaurant-card {
+    background: var(--bg-card);
+    padding: 15px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    width: 100%;
+    min-height: 370px;
+    /* Altura generosa para evitar cortes */
+    height: auto;
+    /* Dejar crecer según contenido */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: visible;
+    /* Permitir que el contenido respire */
+  }
+
+  .card-mini:hover {
+    border-color: var(--accent-primary);
+    background: rgba(233, 69, 96, 0.05);
+  }
+
+  .card-mini-name {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .card-mini-stats {
+    display: flex;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
 
   /* 6. MAPA: Full height */
   .map-container {
@@ -1341,6 +1454,14 @@ body {
   /* Ocultar elementos desktop */
   .mobile-hidden {
     display: none !important;
+  }
+
+  /* Padding extra al fondo de las listas para que no tape la barra de navegación */
+  .cards-list,
+  .detail-content,
+  .cards-container {
+    padding-bottom: 50px !important;
+    /* Espacio para que el último item no quede bajo la barra flotante */
   }
 
   /* Ajustes menores de input y botones */
