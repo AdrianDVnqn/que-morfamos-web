@@ -357,11 +357,14 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   // === NUEVO ESTADO PARA PESTAÑAS MÓVILES ===
   const [mobileTab, setMobileTab] = useState('chat'); // 'chat' | 'results' | 'map'
 
+  // Estado para detectar si el usuario hizo scroll hacia arriba
+  const [userScrolledUp, setUserScrolledUp] = useState(false);
+
   const toneToggleRef = useRef(null);
 
   // Cuando el usuario selecciona la pestaña Chat en mobile, asegurar scroll al final
   useEffect(() => {
-    if (mobileTab === 'chat' && messagesContainerRef.current) {
+    if (mobileTab === 'chat' && messagesContainerRef.current && !userScrolledUp) {
       // Defer para permitir layout si el contenedor venía oculto
       setTimeout(() => {
         try {
@@ -372,7 +375,22 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
         }
       }, 120);
     }
-  }, [mobileTab]);
+  }, [mobileTab, userScrolledUp]);
+
+  // Detectar cuando el usuario hace scroll hacia arriba en el chat
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setUserScrolledUp(!isAtBottom);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const handleDocumentClick = (e) => {
@@ -1236,6 +1254,21 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
             )}
           </div>
 
+          {/* Botón flotante para volver abajo cuando el usuario hace scroll */}
+          {userScrolledUp && (
+            <button
+              className="scroll-to-bottom-btn"
+              onClick={() => {
+                const container = messagesContainerRef.current;
+                if (container) {
+                  container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+                  setUserScrolledUp(false);
+                }
+              }}
+            >
+              ↓ Nuevo mensaje
+            </button>
+          )}
           {/* Mostrar opciones pendientes si el backend las devolvió (labels opcionales) */}
           {conversationContext && conversationContext.pending_options && (
             <div className="pending-options">

@@ -716,6 +716,43 @@ body {
   color: var(--accent-primary);
 }
 
+/* ========== SCROLL TO BOTTOM BUTTON ========== */
+.scroll-to-bottom-btn {
+  position: absolute;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+  animation: bounceIn 0.3s var(--transition-bounce);
+  transition: all 0.2s ease;
+}
+
+.scroll-to-bottom-btn:hover {
+  transform: translateX(-50%) scale(1.05);
+  box-shadow: 0 6px 25px rgba(233, 69, 96, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px) scale(0.8);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
 /* ========== INPUT ========== */
 .input-container {
   display: flex;
