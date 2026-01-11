@@ -260,7 +260,6 @@ const API_URL = getBackendURL();
 // Fondo slideshow (imágenes difuminadas y mezcladas con el tema)
 const BACKGROUND_IMAGES = [
   'https://images.unsplash.com/photo-1762047314688-b59b04b5f5de?q=80&w=928&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  'https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   'https://plus.unsplash.com/premium_photo-1675252369719-dd52bc69c3df?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=820&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   'https://images.unsplash.com/photo-1592861956120-e524fc739696?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
@@ -821,12 +820,15 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   useLayoutEffect(() => {
     if (messagesContainerRef.current) {
       const container = messagesContainerRef.current;
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: 'smooth'
-      });
+      // Solo hacer scroll automático si el usuario NO ha subido manualmente
+      if (!userScrolledUp) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
     }
-  }, [messages, loading]);
+  }, [messages, loading, userScrolledUp]);
 
   const checkBackendHealth = async () => {
     try {
@@ -1015,6 +1017,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     setCurrentTopic(um);
     setInput('');
     setMobileTab('chat');
+    setUserScrolledUp(false); // Resetear flag de scroll para bajar al enviar nuevo mensaje
 
     // Add User Message
     setMessages(prev => [...prev, { role: 'user', content: um }]);
@@ -1036,6 +1039,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     const selectionStr = String(index + 1);
     setCurrentTopic(selectionStr);
     setMobileTab('chat');
+    setUserScrolledUp(false);
 
     // Add User Message
     setMessages(prev => [...prev, { role: 'user', content: selectionStr }]);
