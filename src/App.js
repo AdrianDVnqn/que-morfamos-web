@@ -110,7 +110,7 @@ function FitBounds({ locations, allViewRef, trigger }) {
 
     return () => clearTimeout(timer);
 
-    // AQUÍ ESTÁ LA CLAVE: Agregamos 'trigger' a las dependencias
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, locations, allViewRef, trigger]);
 
   return null;
@@ -357,13 +357,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
   // === NUEVO ESTADO PARA PESTAÑAS MÓVILES ===
   const [mobileTab, setMobileTab] = useState('chat'); // 'chat' | 'results' | 'map'
 
-  const isMobile = window.innerWidth <= 768;
-
   const toneToggleRef = useRef(null);
-
-
-  const hasResults =
-    restaurantCards.length > 0 || mapLocations.length > 0;
 
   // Cuando el usuario selecciona la pestaña Chat en mobile, asegurar scroll al final
   useEffect(() => {
@@ -560,7 +554,6 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     // Trigger animation to zero transform on next frame
     requestAnimationFrame(() => {
       nodes.forEach(node => {
-        const style = window.getComputedStyle(node);
         // Get delta from applied transform if present
         // Use Web Animations API for more reliable animations
         try {
@@ -664,6 +657,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       setIsBgTransitioning(false);
     }, 2000); // Debe coincidir con la transición CSS de 1.8s + margen
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTopic, conversationContext]);
 
   // Pre-cargar detalles de restaurantes cuando llegan las tarjetas
@@ -732,6 +726,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     } else {
       setInlineDetail(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantCards, cardsMode, mapLocations]);
 
   // Verificar estado del backend al cargar y periódicamente
