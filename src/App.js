@@ -969,6 +969,11 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     // Capture start time
     const tStart = Date.now();
 
+    // Limpiar resultados anteriores y volver al chat grande
+    setSidebarMode(false);
+    setMapLocations([]);
+    setRestaurantCards([]);
+
     setCurrentTopic(um);
     setInput('');
     setMobileTab('chat');
