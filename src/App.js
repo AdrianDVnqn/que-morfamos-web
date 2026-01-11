@@ -1158,7 +1158,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
             <h1
               style={{ cursor: 'pointer' }}
               onClick={() => window.location.reload()}
-            >🍽️ ¿Qué Morfamos?</h1>
+            >¿Qué Morfamos?</h1>
             <span className="header-subtitle">Tu IA gastronómica de Neuquén y alrededores</span>
           </div>
           <div className="header-controls">
