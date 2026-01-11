@@ -664,7 +664,7 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
     if (t.includes('pizza') || t.includes('pizzer')) return '🍕';
     if (t.includes('pan') || t.includes('factur') || t.includes('medialun') || t.includes('panader')) return '🥐';
     if (t.includes('bar') || t.includes('cocktail') || t.includes('trago') || t.includes('pub')) return '🍸';
-    if (t.includes('cerveza') || t.includes('birra')) return '🍺';
+    if (t.includes('cerveza') || t.includes('birra') || t.includes('cervecer')) return '🍺';
     if (t.includes('parrill') || t.includes('asado') || t.includes('carne') || t.includes('bife')) return '🥩';
     if (t.includes('vegano') || t.includes('vegetar') || t.includes('vegan') || t.includes('ensalad')) return '🥗';
     if (t.includes('helado') || t.includes('helader')) return '🍦';
