@@ -182,84 +182,39 @@ body {
   margin-left: auto;
 }
 
-.app-header h1 {
-  font-family: 'Yellowtail', cursive;
-  font-size: 4rem;
-  font-weight: 400;
-  color: #fff;
-  letter-spacing: 2px;
-  position: relative;
+
+
+/* Pulsating Glow - Valores ajustados para ROSA */
+
+
+/* Hover: intensifica el glow */
+/* --- Header Video --- */
+.header-video-wrapper {
   display: inline-block;
+  line-height: 0;
+  margin-bottom: 8px;
   cursor: pointer;
-  /* Estado inicial (se sobrescribe por la animación) */
-  text-shadow:
-    0 0 7px #fff,
-    0 0 10px #fff,
-    0 0 21px #fff,
-    0 0 42px #ff00ff,
-    0 0 82px #ff00ff,
-    0 0 92px #ff00ff,
-    0 0 102px #ff00ff,
-    0 0 151px #ff00ff;
-  animation: neonPulsate 1.5s infinite alternate;
   transition: transform 0.3s var(--transition-bounce);
 }
 
-/* Pulsating Glow - Valores ajustados para ROSA */
-@keyframes neonPulsate {
-  100% {
-    /* Larger blur radius */
-    text-shadow:
-      0 0 4px #fff,
-      0 0 11px #fff,
-      0 0 19px #fff,
-      0 0 40px #ff00ff,
-      0 0 80px #ff00ff,
-      0 0 90px #ff00ff,
-      0 0 100px #ff00ff,
-      0 0 150px #ff00ff;
-  }
-
-  0% {
-    /* Smaller blur radius */
-    text-shadow:
-      0 0 2px #fff,
-      0 0 4px #fff,
-      0 0 6px #fff,
-      0 0 10px #ff00ff,
-      0 0 45px #ff00ff,
-      0 0 55px #ff00ff,
-      0 0 70px #ff00ff,
-      0 0 80px #ff00ff;
-  }
+.header-video {
+  height: 110px;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(255, 0, 255, 0.4));
+  border-radius: 4px;
 }
 
-/* Hover: intensifica el glow */
-.app-header h1:hover {
+.header-video-wrapper:hover {
   transform: scale(1.05);
-  text-shadow:
-    0 0 10px #fff,
-    0 0 20px #fff,
-    0 0 40px #fff,
-    0 0 80px var(--accent-primary),
-    0 0 120px var(--accent-primary),
-    0 0 180px var(--accent-secondary),
-    0 0 220px var(--accent-tertiary);
-  animation: none;
 }
 
-/* Click: flash blanco brillante */
-.app-header h1:active {
-  transform: scale(0.98);
-  animation: none;
-  text-shadow:
-    0 0 9px #fff,
-    0 0 15px #fff,
-    0 0 25px #fff,
-    0 0 50px var(--accent-primary),
-    0 0 100px var(--accent-primary),
-    0 0 120px var(--accent-primary),
-    0 0 150px var(--accent-secondary);
+.header-video-wrapper:hover .header-video {
+  filter: drop-shadow(0 0 15px rgba(255, 0, 255, 0.6));
+}
+
+.header-video-wrapper:active {
+  transform: scale(0.95);
 }
 
 .header-subtitle {

@@ -1155,11 +1155,21 @@ Tengo leídas todas las reseñas de Neuquén para recomendarte lo mejor. Pregunt
       <header className="app-header">
         <div className="header-top-row">
           <div className="header-title-group">
-            <h1
-              style={{ cursor: 'pointer' }}
+            <div
+              className="header-video-wrapper"
               onClick={() => window.location.reload()}
-            >¿Qué Morfamos?</h1>
-            <span className="header-subtitle">Tu IA gastronómica de Neuquén y alrededores</span>
+              style={{ cursor: 'pointer' }}
+            >
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="header-video"
+              >
+                <source src={process.env.PUBLIC_URL + '/banner.mp4'} type="video/mp4" />
+              </video>
+            </div>
           </div>
           <div className="header-controls">
             <div
