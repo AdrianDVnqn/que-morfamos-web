@@ -430,6 +430,18 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
   // Modal backend inactivo
   const [showBackendInactiveModal, setShowBackendInactiveModal] = useState(false);
   const [backendCountdown, setBackendCountdown] = useState(60);
+  const [showConnectionToast, setShowConnectionToast] = useState(false);
+  const prevApiStatus = useRef(apiStatus);
+
+  // Mostrar toast cuando el backend se conecta después de estar en error
+  useEffect(() => {
+    if (prevApiStatus.current === 'error' && apiStatus === 'connected') {
+      setShowConnectionToast(true);
+      setTimeout(() => setShowConnectionToast(false), 3000);
+    }
+    prevApiStatus.current = apiStatus;
+  }, [apiStatus]);
+
   // Mostrar modal solo si apiStatus === 'error' y es la página inicial (solo mensaje de bienvenida)
   useEffect(() => {
     let countdownInterval;
@@ -1708,6 +1720,30 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
             </div>
             <p style={{ fontSize: 14, color: '#b3d8ff', marginTop: 10 }}>La página intentará reconectar automáticamente.</p>
           </div>
+        </div>
+      )}
+
+      {/* Toast de conexión exitosa */}
+      {showConnectionToast && (
+        <div style={{
+          position: 'fixed',
+          bottom: 24,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'linear-gradient(135deg, #1a4a2e 0%, #2d5a3d 100%)',
+          color: '#fff',
+          padding: '12px 24px',
+          borderRadius: 8,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          zIndex: 10000,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          animation: 'slideUp 0.3s ease-out',
+          border: '1px solid #3d7a4d'
+        }}>
+          <span style={{ fontSize: 20 }}>✅</span>
+          <span style={{ fontWeight: 500 }}>¡Conexión establecida!</span>
         </div>
       )}
 
