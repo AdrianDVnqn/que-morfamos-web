@@ -1297,7 +1297,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
                       {i + 1}. {opt}
                     </button>
                   ))
-                  : (conversationContext.pending_options.labels || []).map((lbl, i) => (
+                  : (conversationContext.pending_options.options || conversationContext.pending_options.labels || []).map((lbl, i) => (
                     <button key={i} className="pending-btn" onClick={() => selectPendingOption(i)}>
                       {i + 1}. {lbl}
                     </button>
