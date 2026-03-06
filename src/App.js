@@ -895,8 +895,12 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
 
         for (const line of lines) {
           if (!line.trim()) continue;
+          // Skip SSE comments (e.g. proxy flush padding)
+          if (line.trim().startsWith(':')) continue;
           try {
-            const event = JSON.parse(line);
+            // Strip SSE "data: " prefix if present
+            const jsonStr = line.startsWith('data: ') ? line.slice(6) : line;
+            const event = JSON.parse(jsonStr);
 
             if (event.type === 'token') {
               if (!firstTokenReceived && startTime) {

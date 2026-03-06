@@ -16,13 +16,13 @@ La aplicación permite a los usuarios buscar recomendaciones de restaurantes med
 
 - Interfaz conversacional con respuestas en lenguaje natural
 - Mapa interactivo de ubicaciones (Leaflet)
-- Tarjetas de restaurantes con rating, categoría y datos de contacto
+- Tarjetas de restaurantes con rating, categoría y dirección.
 - Diseño responsive para dispositivos móviles
 - Respuestas generadas por IA basadas en reseñas reales
 
 ## Contexto del Proyecto
 
-Este desarrollo forma parte de mi portfolio personal, construido para profundizar mis habilidades en desarrollo frontend y sistemas de IA conversacional. El proyecto integra conceptos de:
+Este desarrollo forma parte de mi portfolio personal, construido para profundizar mis habilidades en desarrollo de sistemas de IA conversacional. El proyecto integra conceptos de:
 
 - Desarrollo de interfaces en React
 - Consumo de APIs RESTful
@@ -39,7 +39,7 @@ Este desarrollo forma parte de mi portfolio personal, construido para profundiza
 | HTTP Client | Axios |
 | Markdown Rendering | react-markdown |
 | Build Tool | Create React App |
-| Deploy | Render (Static Site) |
+| Deploy | Fly.io |
 
 ## Arquitectura
 
