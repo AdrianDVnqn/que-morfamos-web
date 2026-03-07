@@ -874,17 +874,24 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
         body: JSON.stringify(payload)
       });
 
+      console.log(`[PERF] HTTP Response (TTFB proxy): ${Date.now() - startTime}ms`);
+
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
       let buffer = "";
       let firstTokenReceived = false;
+      let firstByteReceived = false;
 
       while (true) {
         const { done, value } = await reader.read();
 
         if (value) {
+          if (!firstByteReceived) {
+            firstByteReceived = true;
+            console.log(`[PERF] Time to First Byte (TTFB): ${Date.now() - startTime}ms (${value.byteLength} bytes)`);
+          }
           buffer += decoder.decode(value, { stream: true });
         }
 
