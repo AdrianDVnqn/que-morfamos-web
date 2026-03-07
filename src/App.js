@@ -89,13 +89,13 @@ function FitBounds({ locations, allViewRef, trigger }) {
       try {
         if (locations.length === 1) {
           const loc = locations[0];
-          if (loc && !isNaN(loc.lat) && !isNaN(loc.lng)) {
+          if (loc && typeof loc.lat === 'number' && typeof loc.lng === 'number' && !isNaN(loc.lat) && !isNaN(loc.lng)) {
             // Animación suave al centro
             map.flyTo([loc.lat, loc.lng], DEFAULT_SINGLE_ZOOM, { duration: 0.8 });
             saveSafeView();
           }
         } else {
-          const validLocs = locations.filter(l => !isNaN(l.lat) && !isNaN(l.lng));
+          const validLocs = locations.filter(l => typeof l.lat === 'number' && typeof l.lng === 'number' && !isNaN(l.lat) && !isNaN(l.lng));
           if (validLocs.length > 0) {
             const bounds = L.latLngBounds(validLocs.map(loc => [loc.lat, loc.lng]));
             if (bounds.isValid()) {
@@ -126,10 +126,10 @@ function CenterOnHover({ centerOn, locations, allViewRef }) {
     // Caso 1: Centrar en un restaurante específico
     if (centerOn && locations.length > 0) {
       const loc = locations.find(l => l.nombre === centerOn);
-      // Validar coordenadas antes de volar
-      if (loc && !isNaN(loc.lat) && !isNaN(loc.lng)) {
+      // Validar coordenadas estrictamente antes de volar
+      if (loc && typeof loc.lat === 'number' && typeof loc.lng === 'number' && !isNaN(loc.lat) && !isNaN(loc.lng)) {
         let hoverZoom = DEFAULT_HOVER_ZOOM;
-        if (allViewRef && allViewRef.current && !isNaN(allViewRef.current.zoom)) {
+        if (allViewRef && allViewRef.current && typeof allViewRef.current.zoom === 'number' && !isNaN(allViewRef.current.zoom)) {
           hoverZoom = Math.max(allViewRef.current.zoom + HOVER_ZOOM_DELTA, 3);
         }
         try {
@@ -144,7 +144,7 @@ function CenterOnHover({ centerOn, locations, allViewRef }) {
         const zoom = allViewRef.current.zoom || 13;
 
         // VALIDACIÓN CRÍTICA PARA EVITAR ERROR (NaN, NaN)
-        if (!isNaN(lat) && !isNaN(lng) && !isNaN(zoom)) {
+        if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
           try {
             map.flyTo([lat, lng], zoom, { duration: 0.5 });
           } catch (e) {
