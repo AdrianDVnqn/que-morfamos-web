@@ -1846,6 +1846,11 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
           </div>
         </div>
       )}
+      
+      {/* Footer adriandv */}
+      <div style={{ textAlign: 'center', padding: '40px 15px 15px', color: 'rgba(255, 255, 255, 0.4)', fontSize: '11px', zIndex: 10, position: 'relative', marginTop: 'auto', letterSpacing: '0.5px' }}>
+        Creado con ❤️ por <a href="https://adriandv.dev" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255, 255, 255, 0.55)', textDecoration: 'none', fontWeight: '400' }}>adriandv.dev</a>
+      </div>
     </div>
   );
 }
