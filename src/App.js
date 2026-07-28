@@ -429,6 +429,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
   const [loadingInlineDetail, setLoadingInlineDetail] = useState(false);
   // Modal backend inactivo
   const [showBackendInactiveModal, setShowBackendInactiveModal] = useState(false);
+  const [showBackendConnectingModal, setShowBackendConnectingModal] = useState(false);
   const [backendCountdown, setBackendCountdown] = useState(60);
   const [showConnectionToast, setShowConnectionToast] = useState(false);
   const prevApiStatus = useRef(apiStatus);
@@ -463,6 +464,24 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
     }
     return () => {
       if (countdownInterval) clearInterval(countdownInterval);
+    };
+  }, [apiStatus, messages]);
+
+  // Mostrar popup de arranque en frío mientras el backend está respondiendo
+  useEffect(() => {
+    const isInitialPage = messages.length === 1 && messages[0]?.role === 'assistant';
+    let timer;
+
+    if (apiStatus === 'checking' && isInitialPage) {
+      timer = setTimeout(() => {
+        setShowBackendConnectingModal(true);
+      }, 250);
+    } else {
+      setShowBackendConnectingModal(false);
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
     };
   }, [apiStatus, messages]);
 
@@ -1684,6 +1703,41 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
           >
             🗺️ Mapa {mapLocations.length > 0 ? `(${mapLocations.length})` : ''}
           </button>
+        </div>
+      )}
+
+      {/* Modal de conexión inicial / arranque en frío */}
+      {showBackendConnectingModal && (
+        <div className="modal-overlay" style={{
+          zIndex: 9998,
+          background: 'rgba(5, 10, 20, 0.72)',
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div className="modal-content" style={{
+            maxWidth: 420,
+            textAlign: 'center',
+            background: 'rgba(14, 18, 34, 0.98)',
+            borderRadius: 16,
+            color: '#fff',
+            boxShadow: '0 16px 48px rgba(0,0,0,0.35)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            padding: 28
+          }}>
+            <div style={{ fontSize: 44, marginBottom: 14 }}>⏳</div>
+            <h2 style={{
+              marginBottom: 14,
+              fontWeight: 800,
+              fontSize: '1.45rem',
+              letterSpacing: 0.2,
+              color: '#ffffff'
+            }}>Conectando al servidor...</h2>
+            <p style={{ marginBottom: 12, fontSize: 16, color: '#d9e6ff', lineHeight: 1.5 }}>
+              Por favor espere en esta pantalla. El servidor está arrancando y suele tardar unos 15 segundos.
+            </p>
+            <p style={{ marginBottom: 0, fontSize: 14, color: '#9cb6da' }}>
+              No cierres la pestaña: en cuanto termine de conectar, la página se habilita sola.
+            </p>
+          </div>
         </div>
       )}
 
