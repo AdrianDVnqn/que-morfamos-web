@@ -430,6 +430,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
   // Modal backend inactivo
   const [showBackendInactiveModal, setShowBackendInactiveModal] = useState(false);
   const [showBackendConnectingModal, setShowBackendConnectingModal] = useState(false);
+  const [backendConnectingSeconds, setBackendConnectingSeconds] = useState(0);
   const [backendCountdown, setBackendCountdown] = useState(60);
   const [showConnectionToast, setShowConnectionToast] = useState(false);
   const prevApiStatus = useRef(apiStatus);
@@ -471,17 +472,25 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
   useEffect(() => {
     const isInitialPage = messages.length === 1 && messages[0]?.role === 'assistant';
     let timer;
+    let interval;
 
     if (apiStatus === 'checking' && isInitialPage) {
+      setBackendConnectingSeconds(0);
       timer = setTimeout(() => {
         setShowBackendConnectingModal(true);
       }, 250);
+
+      interval = setInterval(() => {
+        setBackendConnectingSeconds(prev => prev + 1);
+      }, 1000);
     } else {
       setShowBackendConnectingModal(false);
+      setBackendConnectingSeconds(0);
     }
 
     return () => {
       if (timer) clearTimeout(timer);
+      if (interval) clearInterval(interval);
     };
   }, [apiStatus, messages]);
 
@@ -1734,6 +1743,23 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
             <p style={{ marginBottom: 12, fontSize: 16, color: '#d9e6ff', lineHeight: 1.5 }}>
               Por favor espere en esta pantalla. El servidor está arrancando y suele tardar unos 15 segundos.
             </p>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 10,
+              marginBottom: 12,
+              padding: '10px 16px',
+              borderRadius: 999,
+              background: 'rgba(80, 130, 255, 0.16)',
+              border: '1px solid rgba(120, 170, 255, 0.35)',
+              color: '#eaf2ff',
+              fontSize: 16,
+              fontWeight: 700
+            }}>
+              <span style={{ fontSize: 18 }}>⏳</span>
+              <span>Conectando al servidor...</span>
+              <span style={{ color: '#7fd1ff', fontSize: 18 }}>{backendConnectingSeconds}s</span>
+            </div>
             <p style={{ marginBottom: 0, fontSize: 14, color: '#9cb6da' }}>
               No cierres la pestaña: en cuanto termine de conectar, la página se habilita sola.
             </p>
@@ -1900,7 +1926,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
           </div>
         </div>
       )}
-      
+
       {/* Footer adriandv */}
       <div style={{ textAlign: 'center', padding: '40px 15px 15px', color: 'rgba(255, 255, 255, 0.4)', fontSize: '11px', zIndex: 10, position: 'relative', marginTop: 'auto', letterSpacing: '0.5px' }}>
         Creado con ❤️ por <a href="https://adriandv.dev" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255, 255, 255, 0.55)', textDecoration: 'none', fontWeight: '400' }}>adriandv.dev</a>
