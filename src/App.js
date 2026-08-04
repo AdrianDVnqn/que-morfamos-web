@@ -1733,13 +1733,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
             padding: 28
           }}>
             <div style={{ fontSize: 44, marginBottom: 14 }}>⏳</div>
-            <h2 style={{
-              marginBottom: 14,
-              fontWeight: 800,
-              fontSize: '1.45rem',
-              letterSpacing: 0.2,
-              color: '#ffffff'
-            }}>Conectando al servidor...</h2>
+
             <p style={{ marginBottom: 12, fontSize: 16, color: '#d9e6ff', lineHeight: 1.5 }}>
               Por favor espere en esta pantalla. El servidor está arrancando y suele tardar unos 15 segundos.
             </p>
@@ -1756,8 +1750,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
               fontSize: 16,
               fontWeight: 700
             }}>
-              <span style={{ fontSize: 18 }}>⏳</span>
-              <span>Conectando al servidor...</span>
+              <span className="hourglass-anim" style={{ fontSize: 18 }}>⏳</span>
               <span style={{ color: '#7fd1ff', fontSize: 18 }}>{backendConnectingSeconds}s</span>
             </div>
             <p style={{ marginBottom: 0, fontSize: 14, color: '#9cb6da' }}>

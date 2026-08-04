@@ -3047,3 +3047,27 @@ body {
     display: none !important;
   }
 }
+
+/* ========== HOURGLASS ANIMATION ========== */
+@keyframes hourglassBounce {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-6px) rotate(10deg);
+  }
+}
+
+.hourglass-anim {
+  display: inline-block;
+  animation: hourglassBounce 1.2s var(--transition-smooth) infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.hourglass-anim:hover {
+  animation-duration: 0.8s;
+}
