@@ -1735,7 +1735,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
             <div style={{ fontSize: 44, marginBottom: 14 }}>⏳</div>
 
             <p style={{ marginBottom: 12, fontSize: 16, color: '#d9e6ff', lineHeight: 1.5 }}>
-              Por favor espere en esta pantalla. El servidor está arrancando y suele tardar unos 15 segundos.
+              Por favor espere en esta pantalla. El servidor está arrancando y suele tardar unos 30 segundos máx.
             </p>
             <div style={{
               display: 'inline-flex',
