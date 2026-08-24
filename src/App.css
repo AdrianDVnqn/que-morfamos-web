@@ -853,6 +853,40 @@ body {
   font-size: 13px;
 }
 
+.app-footer-status {
+  position: relative;
+  z-index: 10;
+  margin-top: auto;
+  padding: 32px 15px 15px;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+.dataset-status {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-bottom: 12px;
+}
+
+.dataset-status strong {
+  color: rgba(255, 255, 255, 0.66);
+  font-weight: 500;
+}
+
+.app-footer-credit a {
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  font-weight: 400;
+}
+
+.app-footer-credit a:hover {
+  color: var(--text-primary);
+}
+
 /* ========== MAP ========== */
 .map-container {
   background: var(--bg-card);

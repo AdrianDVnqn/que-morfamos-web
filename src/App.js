@@ -257,6 +257,43 @@ const getBackendURL = () => {
 // URL del API - se adapta automáticamente o usa túnel
 const API_URL = getBackendURL();
 
+const formatStatusDate = (value) => {
+  if (!value) return 'No disponible';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'No disponible';
+  return date.toLocaleString('es-AR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+const getNextWeeklyRun = () => {
+  const next = new Date();
+  next.setHours(22, 0, 0, 0);
+  const daysUntilSunday = (7 - next.getDay()) % 7;
+  next.setDate(next.getDate() + daysUntilSunday);
+  if (next <= new Date()) next.setDate(next.getDate() + 7);
+  return next;
+};
+
+const getNextMonthlyRun = () => {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+  if (next <= now) next.setMonth(next.getMonth() + 1);
+  return next;
+};
+
+const formatNextRun = (date) => date.toLocaleString('es-AR', {
+  weekday: 'short',
+  day: '2-digit',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
 // Fondo slideshow (imágenes difuminadas y mezcladas con el tema)
 const BACKGROUND_IMAGES = [
   'https://images.unsplash.com/photo-1762047314688-b59b04b5f5de?q=80&w=928&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
@@ -328,6 +365,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState('checking');
+  const [backendHealth, setBackendHealth] = useState(null);
   const [conversationContext, setConversationContext] = useState({});
   const [tone, setTone] = useState('cordial'); // 'cordial' (default), 'soberbio', 'sassy'
   const [mapLocations, setMapLocations] = useState([]);
@@ -822,6 +860,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
 
         if (response.data.status === 'healthy') {
           console.log('[Warmup] ✅ Backend caliente!');
+          setBackendHealth(response.data);
           setApiStatus('connected');
           // Una vez conectado, polling menos frecuente
           clearInterval(interval);
@@ -865,6 +904,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
     try {
       const response = await axios.get(`${API_URL}/health`, { timeout: 5000, ...axiosConfig });
       if (response.data.status === 'healthy') {
+        setBackendHealth(response.data);
         setApiStatus('connected');
       } else {
         setApiStatus('error');
@@ -1735,7 +1775,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
             <div style={{ fontSize: 44, marginBottom: 14 }}>⏳</div>
 
             <p style={{ marginBottom: 12, fontSize: 16, color: '#d9e6ff', lineHeight: 1.5 }}>
-              Por favor espere en esta pantalla. El servidor está arrancando y suele tardar unos 15 segundos.
+              Por favor espere en esta pantalla. El servidor está arrancando y suele tardar unos 30 segundos máx.
             </p>
             <div style={{
               display: 'inline-flex',
@@ -1921,8 +1961,18 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
       )}
 
       {/* Footer adriandv */}
-      <div style={{ textAlign: 'center', padding: '40px 15px 15px', color: 'rgba(255, 255, 255, 0.4)', fontSize: '11px', zIndex: 10, position: 'relative', marginTop: 'auto', letterSpacing: '0.5px' }}>
-        Creado con ❤️ por <a href="https://adriandv.dev" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255, 255, 255, 0.55)', textDecoration: 'none', fontWeight: '400' }}>adriandv.dev</a>
+      <div className="app-footer-status">
+        <div className="dataset-status" aria-label="Estado de actualización de datos">
+          <span><strong>Datos:</strong> {formatStatusDate(backendHealth?.last_scraping || backendHealth?.dataset_updated_at)}</span>
+          <span><strong>Próximas reseñas:</strong> {formatNextRun(getNextWeeklyRun())} ART</span>
+          <span><strong>Próximos lugares:</strong> {formatNextRun(getNextMonthlyRun())} ART</span>
+          {(backendHealth?.backend_updated_at || backendHealth?.updated_at || process.env.REACT_APP_BACKEND_UPDATED_AT) && (
+            <span><strong>Backend actualizado:</strong> {formatStatusDate(backendHealth?.backend_updated_at || backendHealth?.updated_at || process.env.REACT_APP_BACKEND_UPDATED_AT)}</span>
+          )}
+        </div>
+        <div className="app-footer-credit">
+          Creado con ❤️ por <a href="https://adriandv.dev" target="_blank" rel="noopener noreferrer">adriandv.dev</a>
+        </div>
       </div>
     </div>
   );
