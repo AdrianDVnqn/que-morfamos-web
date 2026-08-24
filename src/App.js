@@ -259,7 +259,13 @@ const API_URL = getBackendURL();
 
 const formatStatusDate = (value) => {
   if (!value) return 'No disponible';
-  const date = new Date(value);
+  const dateOnly = typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const date = dateOnly
+    ? (() => {
+      const [year, month, day] = value.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    })()
+    : new Date(value);
   if (Number.isNaN(date.getTime())) return 'No disponible';
   return date.toLocaleString('es-AR', {
     day: '2-digit',
@@ -1966,8 +1972,8 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
           <span><strong>Datos:</strong> {formatStatusDate(backendHealth?.last_scraping || backendHealth?.dataset_updated_at)}</span>
           <span><strong>Próximas reseñas:</strong> {formatNextRun(getNextWeeklyRun())} ART</span>
           <span><strong>Próximos lugares:</strong> {formatNextRun(getNextMonthlyRun())} ART</span>
-          {(backendHealth?.backend_updated_at || backendHealth?.updated_at || process.env.REACT_APP_BACKEND_UPDATED_AT) && (
-            <span><strong>Backend actualizado:</strong> {formatStatusDate(backendHealth?.backend_updated_at || backendHealth?.updated_at || process.env.REACT_APP_BACKEND_UPDATED_AT)}</span>
+          {(backendHealth?.backend_updated_at || backendHealth?.updated_at) && (
+            <span><strong>Backend actualizado:</strong> {formatStatusDate(backendHealth.backend_updated_at || backendHealth.updated_at)}</span>
           )}
         </div>
         <div className="app-footer-credit">

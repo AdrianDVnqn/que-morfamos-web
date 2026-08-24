@@ -11,7 +11,8 @@ Registro de cambios en la aplicación web pública (Next.js/React).
 
 ### 📝 Estado del dataset y backend
 - Se agregó al footer información sobre la última actualización disponible y las próximas corridas del scraper.
-- El footer muestra la fecha de actualización del backend (`/health`) con la etiqueta `Backend actualizado`.
+- El footer muestra la fecha de actualización del backend (`/health`) con la etiqueta `Backend actualizado`; la fecha proviene automáticamente del commit desplegado.
+- Las fechas de calendario se muestran sin desplazamiento de zona horaria.
 - La versión y el commit SHA quedan reservados para diagnóstico técnico.
 
 ---
