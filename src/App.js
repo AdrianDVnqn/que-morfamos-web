@@ -35,13 +35,13 @@ function ChangeMapStyle({ url, attribution, detectRetina = true, maxNativeZoom }
 }
 
 // Precarga de tiles en el cache HTTP del navegador.
-// Precargar TODA la ciudad no es viable: para Neuquen + aledanos son ~15.700 tiles (~338 MB)
-// hasta z17 y ~62.000 (~1,3 GB) hasta z18. Pero no hace falta: alcanza con los zooms que la app
-// usa de verdad y solo alrededor de los lugares que se estan mostrando.
-//  - z12..z14 sobre el area de resultados: es la vista general (fitBounds topa en 16, arranca 13)
-//  - z15..z19 en un radio de 1 tile por marcador: cubre el acercamiento del hover
-// Son decenas de tiles, no miles. Se piden con new Image(): quedan en el cache del navegador y
-// cuando Leaflet las necesita, salen de ahi sin ir a la red.
+// ACOTADA A PROPOSITO POR CUOTA: el plan gratuito de Stadia son 200.000 creditos/mes y cada tile
+// raster cuesta 1. Una version anterior de esto precargaba tambien z15..z19 alrededor de cada
+// marcador para adelantarse al hover: eran ~140 tiles por busqueda de las cuales solo ~9 se
+// veian, o sea ~1.400 busquedas/mes de techo. Se dejo solo la vista general (z12..z14 sobre el
+// area de resultados, ~16 tiles), que es lo que el usuario ve SI o SI. El acercamiento del hover
+// se carga bajo demanda: se paga solo por lo que realmente se mira, y queda cacheado despues.
+// Lo que arreglo el parpadeo al panear no fue esto sino updateWhenIdle:false + keepBuffer:6.
 function tileXY(lat, lon, z) {
   const n = Math.pow(2, z);
   const x = Math.floor(((lon + 180) / 360) * n);
@@ -74,14 +74,6 @@ function PrecargarTiles({ locations, urlTemplate }) {
       for (let x = Math.min(a.x, b.x); x <= Math.max(a.x, b.x); x++)
         for (let y = Math.min(a.y, b.y); y <= Math.max(a.y, b.y); y++) agregar(z, x, y);
     }
-    // Acercamiento del hover: un radio chico alrededor de cada marcador
-    locations.forEach(l => {
-      for (let z = 15; z <= 19; z++) {
-        const { x, y } = tileXY(l.lat, l.lng, z);
-        for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) agregar(z, x + dx, y + dy);
-      }
-    });
-
     // De a poco y sin bloquear: el navegador limita las conexiones por host igual.
     let i = 0;
     const id = setInterval(() => {
