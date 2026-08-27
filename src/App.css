@@ -2823,6 +2823,12 @@ body {
   mix-blend-mode: normal;
 }
 
+/* Cuando hay resultados en pantalla, el slideshow queda tapado por los paneles: animarlo solo
+   gasta frames. Se pausa (no se oculta, para que no cambie nada visualmente en los bordes). */
+.sidebar-layout .bg-slide {
+  animation-play-state: paused;
+}
+
 /* Cuando sólo hay una imagen en la lista, evitar que la animación haga fade-out
    y forzar opacidad completa para mantener la imagen visible. */
 .bg-slideshow.single .bg-slide {

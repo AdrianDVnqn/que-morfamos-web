@@ -19,11 +19,78 @@ function ChangeMapStyle({ url, attribution, detectRetina = true, maxNativeZoom }
     attribution,
     detectRetina,
     maxNativeZoom,
-    keepBuffer: 2, // mantener algunos tiles fuera de la vista para zoom/pan suave
-    updateWhenIdle: true, // renderizar tiles cuando el mapa quede idle
+    // keepBuffer 2 -> 6: cuantos anillos de tiles fuera del viewport se conservan. Con 2, al
+    // panear apenas un poco las tiles salientes se descartaban y habia que volver a pedirlas.
+    keepBuffer: 6,
+    // updateWhenIdle true -> false: con true, Leaflet NO pide tiles mientras el mapa se mueve,
+    // solo cuando se detiene. Eso es lo que se ve como "se borra y se regenera" al arrastrar.
+    // En false las va cargando durante el movimiento.
+    updateWhenIdle: false,
+    // No re-renderiza tiles en cada frame de la animacion de zoom: mantiene las del zoom previo
+    // hasta que la animacion termina, en vez de parpadear durante la transicion.
+    updateWhenZooming: false,
   };
 
   return <TileLayer url={url} {...tileOpts} />;
+}
+
+// Precarga de tiles en el cache HTTP del navegador.
+// Precargar TODA la ciudad no es viable: para Neuquen + aledanos son ~15.700 tiles (~338 MB)
+// hasta z17 y ~62.000 (~1,3 GB) hasta z18. Pero no hace falta: alcanza con los zooms que la app
+// usa de verdad y solo alrededor de los lugares que se estan mostrando.
+//  - z12..z14 sobre el area de resultados: es la vista general (fitBounds topa en 16, arranca 13)
+//  - z15..z19 en un radio de 1 tile por marcador: cubre el acercamiento del hover
+// Son decenas de tiles, no miles. Se piden con new Image(): quedan en el cache del navegador y
+// cuando Leaflet las necesita, salen de ahi sin ir a la red.
+function tileXY(lat, lon, z) {
+  const n = Math.pow(2, z);
+  const x = Math.floor(((lon + 180) / 360) * n);
+  const la = (lat * Math.PI) / 180;
+  const y = Math.floor(((1 - Math.asinh(Math.tan(la)) / Math.PI) / 2) * n);
+  return { x, y };
+}
+
+function PrecargarTiles({ locations, urlTemplate }) {
+  useEffect(() => {
+    if (!locations || locations.length === 0 || !urlTemplate) return;
+    const vistos = new Set();
+    const urls = [];
+    const agregar = (z, x, y) => {
+      const clave = `${z}/${x}/${y}`;
+      if (vistos.has(clave)) return;
+      vistos.add(clave);
+      urls.push(
+        urlTemplate
+          .replace('{z}', z).replace('{x}', x).replace('{y}', y)
+          .replace('{r}', '').replace('{s}', 'a')
+      );
+    };
+
+    // Vista general: area que cubre todos los resultados
+    const lats = locations.map(l => l.lat), lons = locations.map(l => l.lng);
+    const bbox = [Math.min(...lats), Math.max(...lats), Math.min(...lons), Math.max(...lons)];
+    for (let z = 12; z <= 14; z++) {
+      const a = tileXY(bbox[1], bbox[2], z), b = tileXY(bbox[0], bbox[3], z);
+      for (let x = Math.min(a.x, b.x); x <= Math.max(a.x, b.x); x++)
+        for (let y = Math.min(a.y, b.y); y <= Math.max(a.y, b.y); y++) agregar(z, x, y);
+    }
+    // Acercamiento del hover: un radio chico alrededor de cada marcador
+    locations.forEach(l => {
+      for (let z = 15; z <= 19; z++) {
+        const { x, y } = tileXY(l.lat, l.lng, z);
+        for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) agregar(z, x + dx, y + dy);
+      }
+    });
+
+    // De a poco y sin bloquear: el navegador limita las conexiones por host igual.
+    let i = 0;
+    const id = setInterval(() => {
+      for (let k = 0; k < 6 && i < urls.length; k++, i++) { const im = new Image(); im.src = urls[i]; }
+      if (i >= urls.length) clearInterval(id);
+    }, 120);
+    return () => clearInterval(id);
+  }, [locations, urlTemplate]);
+  return null;
 }
 
 // Componente para forzar que el mapa cargue correctamente
@@ -72,6 +139,8 @@ function MapResizer() {
 // Ahora recibe 'trigger' para saber cuándo recalcular (ej: al cambiar de tab)
 function FitBounds({ locations, allViewRef, trigger }) {
   const map = useMap();
+  // Stadia tiene datos hasta z20 en Neuquen, asi que se puede acercar de verdad. (Con el
+  // basemap anterior habia que topar en 16 porque de z17 en adelante devolvia placeholders.)
   const DEFAULT_SINGLE_ZOOM = 18;
   const FIT_PADDING = [40, 40];
 
@@ -127,8 +196,15 @@ function FitBounds({ locations, allViewRef, trigger }) {
 // Componente para centrar el mapa en el restaurante hovereado (solo desde tarjetas)
 function CenterOnHover({ centerOn, locations, allViewRef }) {
   const map = useMap();
+  // Al pasar el mouse por una card el mapa se acerca a ese lugar. Antes sumaba 2 niveles SIN
+  // techo: si la vista general ya venia en 16 el hover saltaba a 18, y desde 18 a 20 — a ese
+  // zoom se pierde toda referencia y no se entiende donde esta el lugar.
+  // El hover sobre una card acerca el mapa a ese lugar, con techo en 16. Antes sumaba 2 niveles
+  // SIN techo: si la vista general ya venia en 16 el hover saltaba a 18, y desde 18 a 20, donde
+  // se pierde toda referencia de donde queda el lugar.
   const HOVER_ZOOM_DELTA = 2;
-  const DEFAULT_HOVER_ZOOM = 16;
+  const MAX_HOVER_ZOOM = 19;
+  const DEFAULT_HOVER_ZOOM = 19;
 
   useEffect(() => {
     // Caso 1: Centrar en un restaurante específico
@@ -138,7 +214,10 @@ function CenterOnHover({ centerOn, locations, allViewRef }) {
       if (loc && typeof loc.lat === 'number' && typeof loc.lng === 'number' && !isNaN(loc.lat) && !isNaN(loc.lng)) {
         let hoverZoom = DEFAULT_HOVER_ZOOM;
         if (allViewRef && allViewRef.current && typeof allViewRef.current.zoom === 'number' && !isNaN(allViewRef.current.zoom)) {
-          hoverZoom = Math.max(allViewRef.current.zoom + HOVER_ZOOM_DELTA, 3);
+          hoverZoom = Math.min(
+            Math.max(allViewRef.current.zoom + HOVER_ZOOM_DELTA, 3),
+            MAX_HOVER_ZOOM
+          );
         }
         try {
           map.flyTo([loc.lat, loc.lng], hoverZoom, { duration: 0.5 });
@@ -335,25 +414,21 @@ if (process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_BACKEND_URL.inclu
   axiosConfig.headers = { 'bypass-tunnel-reminder': 'true' };
 }
 
-// Estilo de mapa oscuro.
-// Se usaba el basemap "dark_all" de CARTO en su tier anonimo, pero CARTO empezo a exigir API key
-// y a superponer una marca de agua sobre las tiles. Se paso a OpenStreetMap (sin key, sin
-// registro) y el look oscuro se consigue con un filtro CSS sobre las tiles (ver .leaflet-tile en
-// App.css). El filtro se aplica solo a las tiles, no a los marcadores ni a los popups.
+// Estilo de mapa oscuro: Stadia Maps "Alidade Smooth Dark".
+// Historial de esta decision:
+//  - CARTO dark_all (tier anonimo): dejo de servirse sin key; su plan gratis es trial de 14 dias.
+//  - OpenStreetMap + filtro CSS invert/hue-rotate: mapa de proposito general, demasiado detalle,
+//    y habia que filtrar tile por tile. Ruidoso y lento.
+//  - Esri Dark Gray Canvas: rapido y sin key, pero en Neuquen solo tiene datos hasta z16
+//    (verificado pidiendo z11..z19: de z17 en adelante devuelve siempre el mismo placeholder
+//    "Map data not yet available"), asi que se rompia al acercarse.
+//  - Stadia: datos reales hasta z20 (verificado igual), oscuro nativo y plan gratuito permanente.
+// La key va por env. En una SPA queda embebida en el bundle y es publica: Stadia lo contempla y
+// se protege restringiendo por dominio desde su panel, no ocultandola.
 const MAP_STYLE = {
-  // Esri "Dark Gray Canvas": oscuro de fábrica y deliberadamente minimalista (sin iconos de POI,
-  // casi sin etiquetas), pensado como fondo neutro para superponer datos — que es exactamente
-  // este caso. No pide API key.
-  // Se probo antes OpenStreetMap estandar + un filtro CSS invert/hue-rotate, pero OSM es un mapa
-  // de proposito general: muchisimo detalle (edificios, POIs, etiquetas) que ademas hay que
-  // filtrar tile por tile. Resultado: ruidoso y lento. Esto no necesita filtro.
-  url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-  attribution: '&copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors',
-  // El servicio sirve hasta z16; mas alla Leaflet reescala la ultima tile en vez de pedir 404s.
-  maxNativeZoom: 16,
-  // Este servicio no tiene variantes @2x: sin {r} en la URL, detectRetina haria pedir el doble de
-  // tiles del zoom siguiente para nada.
-  detectRetina: false
+  url: `https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${process.env.REACT_APP_STADIA_KEY || ''}`,
+  attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  detectRetina: true
 };
 
 function App() {
@@ -1049,10 +1124,13 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
                 if (event.cards.length > 0) setSidebarMode(true);
               }
 
-              if (event.locs) {
-                setMapLocations(event.locs);
-                if (event.locs.length > 0 && initialUserMessage) setLastQuery(initialUserMessage);
-              }
+              // Siempre se setea, incluso si el meta no trae `locs`: varios modos del backend
+              // (general, blocked y algunos rag) no incluyen el campo, y como ya no se limpia al
+              // arrancar la consulta, sin este `|| []` quedarian los marcadores de la busqueda
+              // anterior sobre una respuesta que no tiene ubicaciones.
+              const locsNuevas = event.locs || [];
+              setMapLocations(locsNuevas);
+              if (locsNuevas.length > 0 && initialUserMessage) setLastQuery(initialUserMessage);
 
               // If pending options received in meta (e.g. numeric menu)
               if (event.pending) {
@@ -1121,9 +1199,13 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
     // Capture start time
     const tStart = Date.now();
 
-    // Limpiar resultados anteriores y volver al chat grande
+    // Limpiar resultados anteriores y volver al chat grande.
+    // OJO: no se limpia mapLocations aca. El mapa se renderiza condicionalmente con
+    // {mapLocations.length > 0 && ...}, asi que vaciarlo desmontaba TODO el subarbol —
+    // incluida la instancia de Leaflet— durante toda la consulta, y al llegar la respuesta se
+    // reconstruia de cero re-descargando las tiles. Ahora el mapa anterior queda visible
+    // mientras carga y se reemplaza al llegar el meta (que siempre setea locs, ver abajo).
     setSidebarMode(false);
-    setMapLocations([]);
     setRestaurantCards([]);
 
     setCurrentTopic(um);
@@ -1676,6 +1758,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
                   >
                     <MapResizer />
                     <FitBounds locations={mapLocations} allViewRef={allViewRef} trigger={mobileTab} />
+                    <PrecargarTiles locations={mapLocations} urlTemplate={MAP_STYLE.url} />
                     <ChangeMapStyle
                       url={MAP_STYLE.url}
                       attribution={MAP_STYLE.attribution}
