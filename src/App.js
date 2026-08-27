@@ -8,7 +8,7 @@ import './App.css';
 import { lanzarLluviaTono } from './utils/emojiRain.js';
 
 // Componente para cambiar el TileLayer dinámicamente
-function ChangeMapStyle({ url, attribution }) {
+function ChangeMapStyle({ url, attribution, detectRetina = true, maxNativeZoom }) {
   const map = useMap();
   useEffect(() => {
     // Forzar re-render del mapa cuando cambia el estilo
@@ -17,7 +17,8 @@ function ChangeMapStyle({ url, attribution }) {
   // Opciones recomendadas para mejorar la experiencia de carga de tiles
   const tileOpts = {
     attribution,
-    detectRetina: true,
+    detectRetina,
+    maxNativeZoom,
     keepBuffer: 2, // mantener algunos tiles fuera de la vista para zoom/pan suave
     updateWhenIdle: true, // renderizar tiles cuando el mapa quede idle
   };
@@ -31,21 +32,27 @@ function MapResizer() {
   useEffect(() => {
     // Forzar recalcular tamaño después de varios delays para cubrir el caso
     // donde el contenedor padre cambia de tamaño cuando carga el contenido
-    const timers = [
-      setTimeout(() => map.invalidateSize(), 100),
-      setTimeout(() => map.invalidateSize(), 300),
-      setTimeout(() => map.invalidateSize(), 500),
-      setTimeout(() => map.invalidateSize(), 1000),
-    ];
+    // Antes eran cuatro invalidateSize (100/300/500/1000ms). Cada uno fuerza un redibujado
+    // completo de tiles y marcadores; con el ResizeObserver de abajo observando el contenedor,
+    // los tres ultimos eran redundantes.
+    const timers = [setTimeout(() => map.invalidateSize(), 150)];
 
     // También invalidar cuando la ventana cambia de tamaño
     const handleResize = () => map.invalidateSize();
     window.addEventListener('resize', handleResize);
 
-    // Observar cambios en el contenedor del mapa
+    // Observar cambios en el contenedor del mapa.
+    // invalidateSize() puede cambiar el layout y volver a disparar al observer, asi que se
+    // coalescen las notificaciones en un solo frame y se omite si el tamano no cambio de verdad.
     const container = map.getContainer().parentElement;
-    const resizeObserver = new ResizeObserver(() => {
-      map.invalidateSize();
+    let rafId = null;
+    let ultimo = { w: 0, h: 0 };
+    const resizeObserver = new ResizeObserver((entries) => {
+      const r = entries[0] && entries[0].contentRect;
+      if (r && Math.abs(r.width - ultimo.w) < 1 && Math.abs(r.height - ultimo.h) < 1) return;
+      if (r) ultimo = { w: r.width, h: r.height };
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => { rafId = null; map.invalidateSize(); });
     });
     if (container) {
       resizeObserver.observe(container);
@@ -53,6 +60,7 @@ function MapResizer() {
 
     return () => {
       timers.forEach(t => clearTimeout(t));
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('resize', handleResize);
       resizeObserver.disconnect();
     };
@@ -162,9 +170,10 @@ function CenterOnHover({ centerOn, locations, allViewRef }) {
 function MapKick({ visible, mapRef }) {
   useEffect(() => {
     if (!visible || !mapRef?.current) return;
-    console.log('[MapKick] kicking map invalidates');
-    // multiple calls over short time help Leaflet recalc when container was hidden
-    const timers = [60, 180, 420, 900].map((ms) => setTimeout(() => {
+    // Antes eran cuatro invalidateSize (60/180/420/900ms) cada vez que se mostraba la pestana del
+    // mapa. Alcanza con uno: el ResizeObserver de MapResizer ya reacciona cuando el contenedor
+    // pasa de oculto a visible y toma tamano real.
+    const timers = [120].map((ms) => setTimeout(() => {
       try { mapRef.current.invalidateSize(); } catch (e) { console.warn('[MapKick] invalidate failed', e); }
     }, ms));
     return () => timers.forEach(t => clearTimeout(t));
@@ -326,10 +335,25 @@ if (process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_BACKEND_URL.inclu
   axiosConfig.headers = { 'bypass-tunnel-reminder': 'true' };
 }
 
-// Estilo de mapa oscuro
+// Estilo de mapa oscuro.
+// Se usaba el basemap "dark_all" de CARTO en su tier anonimo, pero CARTO empezo a exigir API key
+// y a superponer una marca de agua sobre las tiles. Se paso a OpenStreetMap (sin key, sin
+// registro) y el look oscuro se consigue con un filtro CSS sobre las tiles (ver .leaflet-tile en
+// App.css). El filtro se aplica solo a las tiles, no a los marcadores ni a los popups.
 const MAP_STYLE = {
-  url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  attribution: '&copy; CARTO'
+  // Esri "Dark Gray Canvas": oscuro de fábrica y deliberadamente minimalista (sin iconos de POI,
+  // casi sin etiquetas), pensado como fondo neutro para superponer datos — que es exactamente
+  // este caso. No pide API key.
+  // Se probo antes OpenStreetMap estandar + un filtro CSS invert/hue-rotate, pero OSM es un mapa
+  // de proposito general: muchisimo detalle (edificios, POIs, etiquetas) que ademas hay que
+  // filtrar tile por tile. Resultado: ruidoso y lento. Esto no necesita filtro.
+  url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+  attribution: '&copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors',
+  // El servicio sirve hasta z16; mas alla Leaflet reescala la ultima tile en vez de pedir 404s.
+  maxNativeZoom: 16,
+  // Este servicio no tiene variantes @2x: sin {r} en la URL, detectRetina haria pedir el doble de
+  // tiles del zoom siguiente para nada.
+  detectRetina: false
 };
 
 function App() {
@@ -1637,8 +1661,12 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
                     <h3>📍 {mapLocations.length === 1 ? 'Ubicación' : 'Ubicaciones'}</h3>
                   </div>
                   <MapContainer
-                    key={mapLocations.map(l => l.nombre).join('-')}
-                    whenCreated={(m) => { mapRef.current = m; console.log('[MAP] created', m); }}
+                    /* Antes habia key={mapLocations...join('-')}: cambiar el key en cada consulta
+                       desmontaba el MapContainer y creaba una instancia nueva de Leaflet desde
+                       cero, re-descargando todas las tiles. Los marcadores ya se reconcilian solos
+                       (se renderizan con .map sobre mapLocations) y FitBounds reencuadra al
+                       cambiar `locations`, asi que el remonte no aportaba nada y costaba caro. */
+                    whenCreated={(m) => { mapRef.current = m; }}
                     center={[mapLocations[0].lat, mapLocations[0].lng]}
                     zoom={13}
                     preferCanvas={true}
@@ -1651,6 +1679,8 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
                     <ChangeMapStyle
                       url={MAP_STYLE.url}
                       attribution={MAP_STYLE.attribution}
+                      detectRetina={MAP_STYLE.detectRetina}
+                      maxNativeZoom={MAP_STYLE.maxNativeZoom}
                     />
                     <CenterOnHover
                       centerOn={centerMapOn}

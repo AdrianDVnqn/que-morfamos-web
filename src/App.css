@@ -119,7 +119,10 @@ body {
   /* fondo oscuro solicitado */
 }
 
-/* Transición suave de aparición de tiles para reducir parpadeo */
+/* Transición suave de aparición de tiles para reducir parpadeo.
+   Sin filtro CSS: el basemap (Esri Dark Gray Canvas) ya es oscuro de fabrica. Filtrar tile por
+   tile, como se hizo mientras se probo OpenStreetMap, cuesta composicion en cada tile y se nota
+   al pan/zoom. */
 .leaflet-tile {
   transition: opacity 200ms linear;
 }
