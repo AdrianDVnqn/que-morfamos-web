@@ -969,7 +969,9 @@ Y no hace falta que sea simple: *"una parrilla con juegos para los chicos"* o *"
     const t = setTimeout(() => {
       setPrevBgImages(null);
       setIsBgTransitioning(false);
-    }, 2000); // Debe coincidir con la transición CSS de 1.8s + margen
+      // 3.4s: la capa nueva entra con el mismo cruce de 3s del slideshow (7.5% de 40s), asi
+      // que la vieja tiene que quedarse abajo hasta que este completamente tapada.
+    }, 3400);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTopic, conversationContext]);
@@ -1438,7 +1440,10 @@ Y no hace falta que sea simple: *"una parrilla con juegos para los chicos"* o *"
         <div className="bg-layer base">
           {bgImages.map((src, i) => (
             <div
-              key={`base-${i}`}
+              // La key lleva la URL a proposito: con `base-${i}` React reusaba el mismo div y
+              // solo le cambiaba background-image, o sea un CORTE SECO en medio de la animacion.
+              // Incluyendo el src, la slide se remonta y su cruce arranca de cero.
+              key={`base-${i}-${src}`}
               className={`bg-slide bg-slide-${i}`}
               style={{ backgroundImage: `url(${src})` }}
             />
@@ -1448,7 +1453,7 @@ Y no hace falta que sea simple: *"una parrilla con juegos para los chicos"* o *"
           <div className="bg-layer prev">
             {prevBgImages.map((src, i) => (
               <div
-                key={`prev-${i}`}
+                key={`prev-${i}-${src}`}
                 className={`bg-slide bg-slide-${i}`}
                 style={{ backgroundImage: `url(${src})` }}
               />

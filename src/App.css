@@ -1,3 +1,52 @@
+/* Cruce entre imagenes del slideshow.
+   El anterior iba `linear` y pasaba de opacidad 0 a 0.95 en el 2% del ciclo: 1 segundo seco, sin
+   curva. Y las dos imagenes cruzaban a media opacidad al mismo tiempo, asi que en cada cambio el
+   fondo se hundia a oscuro un instante.
+   Aca la que entra sube ENCIMA de la que sale (z-index 2 mientras aparece), y la que sale se
+   queda opaca abajo hasta quedar completamente tapada: nunca hay dos imagenes a medias, asi que
+   no hay bajon de luz. Los porcentajes asumen 4 slides (25% del ciclo cada uno), que es lo que
+   devuelve getBackgroundImagesForTopic: o las 4 del set general, o 1 sola por tema.
+   El scale lento (Ken Burns) es lo que hace que una foto quieta no parezca un cartel pegado. */
+@keyframes bgCrossfade {
+  0% {
+    opacity: 0;
+    z-index: 2;
+    transform: scale(1.04);
+  }
+
+  7.5% {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  25% {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  25.01% {
+    z-index: 1;
+  }
+
+  /* Sigue opaca pero ya tapada por la siguiente, que a esta altura llego a opacidad 1. */
+  32.5% {
+    opacity: 1;
+    z-index: 1;
+    transform: scale(1.12);
+  }
+
+  32.51% {
+    opacity: 0;
+    z-index: 0;
+  }
+
+  100% {
+    opacity: 0;
+    z-index: 0;
+    transform: scale(1.04);
+  }
+}
+
 /* ========================================
    TEMA OSCURO VIBRANTE - CHATBOT NEUQUÉN
    ======================================== */
@@ -3000,43 +3049,30 @@ body {
   inset: 0;
 }
 
-.bg-slideshow .bg-layer.prev {
+/* Cambio de tema (ej: el usuario busca "opciones veganas" y el fondo pasa al set vegano).
+   Antes la capa VIEJA iba arriba y se desvanecia para revelar la nueva, mientras las slides de
+   la capa nueva recibian todas juntas un fadeInNewBg forzado. Al terminar se les sacaba la clase
+   y volvian de golpe a su animacion normal en cualquier fase: ese salto era el corte que se
+   sentia brusco.
+   Ahora la capa NUEVA va arriba y entra por encima de la vieja, que se queda quieta y opaca
+   abajo hasta quedar tapada. Un disolvido de verdad: sin bajon de luz y sin salto al final. */
+.bg-slideshow .bg-layer.base {
   z-index: 2;
 }
 
-.bg-slideshow .bg-layer.base {
-  z-index: 0;
+.bg-slideshow .bg-layer.prev {
+  z-index: 1;
 }
 
-/* Transición crossfade: prev hace fade-out mientras base hace fade-in */
-
-/* Base layer: cuando hay transición, empezamos con opacidad baja */
-.bg-slideshow.is-transitioning .bg-layer.base .bg-slide {
-  animation: fadeInNewBg 1.8s ease-out forwards !important;
-}
-
-@keyframes fadeInNewBg {
-  0% {
-    opacity: 0;
-    transform: scale(1.08);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1.03);
-  }
-}
-
-/* Prev layer: hace fade-out lento */
+/* La capa vieja queda congelada mientras la tapan. Se muestra solo su primera imagen: las demas
+   estan apiladas debajo y no se ven igual. */
 .bg-slideshow .bg-layer.prev .bg-slide {
-  transition: opacity 1.8s ease-in-out, transform 2.2s ease-out;
   animation: none !important;
   opacity: 1;
 }
 
-.bg-slideshow.is-transitioning .bg-layer.prev .bg-slide {
-  opacity: 0;
-  transform: scale(1.06);
+.bg-slideshow .bg-layer.prev .bg-slide:not(:first-child) {
+  display: none;
 }
 
 /* ligera superposición de color para integrar con tema */
@@ -3075,25 +3111,23 @@ body {
   }
 }
 
-/* Aplicar animación con offsets para cada slide: delay de 10s entre slides */
+/* Ciclo de 40s con 4 slides cada 10s. Antes eran 50s con reglas para 5 slides (.bg-slide-4)
+   pero BACKGROUND_IMAGES tiene 4: el quinto turno no lo ocupaba nadie y el fondo se quedaba en
+   NEGRO 10 segundos enteros en cada vuelta. */
 .bg-slide-0 {
-  animation: slideFade 50s linear infinite 0s;
+  animation: bgCrossfade 40s ease-in-out infinite 0s;
 }
 
 .bg-slide-1 {
-  animation: slideFade 50s linear infinite 10s;
+  animation: bgCrossfade 40s ease-in-out infinite 10s;
 }
 
 .bg-slide-2 {
-  animation: slideFade 50s linear infinite 20s;
+  animation: bgCrossfade 40s ease-in-out infinite 20s;
 }
 
 .bg-slide-3 {
-  animation: slideFade 50s linear infinite 30s;
-}
-
-.bg-slide-4 {
-  animation: slideFade 50s linear infinite 40s;
+  animation: bgCrossfade 40s ease-in-out infinite 30s;
 }
 
 /* Afinar: menor opacidad en móviles para no competir con legibilidad */
@@ -3717,4 +3751,34 @@ h4 {
    ========================================================================== */
 .chips-expandable {
   min-width: 0;
+}
+
+/* ==========================================================================
+   FONDO: VINETA
+   Degradado radial que oscurece los bordes y deja el centro mas limpio. Le da profundidad a la
+   foto y sube el contraste del panel de chat sin tener que bajarle brillo a la imagen entera,
+   que es lo que la dejaba apagada.
+   ========================================================================== */
+.bg-slideshow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 45%, transparent 32%, rgba(8, 8, 18, 0.55) 100%),
+    linear-gradient(180deg, rgba(8, 8, 18, 0.38) 0%, transparent 22%, transparent 68%, rgba(8, 8, 18, 0.5) 100%);
+}
+
+/* Sin movimiento: se cortan el Ken Burns y el cruce, y queda la primera imagen fija. */
+@media (prefers-reduced-motion: reduce) {
+
+  .bg-slide {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .bg-layer.base .bg-slide:first-child {
+    opacity: 1;
+  }
 }
