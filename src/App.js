@@ -498,7 +498,10 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'reviews', 'name'
   const [sidebarMode, setSidebarMode] = useState(false); // Chat en sidebar después del primer mensaje
   const [hoveredRestaurant, setHoveredRestaurant] = useState(null);
-  const [chipsExpanded, setChipsExpanded] = useState(false);
+  // Arrancan ABIERTOS: en el estado inicial los ejemplos son la mejor forma de comunicar que se
+  // le puede pedir al bot. Escondidos detras del boton 💡, practicamente nadie los descubria — y
+  // encima la pantalla inicial quedaba medio vacia. Se colapsan al primer envio (ver handleSend).
+  const [chipsExpanded, setChipsExpanded] = useState(true);
   const [tonesExpanded, setTonesExpanded] = useState(false);
 
   // === NUEVO ESTADO PARA PESTAÑAS MÓVILES ===
@@ -1231,6 +1234,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
 
     setCurrentTopic(um);
     setInput('');
+    setChipsExpanded(false); // ya no hacen falta una vez que el usuario sabe que pedir
     setMobileTab('chat');
     setUserScrolledUp(false); // Resetear flag de scroll para bajar al enviar nuevo mensaje
 
