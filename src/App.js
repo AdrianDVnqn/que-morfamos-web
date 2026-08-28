@@ -533,15 +533,16 @@ function App() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      // El texto anterior gastaba tres párrafos en explicar la taxonomía interna del bot
-      // (recomendaciones / lugar específico / stats). Nadie piensa "necesito el modo STATS": esa
-      // es nuestra cabeza, no la del que llega con hambre. Y los ejemplos entre paréntesis
-      // repetían lo que ya hacen los chips, que están dos centímetros más abajo.
-      // Ahora arranca por el diferencial concreto —el número real— y enseña de qué es capaz con
-      // un ejemplo difícil en vez de con una lista de modos.
-      content: `Me leí las **204.726 reseñas** de los 929 lugares de Neuquén. Vos preguntá nomás. 🍷
+      // Las versiones anteriores arrancaban con "me leí X reseñas": un dato sobre el bot, no
+      // sobre el que llega con hambre. A un dev le impresiona el número; a alguien decidiendo
+      // dónde cenar un martes, no le mueve nada. Y seguían con una orden ("preguntá", "decime"),
+      // que es el tipo de frase más flojo que hay.
+      // Esto nombra el momento real: la app se llama "¿Qué morfamos?", o sea que el chiste ya
+      // está en la marca y se puede cobrar. Los ejemplos de qué pedirle los cargan los chips,
+      // que están justo abajo.
+      content: `*—¿Dónde comemos? —Y... no sé, ¿vos qué querés?*
 
-Y no hace falta que sea simple: *"una parrilla con juegos para los chicos"* o *"dónde desayunar sin TACC"* también.`,
+Cortemos con eso: decime qué se te antoja y te digo dónde.`,
       mode: 'system'
     }
   ]);
@@ -1372,7 +1373,7 @@ Y no hace falta que sea simple: *"una parrilla con juegos para los chicos"* o *"
       case 'estadisticas': return '📊';
       case 'rag': return '🧠';
       case 'resumen': return '📝';
-      default: return '🤖';
+      default: return '🎯';  // el 🤖 reforzaba justo lo que queriamos sacar
     }
   };
 
@@ -1381,7 +1382,10 @@ Y no hace falta que sea simple: *"una parrilla con juegos para los chicos"* o *"
       case 'estadisticas': return 'Estadísticas';
       case 'rag': return 'Recomendaciones';
       case 'resumen': return 'Resumen';
-      default: return 'Morfi-Bot';
+      // "Morfi-Bot" describia la tecnologia, que es lo menos interesante que tiene. Un datero
+      // es el que te pasa el dato que nadie mas tiene — en la cancha, en el barrio, en el
+      // hipodromo. Dice lo que hace, es local, y no lo tiene nadie mas.
+      default: return 'El Datero';
     }
   };
 
