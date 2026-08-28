@@ -4287,27 +4287,23 @@ h4 {
   gap: 16px;
 }
 
-/* Silueta en el mismo color que el nombre: es lo que ata visualmente el avatar con quien habla,
-   sin inventar caras ni cargar imagenes. El circulo va neutro para que el color sea el de la
-   figura, que es lo que se compara con el nombre. */
+/* Inicial sobre el color del nombre: se reconoce quien habla de un vistazo, cosa que una silueta
+   —igual para todos— no permite. El color del circulo es el mismo del nombre, asi que avatar y
+   nombre quedan atados. */
 .chat-avatar {
   flex-shrink: 0;
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  /* Texto oscuro: los colores de los participantes son claros a proposito para leerse sobre el
+     fondo ciruela, asi que sobre ellos hace falta un texto oscuro. */
+  color: rgba(18, 10, 16, 0.88);
   margin-top: 1px;
-}
-
-.chat-avatar svg {
-  width: 22px;
-  height: 22px;
-  display: block;
 }
 
 .autor-nombre {
@@ -4338,4 +4334,22 @@ h4 {
 /* Y menos aire entre mensajes: 20px separaba tanto que se perdia la sensacion de conversacion. */
 .messages-container {
   gap: 12px;
+}
+
+/* El bot es un participante mas del chat: mismo avatar y mismo nombre dentro del globo que el
+   resto. Antes tenia el nombre en una barra oscura aparte y sin avatar, asi que rompia con la
+   escena de grupo. */
+.message-assistant {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* El avatar del bot lleva emoji en vez de la silueta SVG, con un fondo tenido con el color de
+   marca para que se distinga del resto del grupo de un vistazo. */
+.chat-avatar--bot {
+  background: rgba(var(--accent-primary-rgb), 0.16);
+  border-color: rgba(var(--accent-primary-rgb), 0.35);
+  font-size: 16px;
+  line-height: 1;
 }

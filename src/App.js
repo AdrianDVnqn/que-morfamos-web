@@ -7,6 +7,24 @@ import 'leaflet/dist/leaflet.css';
 import './App.css';
 import { lanzarLluviaTono } from './utils/emojiRain.js';
 
+// Avatar de participante del chat: una silueta en el color de quien habla. Es lo que ata el
+// avatar con el nombre sin inventar caras ni cargar imagenes.
+function AvatarChat({ color, emoji, inicial }) {
+  // El Sommelier lleva cara propia y no inicial: ademas de darle identidad, marca que no es uno
+  // mas del grupo. Va emoji y no una foto: una foto de stock implicaria una persona real que no
+  // existe, y ademas habria que licenciarla.
+  if (emoji) {
+    return <span className="chat-avatar chat-avatar--bot" aria-hidden="true">{emoji}</span>;
+  }
+  // Para las personas, la inicial sobre el color de su nombre: se reconoce quien habla de un
+  // vistazo mejor que con una silueta, que es igual para todos.
+  return (
+    <span className="chat-avatar" style={{ background: color }} aria-hidden="true">
+      {inicial}
+    </span>
+  );
+}
+
 // Mini mapa estatico para la cabecera del detalle.
 //
 // Se arma con <img> de tiles y aritmetica de coordenadas en vez de montar un Leaflet: una
@@ -677,6 +695,9 @@ function App() {
   // muestra el RANGO del bot sin tener que explicarlo, ademas de dramatizar el problema.
   // Los nombres van en colores distintos como en WhatsApp: es lo que hace que se lea como un
   // grupo y no como una persona hablando sola.
+  const EMOJI_BOT = '🧐';  // el monoculo ES el personaje, y ya aparece en su mensaje
+  const COLOR_BOT = '#ff8fa3';  // el rosa de marca, aclarado para que se lea sobre el ciruela
+
   const BIENVENIDA = useMemo(() => ([
     { role: 'otro', autor: 'Sabro', color: '#7fd1ff', content: 'Che, ¿qué morfamos esta noche?' },
     { role: 'otro', autor: 'Colo',  color: '#ffb27f', content: 'Yo quiero una buena burger' },
@@ -1848,22 +1869,21 @@ function App() {
           <div className="messages-container" ref={messagesContainerRef}>
             {messages.map((message, index) => (
               <div key={index} className={`message message-${message.role}`}>
-                {message.role === 'assistant' && message.mode && (
-                  <div className="message-mode">
-                    {getModeIcon(message.mode)} {getModeLabel(message.mode)}
-                  </div>
-                )}
-                {message.role === 'otro' && message.autor && (
-                  <span className="chat-avatar" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill={message.color}>
-                      <circle cx="12" cy="8.2" r="3.9" />
-                      <path d="M12 13.6c-4 0-7.2 2.4-7.2 5.4v1.4h14.4v-1.4c0-3-3.2-5.4-7.2-5.4z" />
-                    </svg>
-                  </span>
+                {(message.role === 'otro' || message.role === 'assistant') && (
+                  <AvatarChat
+                    color={message.color}
+                    inicial={message.autor?.[0]}
+                    emoji={message.role === 'assistant' ? EMOJI_BOT : null}
+                  />
                 )}
                 <div className="message-content">
                   {message.role === 'otro' && message.autor && (
                     <span className="autor-nombre" style={{ color: message.color }}>{message.autor}</span>
+                  )}
+                  {message.role === 'assistant' && message.mode && (
+                    <span className="autor-nombre" style={{ color: COLOR_BOT }}>
+                      {getModeIcon(message.mode)} {getModeLabel(message.mode)}
+                    </span>
                   )}
                   <ReactMarkdown>{message.content}</ReactMarkdown>
                 </div>
@@ -1871,17 +1891,16 @@ function App() {
             ))}
             {escribiendo && (
               <div className={`message message-${escribiendo.role} message-tipeando`}>
-                {escribiendo.role === 'otro' && escribiendo.autor && (
-                  <span className="chat-avatar" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill={escribiendo.color}>
-                      <circle cx="12" cy="8.2" r="3.9" />
-                      <path d="M12 13.6c-4 0-7.2 2.4-7.2 5.4v1.4h14.4v-1.4c0-3-3.2-5.4-7.2-5.4z" />
-                    </svg>
-                  </span>
+                {escribiendo.role !== 'user' && (
+                  <AvatarChat
+                    color={escribiendo.color}
+                    inicial={escribiendo.autor?.[0]}
+                    emoji={escribiendo.role === 'assistant' ? EMOJI_BOT : null}
+                  />
                 )}
                 <div className="message-content">
                   {escribiendo.role !== 'user' && escribiendo.autor && (
-                    <span className="autor-nombre" style={{ color: escribiendo.color }}>
+                    <span className="autor-nombre" style={{ color: escribiendo.color || COLOR_BOT }}>
                       {escribiendo.autor} está escribiendo…
                     </span>
                   )}
