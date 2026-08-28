@@ -698,17 +698,70 @@ function App() {
   const EMOJI_BOT = '🧐';  // el monoculo ES el personaje, y ya aparece en su mensaje
   const COLOR_BOT = '#ff8fa3';  // el rosa de marca, aclarado para que se lea sobre el ciruela
 
-  const BIENVENIDA = useMemo(() => ([
-    { role: 'otro', autor: 'Sabro', color: '#7fd1ff', content: 'Che, ¿qué morfamos esta noche?' },
-    { role: 'otro', autor: 'Colo',  color: '#ffb27f', content: 'Yo quiero una buena burger' },
-    { role: 'otro', autor: 'Edu',   color: '#8ee6a8', content: 'Yo voy a pedir algo vegan' },
-    { role: 'otro', autor: 'Lauti', color: '#c9a7ff', content: 'Empanadas fritas papáaa' },
-    // Guiño a Los Simuladores: la frase que antecede a la entrada del especialista.
-    { role: 'user', autor: 'Vos', content: 'Banquen que conozco a alguien que nos puede ayudar... 🕵️' },
-    // Aviso de sistema: nadie lo "escribe", asi que no lleva indicador de tipeo.
-    { role: 'sistema', content: 'El Sommelier del Comahue se unió al grupo' },
-    { role: 'assistant', autor: 'El Sommelier del Comahue', mode: 'system', content: 'A sus órdenes. Yo les tiro la posta. 🧐' },
-  ]), []);
+  // La escena se arma sola en cada carga: cambian quienes aparecen y que pide cada uno, asi el
+  // que vuelve a entrar no ve siempre lo mismo. Se calcula una sola vez por montaje (useMemo con
+  // deps vacias); si se recalculara en cada render, los nombres bailarian mientras se actua.
+  const BIENVENIDA = useMemo(() => {
+    const POOL = ['Vic', 'Sabro', 'Lauti', 'Colo', 'Edu', 'Santi', 'Fabio', 'Juli',
+      'Juan', 'Fer', 'Stefa', 'Vicky', 'Lau', 'Lia'];
+    const COLORES = ['#7fd1ff', '#ffb27f', '#8ee6a8', '#c9a7ff', '#ffd479', '#8fd4c8'];
+    // Pedidos variados para el resto. Edu y Sabro tienen el suyo fijo (ver mas abajo).
+    const PEDIDOS = [
+      'Yo quiero una buena burger',
+      'Empanadas fritas papáaa',
+      'Yo voto pizza, como siempre',
+      'Hace mil que no como un asado',
+      'Yo me tiro por unas milanesas',
+      'Sushi, invito yo',
+      'Quiero unos tacos bien picantes',
+      'Pastas caseras y no se discute',
+      'Algo con buena cerveza artesanal',
+      'Yo quiero helado, no me importa la hora',
+    ];
+
+    const mezclar = (arr) => {
+      const c = [...arr];
+      for (let i = c.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [c[i], c[j]] = [c[j], c[i]];
+      }
+      return c;
+    };
+
+    const elegidos = mezclar(POOL).slice(0, 4);
+    // Edu y Sabro tienen pedido propio, asi que no pueden ser quien abre la charla: ahi se
+    // perderia su linea. Si les toca esa posicion, se los cambia por otro del grupo.
+    // Estos tres piden siempre lo mismo porque es parte de quienes son, no del humor del dia.
+    // Lau es celiaca: para ella no es preferencia, es necesidad, y la linea lo dice.
+    const FIJOS = {
+      Edu: 'Yo voy a pedir algo vegan',
+      Sabro: 'Yo quiero algo vegetariano',
+      Lau: 'Yo necesito algo sin TACC, acuérdense',
+    };
+    if (FIJOS[elegidos[0]]) {
+      const otro = elegidos.findIndex((n, i) => i > 0 && !FIJOS[n]);
+      if (otro > 0) [elegidos[0], elegidos[otro]] = [elegidos[otro], elegidos[0]];
+    }
+
+    const sueltos = mezclar(PEDIDOS);
+    const colores = mezclar(COLORES);
+    const [quienAbre, ...piden] = elegidos;
+
+    return [
+      { role: 'otro', autor: quienAbre, color: colores[0], content: 'Che, ¿qué morfamos esta noche?' },
+      ...piden.map((nombre, i) => ({
+        role: 'otro',
+        autor: nombre,
+        color: colores[i + 1],
+        content: FIJOS[nombre] || sueltos.pop(),
+      })),
+      // Guiño a Los Simuladores: la frase que antecede a la entrada del especialista.
+      { role: 'user', autor: 'Vos', content: 'Banquen que conozco a alguien que nos puede ayudar... 🕵️' },
+      // Aviso de sistema: nadie lo "escribe", asi que no lleva indicador de tipeo.
+      { role: 'sistema', content: 'El Sommelier del Comahue se unió al grupo' },
+      { role: 'assistant', autor: 'El Sommelier del Comahue', mode: 'system', content: 'A sus órdenes. Yo les tiro la posta. 🧐' },
+    ];
+  }, []);
 
   // Cuanto tarda alguien en escribir un mensaje. Antes esto era un numero a mano por mensaje —
   // el comentario decia que salia del largo del texto, pero no era cierto. Ahora si: 32ms por
