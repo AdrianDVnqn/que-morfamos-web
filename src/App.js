@@ -658,6 +658,9 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
   const [centerMapOn, setCenterMapOn] = useState(null); // Solo se activa desde tarjetas
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  // Distinto de loadingDetail: la tarjeta ya se está mostrando (con sus reseñas) pero el bloque
+  // del resumen todavía espera al LLM.
+  const [loadingAnalisis, setLoadingAnalisis] = useState(false);
   const [detailsCache, setDetailsCache] = useState({});
   const getDetailsCacheKey = (nombre, topicParam = null) => {
     const t = topicParam || conversationContext?.topic || 'default';
@@ -1407,25 +1410,43 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
       return;
     }
 
-    // Si no está en cache, cargar normalmente
+    // Carga en dos tiempos. Medido en el endpoint: metadata 0.31s, reseñas 1.13s, análisis del
+    // LLM 4.49s — o sea que el 72% de la espera es UNA parte y el resto está listo a 1.4s.
+    // Antes se esperaba todo junto y el usuario miraba 6 segundos de esqueleto. Ahora se piden
+    // las dos cosas EN PARALELO (no en cadena: encadenarlas sumaría los tiempos en vez de
+    // solaparlos): apenas llega la base se pinta la tarjeta con sus reseñas, y el esqueleto queda
+    // sólo en el bloque del resumen, que es lo único que falta.
+    const base = `${API_URL}/restaurant/${encodeURIComponent(nombreRestaurante)}`;
+    const params = (extra) =>
+      `?tone=${encodeURIComponent(tone)}${topic ? `&topic=${encodeURIComponent(topic)}` : ''}${extra}`;
+
     setLoadingDetail(true);
+    setLoadingAnalisis(true);
+
+    const pedidoCompleto = axios.get(base + params(''), axiosConfig);
+
+    // La base sólo se pinta si el análisis todavía no llegó: si el completo vino de caché y ganó
+    // la carrera, pisarlo con la base dejaría la tarjeta sin resumen.
+    axios.get(base + params('&solo_base=1'), axiosConfig)
+      .then(({ data }) => {
+        setSelectedRestaurant(prev => (prev && prev.resumen_general) ? prev : data);
+        setLoadingDetail(false);
+      })
+      .catch(() => { /* si falla, el pedido completo sigue en vuelo y resuelve igual */ });
+
     try {
-      // Si hay topic en el contexto, pasarlo como query param para obtener reseñas filtradas
-      const url = topic
-        ? `${API_URL}/restaurant/${encodeURIComponent(nombreRestaurante)}?topic=${encodeURIComponent(topic)}&tone=${encodeURIComponent(tone)}`
-        : `${API_URL}/restaurant/${encodeURIComponent(nombreRestaurante)}?tone=${encodeURIComponent(tone)}`;
-      const response = await axios.get(url, axiosConfig);
+      const response = await pedidoCompleto;
       setSelectedRestaurant(response.data);
-      // Guardar en cache con key que incluye topic si aplica
       setDetailsCache(prev => ({
         ...prev,
         [cacheKey]: response.data
       }));
     } catch (error) {
       console.error('Error al obtener detalles:', error);
-      setSelectedRestaurant(null);
+      setSelectedRestaurant(prev => prev || null);
     } finally {
       setLoadingDetail(false);
+      setLoadingAnalisis(false);
     }
   };
 
@@ -2165,7 +2186,20 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
                   )}
                 </div>
 
-                {selectedRestaurant.resumen_general && (
+                {/* El esqueleto queda SOLO donde falta el dato. El resto de la tarjeta —nombre,
+                    rating, dirección, reseñas— ya está pintado desde el pedido base, que llega a
+                    ~1.6s contra los ~6s del completo. */}
+                {loadingAnalisis && !selectedRestaurant.resumen_general ? (
+                  <div className="modal-summary" role="status" aria-live="polite" aria-busy="true">
+                    <h3>📋 Resumen</h3>
+                    <span className="sr-only">Preparando el resumen del lugar</span>
+                    <div className="detalle-esqueleto">
+                      <div className="esq esq--linea" />
+                      <div className="esq esq--linea" />
+                      <div className="esq esq--linea es-ultima" />
+                    </div>
+                  </div>
+                ) : selectedRestaurant.resumen_general && (
                   <div className="modal-summary">
                     <h3>📋 Resumen</h3>
                     <p>{selectedRestaurant.resumen_general}</p>
