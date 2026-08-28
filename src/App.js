@@ -1371,12 +1371,27 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
           </div>
         )}
       </div>
+      {/* Primer elemento enfocable de la pagina: permite saltar la cabecera e ir al contenido. */}
+      <a href="#contenido" className="skip-link">Saltar al contenido</a>
+
       <header className="app-header">
+        {/* La pagina no tenia H1: el titulo existia solo como video, invisible para un lector de
+            pantalla y para los buscadores. Va oculto visualmente porque el logo ya cumple ese rol
+            a nivel visual. */}
+        <h1 className="sr-only">¿Qué morfamos? — Recomendaciones de restaurantes en Neuquén</h1>
         <div className="header-top-row">
           <div className="header-title-group">
             <div
               className="header-video-wrapper"
               onClick={() => window.location.reload()}
+              /* Era un div clickeable: invisible para teclado y para lectores de pantalla.
+                 Con role/tabIndex/onKeyDown se comporta como un boton de verdad. */
+              role="button"
+              tabIndex={0}
+              aria-label="Volver al inicio"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.reload(); }
+              }}
               style={{ cursor: 'pointer' }}
             >
               <video
@@ -1385,6 +1400,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
                 muted
                 playsInline
                 className="header-video"
+                aria-hidden="true"
               >
                 <source src={process.env.PUBLIC_URL + '/banner.mp4'} type="video/mp4" />
               </video>
@@ -1447,7 +1463,9 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
         </div>
       </header>
 
-      <div className="main-content">
+      {/* <main> en vez de <div>: sin landmarks, un lector de pantalla no puede saltar entre
+          regiones de la pagina. La auditoria daba main/nav/footer/section = 0. */}
+      <main className="main-content" id="contenido">
         {/* CONTENEDOR DEL CHAT: oculto en mobile si mobileTab no es 'chat' */}
         <div className={`chat-container ${sidebarMode ? 'chat-sidebar' : ''} ${mobileTab !== 'chat' ? 'mobile-hidden' : ''}`}>
           {sidebarMode && (
@@ -1555,13 +1573,19 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
               placeholder="¿Qué tenés ganas de comer hoy?"
               disabled={loading || apiStatus !== 'connected'}
               className="message-input"
+              /* El placeholder no sirve como etiqueta: desaparece al escribir y varios lectores
+                 de pantalla no lo anuncian. */
+              aria-label="Buscar restaurantes en Neuquén"
             />
             <button
               type="submit"
               disabled={loading || !input.trim() || apiStatus !== 'connected'}
               className="send-button"
+              /* Un emoji no es un nombre accesible: un lector de pantalla anunciaba "boton" a
+                 secas. aria-hidden en el emoji evita que ademas lo lea como "bandeja de salida". */
+              aria-label={loading ? 'Enviando consulta' : 'Enviar consulta'}
             >
-              {loading ? '⏳' : '📤'}
+              <span aria-hidden="true">{loading ? '⏳' : '📤'}</span>
             </button>
           </form>
         </div>
@@ -1861,7 +1885,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
           </div>
 
         </div>{/* Fin results-area */}
-      </div>{/* Fin main-content */}
+      </main>{/* Fin main-content */}
 
       {/* BARRA DE NAVEGACIÓN MÓVIL (Solo visible si sidebarMode es true) */}
       {sidebarMode && (
@@ -2101,7 +2125,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
       )}
 
       {/* Footer adriandv */}
-      <div className="app-footer-status">
+      <footer className="app-footer-status">
         {/* Etiquetas y fechas abreviadas: cuatro items con año y hora completa saturaban la
             linea. El dato preciso sigue disponible en el title de cada uno. */}
         <div className="dataset-status" aria-label="Estado de actualización de datos">
@@ -2125,7 +2149,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
         <div className="app-footer-credit">
           Creado con ❤️ por <a href="https://adriandv.dev" target="_blank" rel="noopener noreferrer">adriandv.dev</a>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

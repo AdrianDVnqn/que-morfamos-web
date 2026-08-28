@@ -2349,7 +2349,9 @@ body {
 }
 
 .card-rating .reviews {
-  color: var(--text-muted);
+  /* --text-muted daba 3.65:1 sobre el fondo de la tarjeta, por debajo del minimo WCAG AA de
+     4.5:1 para texto chico. Era el unico fallo de contraste real de la app. */
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
@@ -3135,4 +3137,100 @@ body {
 
 .hourglass-anim:hover {
   animation-duration: 0.8s;
+}
+/* ==========================================================================
+   FOCO DE TECLADO
+   Medido con una auditoria sobre la app: 14 de 15 elementos enfocables no mostraban NADA al
+   recibir foco. Alguien navegando con Tab quedaba a ciegas. Se usa :focus-visible (y no :focus)
+   para que el anillo aparezca en navegacion por teclado pero no al hacer click con el mouse.
+   ========================================================================== */
+:where(a, button, input, textarea, select, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--accent-primary, #e94560);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Sobre superficies oscuras el anillo del color de acento puede perderse; se le suma un halo
+   claro para que se lea contra cualquier fondo. */
+.leaflet-container :focus-visible,
+.map-container :focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.55);
+}
+
+/* Enlace para saltar al contenido: primer tab de la pagina, oculto hasta enfocarse. */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -60px;
+  z-index: 2000;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--accent-primary, #e94560);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 140ms ease;
+}
+
+.skip-link:focus {
+  top: 8px;
+}
+
+/* ==========================================================================
+   ALTO DEL MAPA
+   El mapa ocupaba 450px dentro de una columna de 1060px (42%): el resto era vacio oscuro.
+   La causa era la cadena de contenedores: .map-container es flex column, pero .map-wrapper y
+   .map-inner eran `display: block` con `flex: 0 1 auto`, asi que no crecian, y el `flex: 1` del
+   .leaflet-container no tenia efecto porque su padre no era un contenedor flex.
+   ========================================================================== */
+.sidebar-layout .map-container .map-wrapper,
+.sidebar-layout .map-container .map-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0; /* sin esto, un hijo flex no puede encogerse por debajo de su contenido */
+}
+
+.sidebar-layout .map-container .map-inner > .leaflet-container {
+  flex: 1 1 auto;
+  min-height: 320px; /* piso razonable en pantallas bajas; antes eran 450px fijos */
+}
+
+/* ==========================================================================
+   BOTON "NUEVO MENSAJE" EN MOBILE
+   Estaba en `bottom: 90px`, calculado para desktop. En mobile el area de input es mas alta y el
+   boton quedaba ENCIMA del campo de texto, tapando el placeholder e impidiendo escribir sin
+   scrollear antes.
+   ========================================================================== */
+@media (max-width: 800px) {
+  .scroll-to-bottom-btn {
+    bottom: 150px;
+  }
+}
+
+/* ==========================================================================
+   PIE EN MOBILE
+   La barra de estado quedaba tapada por la tab bar inferior. Se le reserva el alto de la barra
+   mas el area segura del dispositivo (notch / gesture bar en iOS).
+   ========================================================================== */
+@media (max-width: 800px) {
+  .app-footer-status {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Visible solo para lectores de pantalla: se saca del flujo visual pero NO con display:none
+   (eso lo ocultaria tambien a la tecnologia asistiva). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
