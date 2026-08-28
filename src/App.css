@@ -556,11 +556,12 @@ body {
 
 .chat-sidebar .chat-header .chat-badge {
   font-size: var(--fs-2xs);
-  background: var(--accent-gradient);
+  /* Mismo gradiente profundo que la burbuja del usuario, por la misma razon de contraste. */
+  background: linear-gradient(135deg, #c9294a 0%, #9c4a24 100%);
   padding: 4px 10px;
   border-radius: 12px;
-  color: white;
-  font-weight: 600;
+  color: #fff;
+  font-weight: 700;
 }
 
 .messages-container {
@@ -637,8 +638,14 @@ body {
 }
 
 .message-user .message-content {
-  background: var(--accent-gradient);
-  color: white;
+  /* Gradiente propio, mas profundo que --accent-gradient. Con el de marca, el texto blanco daba
+     3.83 sobre el rosa, 2.78 sobre el coral y 1.52 sobre el amarillo: fallaba en los tres tramos
+     (el minimo WCAG AA es 4.5) y sobre el amarillo era practicamente ilegible.
+     Se probo texto oscuro, que pasaba comodo, pero desentonaba: el resto de los mensajes son
+     blancos y la burbuja quedaba como de otra app. Asi que se oscurece el FONDO en vez del texto,
+     conservando el recorrido calido del original. Peor contraste del recorrido: 5.39. */
+  background: linear-gradient(135deg, #c9294a 0%, #b83a3f 55%, #9c4a24 100%);
+  color: #fff;
   border-top-right-radius: 0;
   /* Esquina cuadrada arriba */
   border-bottom-right-radius: 6px;
@@ -662,7 +669,8 @@ body {
   border-style: solid;
   border-width: 0 0 15px 15px;
   /* Triángulo con borde izquierdo color, borde bottom transparente */
-  border-color: transparent transparent transparent #ff9a61;
+  /* Coincide con el tramo del gradiente donde nace la cola (arriba a la derecha). */
+  border-color: transparent transparent transparent #a8412f;
   transform: rotate(0deg);
 }
 
@@ -3024,7 +3032,10 @@ body {
   opacity: 0;
   /* default hidden, animation controls visibility */
   /* Más blur y menor saturación, y todavía más oscuro para garantizar contraste */
-  filter: blur(2px) saturate(0.91) contrast(0.9) brightness(0.9);
+  /* 1px y no 2: con 2px las fotos no se distinguian. El contraste del panel ya lo resuelve la
+     vinieta y el fondo propio de cada superficie, asi que el desenfoque no tiene que hacer ese
+     trabajo tambien. */
+  filter: blur(1px) saturate(0.95) contrast(0.95) brightness(0.95);
   transform: scale(1.03);
   mix-blend-mode: normal;
 }
