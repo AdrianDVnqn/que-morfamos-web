@@ -871,13 +871,35 @@ body {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 6px 18px;
+  align-items: baseline;
+  gap: 4px 14px;
   margin-bottom: 12px;
+}
+
+/* Separador entre items: sin el punto, cuatro pares etiqueta+fecha se leen como un bloque
+   corrido. Se omite en el ultimo y no se muestra si el item quedo solo en su linea al envolver. */
+.dataset-status span:not(:last-child)::after {
+  content: "·";
+  margin-left: 14px;
+  color: rgba(255, 255, 255, 0.22);
 }
 
 .dataset-status strong {
   color: rgba(255, 255, 255, 0.66);
   font-weight: 500;
+  margin-right: 2px;
+}
+
+/* En pantallas chicas los cuatro items no entran comodos en una linea: se apilan de a dos. */
+@media (max-width: 560px) {
+  .dataset-status {
+    gap: 2px 12px;
+    font-size: 10px;
+  }
+
+  .dataset-status span:not(:last-child)::after {
+    margin-left: 12px;
+  }
 }
 
 .app-footer-credit a {

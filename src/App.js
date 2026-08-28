@@ -380,6 +380,28 @@ const formatNextRun = (date) => date.toLocaleString('es-AR', {
   minute: '2-digit',
 });
 
+// Formato compacto para el pie: 23/08/26 - 5:21 am. En una linea con cuatro fechas, el formato
+// largo ("23 de ago de 2026, 05:21 a. m.") satura; este dice lo mismo en la mitad de caracteres.
+// Se omite la zona horaria: todo el proyecto es de Neuquen y aclarar ART en cada item era ruido.
+const _aHoraCompacta = (date) =>
+  date
+    .toLocaleTimeString('es-AR', { hour: 'numeric', minute: '2-digit', hour12: true })
+    .replace(/\s*a\.\s*m\.?/i, ' am')
+    .replace(/\s*p\.\s*m\.?/i, ' pm')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const formatCompacta = (value) => {
+  if (!value) return null;
+  const soloFecha = typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const date = soloFecha
+    ? (() => { const [y, m, d] = value.split('-').map(Number); return new Date(y, m - 1, d); })()
+    : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const dia = date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  return `${dia} - ${_aHoraCompacta(date)}`;
+};
+
 // Fondo slideshow (imágenes difuminadas y mezcladas con el tema)
 const BACKGROUND_IMAGES = [
   'https://images.unsplash.com/photo-1762047314688-b59b04b5f5de?q=80&w=928&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
@@ -959,6 +981,13 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
           console.log('[Warmup] ✅ Backend caliente!');
           setBackendHealth(response.data);
           setApiStatus('connected');
+          // Los datos del pie (fecha del ultimo scraping) requieren consultar la base, asi que
+          // el backend los deja detras de ?full=1 y /health a secas es un chequeo barato. Se pide
+          // la version completa UNA sola vez al conectar; el polling de abajo sigue siendo barato
+          // porque corre cada 30s en cada pestaña abierta.
+          axios.get(`${API_URL}/health?full=1`, { timeout: 15000, ...axiosConfig })
+            .then(full => setBackendHealth(prev => ({ ...prev, ...full.data })))
+            .catch(() => { /* el pie muestra solo lo que tenga; no vale romper por esto */ });
           // Una vez conectado, polling menos frecuente
           clearInterval(interval);
           interval = setInterval(checkBackendHealth, 30000); // Cada 30s cuando ya está activo
@@ -2073,12 +2102,24 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
 
       {/* Footer adriandv */}
       <div className="app-footer-status">
+        {/* Etiquetas y fechas abreviadas: cuatro items con año y hora completa saturaban la
+            linea. El dato preciso sigue disponible en el title de cada uno. */}
         <div className="dataset-status" aria-label="Estado de actualización de datos">
-          <span><strong>Datos:</strong> {formatStatusDate(backendHealth?.last_scraping || backendHealth?.dataset_updated_at)}</span>
-          <span><strong>Próximas reseñas:</strong> {formatNextRun(getNextWeeklyRun())} ART</span>
-          <span><strong>Próximos lugares:</strong> {formatNextRun(getNextMonthlyRun())} ART</span>
+          {formatCompacta(backendHealth?.last_scraping || backendHealth?.dataset_updated_at) && (
+            <span title={`Últimos datos scrapeados: ${formatStatusDate(backendHealth?.last_scraping || backendHealth?.dataset_updated_at)}`}>
+              <strong>Datos</strong> {formatCompacta(backendHealth?.last_scraping || backendHealth?.dataset_updated_at)}
+            </span>
+          )}
+          <span title={`Próxima actualización de reseñas: ${formatNextRun(getNextWeeklyRun())} ART`}>
+            <strong>Próx. reseñas</strong> {formatCompacta(getNextWeeklyRun())}
+          </span>
+          <span title={`Próxima búsqueda de lugares nuevos: ${formatNextRun(getNextMonthlyRun())} ART`}>
+            <strong>Próx. lugares</strong> {formatCompacta(getNextMonthlyRun())}
+          </span>
           {(backendHealth?.backend_updated_at || backendHealth?.updated_at) && (
-            <span><strong>Backend actualizado:</strong> {formatStatusDate(backendHealth.backend_updated_at || backendHealth.updated_at)}</span>
+            <span title={`Backend desplegado: ${formatStatusDate(backendHealth.backend_updated_at || backendHealth.updated_at)}`}>
+              <strong>Deploy</strong> {formatCompacta(backendHealth.backend_updated_at || backendHealth.updated_at)}
+            </span>
           )}
         </div>
         <div className="app-footer-credit">
