@@ -1373,7 +1373,10 @@ Cortemos con eso: decime qué se te antoja y te digo dónde.`,
       case 'estadisticas': return '📊';
       case 'rag': return '🧠';
       case 'resumen': return '📝';
-      default: return '🎯';  // el 🤖 reforzaba justo lo que queriamos sacar
+      // Sin emoji: el 🤖 gritaba "chatbot generico" y cualquier reemplazo (🎯, 🍽️) sigue
+      // oliendo a asistente de IA. La etiqueta sola, en versalitas y con el color de marca, es
+      // mas fuerte desnuda.
+      default: return '';
     }
   };
 
@@ -1384,8 +1387,8 @@ Cortemos con eso: decime qué se te antoja y te digo dónde.`,
       case 'resumen': return 'Resumen';
       // "Morfi-Bot" describia la tecnologia, que es lo menos interesante que tiene. Un datero
       // es el que te pasa el dato que nadie mas tiene — en la cancha, en el barrio, en el
-      // hipodromo. Dice lo que hace, es local, y no lo tiene nadie mas.
-      default: return 'El Datero';
+      // hipodromo — y el Comahue lo planta en la region en vez de en un servidor.
+      default: return 'El Datero del Comahue';
     }
   };
 
