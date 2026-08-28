@@ -172,7 +172,7 @@ function movimientoReducido() {
 
 // Componente para ajustar el zoom para mostrar todos los marcadores
 // Ahora recibe 'trigger' para saber cuándo recalcular (ej: al cambiar de tab)
-function FitBounds({ locations, allViewRef, trigger }) {
+function FitBounds({ locations, trigger }) {
   const map = useMap();
   // Stadia tiene datos hasta z20 en Neuquen, asi que se puede acercar de verdad. (Con el
   // basemap anterior habia que topar en 16 porque de z17 en adelante devolvia placeholders.)
@@ -181,17 +181,6 @@ function FitBounds({ locations, allViewRef, trigger }) {
 
   useEffect(() => {
     if (!locations || locations.length === 0) return;
-
-    // Función segura para guardar la vista
-    const saveSafeView = () => {
-      try {
-        const c = map.getCenter();
-        const z = map.getZoom();
-        if (!isNaN(c.lat) && !isNaN(c.lng) && !isNaN(z)) {
-          allViewRef && (allViewRef.current = { center: [c.lat, c.lng], zoom: z });
-        }
-      } catch (e) { /* ignore */ }
-    };
 
     // Antes esto era invalidateSize() + setTimeout(150) y a encomendarse: adivinar cuanto tarda
     // el layout. En mobile el mapa esta oculto detras de la pestana, asi que a los 150ms seguia
@@ -203,7 +192,6 @@ function FitBounds({ locations, allViewRef, trigger }) {
           if (loc && typeof loc.lat === 'number' && typeof loc.lng === 'number' && !isNaN(loc.lat) && !isNaN(loc.lng)) {
             // Animación suave al centro
             map.flyTo([loc.lat, loc.lng], DEFAULT_SINGLE_ZOOM, { duration: 0.8 });
-            saveSafeView();
           }
         } else {
           const validLocs = locations.filter(l => typeof l.lat === 'number' && typeof l.lng === 'number' && !isNaN(l.lat) && !isNaN(l.lng));
@@ -212,7 +200,6 @@ function FitBounds({ locations, allViewRef, trigger }) {
             if (bounds.isValid()) {
               // Usamos flyToBounds para una transición suave o fitBounds para instantánea
               map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: 16, animate: true, duration: 0.8 });
-              saveSafeView();
             }
           }
         }
@@ -222,91 +209,75 @@ function FitBounds({ locations, allViewRef, trigger }) {
     return cancelar;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, locations, allViewRef, trigger]);
+  }, [map, locations, trigger]);
 
   return null;
 }
 
-// Mueve el mapa al lugar que el usuario esta hovereando en la lista de tarjetas.
+// Cuando el usuario hoverea una tarjeta, el marcador correspondiente se destaca (ver
+// .marker-highlighted en App.css) y el mapa NO se mueve. Este componente solo se ocupa del caso
+// borde: que el marcador destacado haya quedado fuera de la vista.
 //
-// El comportamiento anterior tenia tres problemas de sensacion, todos por la misma causa: cada
-// mouseenter y cada mouseleave disparaba su propio flyTo de inmediato.
-//   1. Rebote. Al pasar de una tarjeta a la de al lado, el mouseleave manda a volar de vuelta a
-//      la vista general y el mouseenter siguiente manda a volar al lugar nuevo: dos viajes para
-//      un movimiento que deberia ser uno solo, y el mapa "pasa por el medio" sin motivo.
-//   2. Cascada. Barrer la lista con el mouse encolaba un vuelo por tarjeta rozada, aunque el
-//      usuario nunca hubiera querido mirar ninguna de ellas.
-//   3. Arco innecesario. flyTo hace zoom out y zoom in en el medio del recorrido. Eso esta bien
-//      para el primer salto (cambia el zoom), pero entre dos tarjetas ya estando cerca es puro
-//      mareo: ahi lo natural es desplazarse en linea recta.
-function CenterOnHover({ centerOn, locations, allViewRef }) {
+// Por que el mapa no se mueve, si antes volaba hasta el lugar:
+//   - Hover es la senal mas debil que existe en una interfaz: el mouse pasa por encima de las
+//     cosas sin que el usuario lo decida. Mover la camara es la accion mas fuerte que se le puede
+//     hacer al mapa, porque le saca el encuadre que eligio. Gastar la accion mas fuerte en la
+//     senal mas debil es lo que hacia que se sintiera fuera de control.
+//   - Peor: acercarse a un lugar borra del mapa a los otros cuatro. Al hoverear una tarjeta la
+//     pregunta es "donde queda este respecto de los demas", y el zoom destruia justamente la
+//     informacion por la que el mapa esta ahi.
+// Es lo que hacen Airbnb, Booking, Zillow e Idealista: hover destaca el pin, el movimiento queda
+// reservado para el click.
+function AsegurarHoverVisible({ centerOn, locations }) {
   const map = useMap();
 
-  // Se acerca a un techo fijo en vez de "el zoom actual + 2". Con el delta, el zoom de destino
-  // dependia de como hubiera quedado la vista general de esa busqueda, asi que el mismo gesto
-  // daba acercamientos distintos segun la consulta. Un destino fijo es predecible.
-  const ZOOM_HOVER = 17;
-
-  // Esperar un toque antes de moverse descarta las tarjetas que el mouse solo roza de paso.
-  const RETARDO_ENTRADA_MS = 130;
-  // Y esperar antes de volver a la vista general permite encadenar tarjeta -> tarjeta sin pasar
-  // por el medio. Tiene que ser comodamente mayor al hueco entre el mouseleave de una tarjeta y
-  // el mouseenter de la siguiente.
-  const RETARDO_SALIDA_MS = 420;
+  // Misma espera que antes: descarta las tarjetas que el mouse solo roza de paso.
+  const RETARDO_MS = 130;
+  // Margen en pixeles, no en porcentaje. Con porcentaje, el mismo numero significaba cosas muy
+  // distintas segun la forma del panel: en el mapa de escritorio (angosto y alto) un 12% eran
+  // ~120px arriba y abajo, mientras FitBounds deja los marcadores a 40px del borde — asi que
+  // marcadores perfectamente visibles contaban como "afuera" y el mapa paneaba de gusto.
+  // 32px queda comodamente por dentro de ese padding: un marcador recien encuadrado no dispara
+  // nada, y solo se panea si de verdad quedo fuera de la pantalla.
+  const MARGEN_PX = 32;
 
   const temporizador = useRef(null);
   const cancelarEspera = useRef(null);
-  const enfocado = useRef(false); // ya estamos acercados sobre alguna tarjeta
 
   useEffect(() => {
     clearTimeout(temporizador.current);
+    if (!centerOn || !locations || locations.length === 0) return;
 
-    const suave = !movimientoReducido();
-    const irA = (latlng, zoom, { recto }) => {
+    const loc = locations.find(l => l.nombre === centerOn);
+    if (!loc || typeof loc.lat !== 'number' || typeof loc.lng !== 'number'
+      || isNaN(loc.lat) || isNaN(loc.lng)) return;
+
+    temporizador.current = setTimeout(() => {
       cancelarEspera.current && cancelarEspera.current();
       cancelarEspera.current = cuandoTengaTamano(map, () => {
         try {
-          if (!suave) {
-            map.setView(latlng, zoom, { animate: false });
-          } else if (recto) {
-            // Mismo zoom: desplazamiento en linea recta, sin el arco de flyTo.
-            map.panTo(latlng, { duration: 0.45 });
-          } else {
-            map.flyTo(latlng, zoom, { duration: 0.6 });
-          }
-        } catch (e) { console.warn('CenterOnHover:', e); }
+          const punto = L.latLng(loc.lat, loc.lng);
+          const p = map.latLngToContainerPoint(punto);
+          const tam = map.getSize();
+          const seVe = p.x >= MARGEN_PX && p.y >= MARGEN_PX
+            && p.x <= tam.x - MARGEN_PX && p.y <= tam.y - MARGEN_PX;
+          // Si ya se ve, no se toca nada. Quedarse quieto es la respuesta correcta casi siempre.
+          if (seVe) return;
+          // Y si hay que traerlo, se desplaza sin tocar el zoom: el usuario conserva su escala.
+          // Ojo con NO pasar animate:true aca: eso anula la guarda de Leaflet que evita animar
+          // distancias enormes. Si el usuario arrastro el mapa a la otra punta, animar el paneo
+          // significa barrer media provincia pixel a pixel; sin el flag, Leaflet reposiciona de
+          // una cuando el destino no entra en pantalla, y anima solo los tramos cortos.
+          map.panTo(punto, movimientoReducido() ? { animate: false } : { duration: 0.4 });
+        } catch (e) { console.warn('AsegurarHoverVisible:', e); }
       });
-    };
-
-    // Entrar en una tarjeta
-    if (centerOn && locations.length > 0) {
-      const loc = locations.find(l => l.nombre === centerOn);
-      if (!loc || typeof loc.lat !== 'number' || typeof loc.lng !== 'number'
-        || isNaN(loc.lat) || isNaN(loc.lng)) return;
-
-      const yaEstabaEnfocado = enfocado.current;
-      temporizador.current = setTimeout(() => {
-        enfocado.current = true;
-        irA([loc.lat, loc.lng], ZOOM_HOVER, { recto: yaEstabaEnfocado });
-      }, RETARDO_ENTRADA_MS);
-    }
-    // Salir: volver a la vista general, pero recien si no entra otra tarjeta enseguida
-    else if (allViewRef && allViewRef.current && allViewRef.current.center) {
-      const [lat, lng] = allViewRef.current.center;
-      const zoom = allViewRef.current.zoom || 13;
-      if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) return;
-
-      temporizador.current = setTimeout(() => {
-        enfocado.current = false;
-        irA([lat, lng], zoom, { recto: false });
-      }, RETARDO_SALIDA_MS);
-    }
+    }, RETARDO_MS);
 
     return () => {
       clearTimeout(temporizador.current);
       cancelarEspera.current && cancelarEspera.current();
     };
-  }, [centerOn, locations, map, allViewRef]);
+  }, [centerOn, locations, map]);
 
   return null;
 }
@@ -736,7 +707,6 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
   const cardRefs = useRef({}); // Refs para scroll a tarjetas
   const cardsContainerRef = useRef(null); // Ref del contenedor de tarjetas
   const scrollingFromMap = useRef(false); // Flag para evitar centrar mapa cuando scroll es desde marcador
-  const allViewRef = useRef({ center: null, zoom: null }); // Guarda la vista que muestra todos los iconos
   const mapRef = useRef(null); // Ref al objeto Leaflet map (usado para invalidateSize)
 
   // Ensure map invalidation when mobile tab is shown
@@ -894,9 +864,6 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
       const marker = markerRefs.current[hoveredRestaurant];
       if (marker && marker._icon) {
         marker._icon.classList.add('marker-highlighted');
-        console.log('[HIGHLIGHT] Agregando clase a:', hoveredRestaurant, marker._icon);
-      } else {
-        console.log('[HIGHLIGHT] Marker sin _icon:', hoveredRestaurant, marker);
       }
     }
   }, [hoveredRestaurant]);
@@ -1882,7 +1849,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
                     style={{ height: '100%', width: '100%', borderRadius: '12px' }}
                   >
                     <MapResizer />
-                    <FitBounds locations={mapLocations} allViewRef={allViewRef} trigger={mobileTab} />
+                    <FitBounds locations={mapLocations} trigger={mobileTab} />
                     <PrecargarTiles locations={mapLocations} urlTemplate={MAP_STYLE.url} />
                     <ChangeMapStyle
                       url={MAP_STYLE.url}
@@ -1890,10 +1857,9 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
                       detectRetina={MAP_STYLE.detectRetina}
                       maxNativeZoom={MAP_STYLE.maxNativeZoom}
                     />
-                    <CenterOnHover
+                    <AsegurarHoverVisible
                       centerOn={centerMapOn}
                       locations={mapLocations}
-                      allViewRef={allViewRef}
                     />
                     {/** small hack: kick-map-invalidates after mount */}
                     <MapKick visible={mobileTab === 'map'} mapRef={mapRef} />
