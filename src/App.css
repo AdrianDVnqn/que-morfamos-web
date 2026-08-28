@@ -277,16 +277,22 @@ body {
   mix-blend-mode: screen;
   display: block;
   border-radius: 4px;
-  filter: contrast(89.4%) brightness(99%);
+  /* El blend `screen` vuelve transparente al negro PURO, pero el fondo del video no lo es:
+     tiene ruido de compresion, asi que aclara apenas el fondo y se dibuja un recuadro oscuro
+     alrededor del cartel. El filtro anterior lo empeoraba — contrast(89.4%) BAJA el contraste,
+     o sea que aclaraba todavia mas esos negros. Subirlo los aplasta contra el 0 y el blend los
+     hace desaparecer. */
+  filter: contrast(1.3) brightness(0.92);
 
-  /* ... tus otros estilos ... */
   border-radius: 50px;
-  /* Ajusta el valor a gusto */
 
-  /* A veces Chrome necesita esto para recortar bien el video: */
+  /* La mascara es la mitad del truco, y se descubrio sacandola: sin ella el recuadro se ve MAS,
+     porque lo que lo disimulaba era el difuminado de los bordes. Va elipse y no circulo porque
+     el video es mas ancho que alto: un circulo recorta los costados del cartel. El 58%/88%
+     difumina solo las esquinas, que son fondo, sin tocar la cola del globo. */
   overflow: hidden;
-  mask-image: radial-gradient(white, black);
-  /* Truco de compatibilidad para Safari a veces */
+  mask-image: radial-gradient(ellipse at 50% 50%, white 58%, transparent 88%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, white 58%, transparent 88%);
 }
 
 
