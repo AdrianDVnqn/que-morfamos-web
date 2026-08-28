@@ -730,6 +730,7 @@ function App() {
       'Algo tranqui donde se pueda charlar',
       'Cualquier cosa, pero que no salga un ojo de la cara',
       'Algo rápido que ando corriendo',
+      'Lo que sea pero ya, me muero de hambre',
       'Yo arranco por el postre y después vemos',
       // Esta apunta a otra cosa que el bot sabe hacer: preguntar por UN lugar puntual.
       'Che, me contaron de un lugar nuevo pero no sé qué onda',
@@ -2045,7 +2046,11 @@ function App() {
             <div
               className="chip-bar-mobile"
               onMouseEnter={() => setChipsExpanded(true)}
-              onMouseLeave={() => setChipsExpanded(false)}
+              // En la pantalla inicial NO se colapsan al salir el mouse: arrancan abiertos justo
+              // para que se descubran, y bastaba que el puntero pasara una vez por encima para
+              // que se cerraran y no volvieran. Una vez que hay resultados si tiene sentido que
+              // se replieguen, porque ahi el espacio vale mas.
+              onMouseLeave={() => { if (sidebarMode) setChipsExpanded(false); }}
             >
               <button
                 className={`chip-bubble-btn ${chipsExpanded ? 'expanded' : ''}`}
