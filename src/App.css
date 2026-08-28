@@ -4425,14 +4425,20 @@ h4 {
   }
 }
 
-/* Zoom lento del minimapa al abrir la tarjeta. Le da algo de vida a lo que si no es una imagen
-   completamente quieta, sin distraer: 14s para un 8% de escala es una deriva que se percibe
-   pero no se mira. Va `forwards` porque no tiene que volver: no es un latido, es una entrada. */
+/* Zoom lento del minimapa al abrir la tarjeta.
+   Dos correcciones sobre el primer intento, que practicamente no se veia:
+   - Va `linear` y no `ease-out`. Con ease-out casi todo el movimiento pasaba en el primer
+     segundo —justo cuando estas leyendo el titulo y todavia cargan los tiles— y despues quedaba
+     arrastrandose casi quieto. El ojo detecta mucho mejor una deriva CONSTANTE que una que
+     desacelera y se frena.
+   - Sube de 8% a 18%. Sobre un mapa de 300px, un 8% son 24px en total: en un elemento chico eso
+     es imperceptible. 18% son ~54px, que ya se lee como movimiento.
+   Va `forwards` porque no tiene que volver: es una entrada, no un latido. */
 .mini-mapa__lienzo {
   position: absolute;
   inset: 0;
   transform-origin: 50% 50%;
-  animation: minimapaZoom 14s ease-out forwards;
+  animation: minimapaZoom 20s linear forwards;
 }
 
 @keyframes minimapaZoom {
@@ -4441,7 +4447,7 @@ h4 {
   }
 
   to {
-    transform: scale(1.08);
+    transform: scale(1.18);
   }
 }
 
