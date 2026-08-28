@@ -674,44 +674,57 @@ function App() {
   // largo del texto: un mensaje corto se escribe rapido y uno largo tarda, que es lo que hace
   // que se sienta gente tipeando y no un temporizador.
   const BIENVENIDA = useMemo(() => ([
-    { role: 'user',  content: 'Che, ¿a dónde vamos hoy? Tengo ganas de una buena burger', pausa: 800 },
-    { role: 'otro',  content: 'Ni idea, no conozco mucho por acá', pausa: 1500 },
+    { role: 'user',  autor: 'Vos', content: 'Che, ¿a dónde vamos hoy? Tengo ganas de una buena burger' },
+    { role: 'otro',  autor: 'Meli', content: 'Ni idea, no conozco mucho por acá' },
     // Guiño a Los Simuladores: la frase que antecede a la entrada del especialista.
-    { role: 'user',  content: 'Esperá que conozco a alguien que nos puede ayudar... 🕵️', pausa: 1400 },
-    // Aviso de sistema, igual que cuando WhatsApp anuncia que alguien entro al grupo: convierte
-    // la aparicion del bot en un hecho de la escena en vez de un mensaje que cae de la nada.
-    { role: 'sistema', content: 'El Sommelier del Comahue se unió al grupo', pausa: 900 },
-    { role: 'assistant', mode: 'system', pausa: 1200, content: 'Decime qué te pinta y te digo dónde. 🧐' },
+    { role: 'user',  autor: 'Vos', content: 'Esperá que conozco a alguien que nos puede ayudar... 🕵️' },
+    // Aviso de sistema: nadie lo "escribe", asi que no lleva indicador de tipeo.
+    { role: 'sistema', content: 'El Sommelier del Comahue se unió al grupo' },
+    { role: 'assistant', autor: 'El Sommelier del Comahue', mode: 'system', content: 'Decime qué te pinta y te digo dónde. 🧐' },
   ]), []);
 
+  // Cuanto tarda alguien en escribir un mensaje. Antes esto era un numero a mano por mensaje —
+  // el comentario decia que salia del largo del texto, pero no era cierto. Ahora si: 32ms por
+  // caracter, con un piso para que los mensajes cortos no aparezcan de golpe y un techo para que
+  // los largos no eternicen la escena.
+  const tiempoDeTipeo = (texto) => Math.min(2200, Math.max(700, texto.length * 32));
+
+  const [escribiendo, setEscribiendo] = useState(null);
+
   useEffect(() => {
-    // Si el usuario ya escribio algo, la escena no tiene que pisarle nada.
     let cancelado = false;
-    const temporizadores = [];
-    let acumulado = 0;
+    const esperar = (ms) => new Promise(r => setTimeout(r, ms));
 
     const sinMovimiento = typeof window.matchMedia === 'function'
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (sinMovimiento) {
       // Quien pidio menos movimiento no quiere ver una escena actuandose: va entera y listo.
-      setMessages(BIENVENIDA.map(({ pausa, ...m }) => m));
+      setMessages(BIENVENIDA.map(({ autor, ...m }) => m));
       setBienvenidaEnCurso(false);
       return;
     }
 
-    BIENVENIDA.forEach((m, i) => {
-      acumulado += m.pausa;
-      temporizadores.push(setTimeout(() => {
+    (async () => {
+      await esperar(600);
+      for (const m of BIENVENIDA) {
         if (cancelado) return;
-        const { pausa, ...limpio } = m;
-        setMessages(prev => [...prev, limpio]);
-        reproducirBlip(m.role !== 'assistant');
-        if (i === BIENVENIDA.length - 1) setBienvenidaEnCurso(false);
-      }, acumulado));
-    });
+        if (m.role !== 'sistema') {
+          setEscribiendo({ role: m.role, autor: m.autor });
+          await esperar(tiempoDeTipeo(m.content));
+          if (cancelado) return;
+          setEscribiendo(null);
+        }
+        setMessages(prev => [...prev, m]);
+        reproducirBlip(m.role === 'user');
+        // Un respiro antes de que el siguiente empiece a tipear, como cuando alguien lee lo que
+        // le acaban de mandar.
+        await esperar(m.role === 'sistema' ? 700 : 500);
+      }
+      if (!cancelado) setBienvenidaEnCurso(false);
+    })();
 
-    return () => { cancelado = true; temporizadores.forEach(clearTimeout); };
+    return () => { cancelado = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -1834,11 +1847,24 @@ function App() {
                     {getModeIcon(message.mode)} {getModeLabel(message.mode)}
                   </div>
                 )}
+                {message.role === 'otro' && message.autor && (
+                  <div className="message-mode">{message.autor}</div>
+                )}
                 <div className="message-content">
                   <ReactMarkdown>{message.content}</ReactMarkdown>
                 </div>
               </div>
             ))}
+            {escribiendo && (
+              <div className={`message message-${escribiendo.role} message-tipeando`}>
+                {escribiendo.role !== 'user' && escribiendo.autor && (
+                  <div className="message-mode">{escribiendo.autor} está escribiendo…</div>
+                )}
+                <div className="message-content">
+                  <span className="puntos-tipeo"><span /><span /><span /></span>
+                </div>
+              </div>
+            )}
             {loading && (
               <div className="message message-assistant">
                 <div className="message-content loading">
