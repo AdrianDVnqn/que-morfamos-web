@@ -612,9 +612,7 @@ function App() {
   // como se ve el chat antes de que escribas nada.
   // Arranca vacia: la llena BIENVENIDA con temporizadores (ver el efecto mas abajo).
   const [messages, setMessages] = useState([]);
-  // La bienvenida terminada cuenta como "pagina inicial" aunque tenga 4 mensajes: varios lugares
-  // preguntaban messages.length <= 1 para saberlo, y eso se rompia al partirla en varios.
-  const [bienvenidaEnCurso, setBienvenidaEnCurso] = useState(true);
+
   // Sonidito de mensaje.
   //
   // Se SINTETIZA con Web Audio en vez de reproducir un archivo: el tono de WhatsApp es marca
@@ -834,7 +832,6 @@ function App() {
     if (sinMovimiento) {
       // Quien pidio menos movimiento no quiere ver una escena actuandose: va entera y listo.
       setMessages(BIENVENIDA.map(({ autor, ...m }) => m));
-      setBienvenidaEnCurso(false);
       return;
     }
 
@@ -854,7 +851,6 @@ function App() {
         // le acaban de mandar.
         await esperar(m.role === 'sistema' ? 600 : 340);
       }
-      if (!cancelado) setBienvenidaEnCurso(false);
     })();
 
     return () => { cancelado = true; };
@@ -1033,7 +1029,7 @@ function App() {
     return () => {
       if (countdownInterval) clearInterval(countdownInterval);
     };
-  }, [apiStatus, messages]);
+  }, [apiStatus, messages, sidebarMode]);
 
   // Mostrar popup de arranque en frío mientras el backend está respondiendo
   useEffect(() => {
@@ -1059,7 +1055,7 @@ function App() {
       if (timer) clearTimeout(timer);
       if (interval) clearInterval(interval);
     };
-  }, [apiStatus, messages]);
+  }, [apiStatus, messages, sidebarMode]);
 
   // === NUEVO REF PARA CONTENEDOR DE MENSAJES ===
   const messagesContainerRef = useRef(null);
