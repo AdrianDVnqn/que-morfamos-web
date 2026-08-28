@@ -305,13 +305,28 @@ L.Icon.Default.mergeOptions({
 });
 
 // Función para crear icono con emoji dinámico
-const createFoodIcon = (emoji) => L.divIcon({
-  html: `<div class="marker-emoji">${emoji}</div>`,
+// El marcador es una pildora con el emoji y el rating. El emoji lo elige la CONSULTA, no el
+// lugar, asi que los cinco marcadores de una busqueda son identicos entre si: sin el numero, el
+// mapa no dice cual es cual y hay que ir y volver a la lista para averiguarlo.
+// El contenedor va con ancho fijo (Leaflet lo posiciona por iconSize/iconAnchor) y la pildora se
+// centra adentro, asi el anclaje no depende de cuanto mida el texto.
+const createFoodIcon = (emoji, rating) => L.divIcon({
+  html: `<div class="marker-pill"><span class="marker-pill__emoji">${emoji}</span>`
+    + (rating ? `<span class="marker-pill__rating">${rating}</span>` : '')
+    + `</div>`,
   className: 'food-marker',
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-  popupAnchor: [0, -20]
+  iconSize: [64, 30],
+  iconAnchor: [32, 15],
+  popupAnchor: [0, -18]
 });
+
+// El rating llega en la tarjeta o en la ubicacion segun por donde haya venido el dato; misma
+// precedencia que ya usaba el popup del marcador.
+const ratingDe = (loc, cards) => {
+  const card = (cards || []).find(c => c.nombre.toLowerCase() === loc.nombre.toLowerCase());
+  const r = (card && card.rating > 0) ? card.rating : loc.rating;
+  return (typeof r === 'number' && r > 0) ? r.toFixed(1) : null;
+};
 
 // Detectar tipo de comida y devolver emoji correspondiente
 const detectFoodType = (query) => {
@@ -735,10 +750,17 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
     }
   };
 
-  // Memoizar el icono para que no se recree en cada render
-  const currentIcon = useMemo(() => {
-    return createFoodIcon(detectFoodType(lastQuery));
-  }, [lastQuery]);
+  // Un icono por lugar, porque ahora cada uno lleva su rating. Se memoiza el mapa completo: si
+  // los iconos se recrearan en cada render, Leaflet reemplazaria el nodo del marcador y se
+  // perderia la clase .marker-highlighted que el hover le agrega por fuera de React.
+  const iconosPorLugar = useMemo(() => {
+    const emoji = detectFoodType(lastQuery);
+    const m = {};
+    (mapLocations || []).forEach(loc => {
+      m[loc.nombre] = createFoodIcon(emoji, ratingDe(loc, restaurantCards));
+    });
+    return m;
+  }, [lastQuery, mapLocations, restaurantCards]);
 
   // Ordenar tarjetas según criterio seleccionado
   const sortedCards = useMemo(() => {
@@ -1868,7 +1890,7 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
                       <Marker
                         key={`${loc.nombre}-${idx}`}
                         position={[loc.lat, loc.lng]}
-                        icon={currentIcon}
+                        icon={iconosPorLugar[loc.nombre]}
                         ref={(ref) => { if (ref) markerRefs.current[loc.nombre] = ref; }}
                         eventHandlers={{
                           mouseover: () => {

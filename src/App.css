@@ -1027,23 +1027,59 @@ body {
   border: none !important;
 }
 
-.marker-emoji {
-  font-size: 28px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  transition: filter 0.2s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
-  /* Crece desde la base: el emoji marca un punto del mapa, y ese punto no se tiene que mover. */
-  transform-origin: 50% 100%;
+/* Pildora del marcador: emoji + rating.
+   El emoji lo elige la CONSULTA y no el lugar, asi que todos los marcadores de una busqueda son
+   iguales. El numero es lo unico que los distingue, y lo que permite comparar sin volver a la
+   lista. Es el equivalente a la pildora de precio de Airbnb. */
+.marker-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+  background: rgba(15, 15, 35, 0.92);
+  border: 1px solid rgba(var(--accent-primary-rgb), 0.45);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
   cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.18s ease, border-color 0.18s ease;
 }
 
-/* El destaque tiene que ganarle a cuatro emojis identicos. Antes era solo un halo, y entre cinco
-   pizzas del mismo tamano practicamente no se veia cual era. El tamano es lo que se lee de un
-   vistazo; el halo solo, no. */
-.food-marker:hover .marker-emoji,
-.marker-highlighted .marker-emoji {
-  transform: scale(1.5);
-  filter: drop-shadow(0 0 8px var(--accent-primary)) drop-shadow(0 0 16px var(--accent-secondary)) drop-shadow(0 0 24px var(--accent-primary));
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+/* Leaflet posiciona un contenedor de ancho fijo (ver createFoodIcon): la pildora se centra
+   adentro para que el anclaje no se corra segun cuanto mida el texto. */
+.food-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.marker-pill__emoji {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.marker-pill__rating {
+  font-family: var(--font-heading);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--accent-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Destacado: la pildora se invierte al color de marca en vez de solo brillar. Un halo entre
+   varios marcadores iguales no se distingue; un cambio de relleno si. */
+.food-marker:hover .marker-pill,
+.marker-highlighted .marker-pill {
+  transform: scale(1.22);
+  background: rgba(var(--accent-primary-rgb), 0.96);
+  border-color: var(--text-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), var(--accent-glow);
+}
+
+.food-marker:hover .marker-pill__rating,
+.marker-highlighted .marker-pill__rating {
+  color: var(--text-primary);
 }
 
 /* Leaflet ordena los marcadores por latitud con un z-index inline, asi que el destacado puede
@@ -1055,7 +1091,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
 
-  .marker-emoji {
+  .marker-pill {
     transition: none;
   }
 }
