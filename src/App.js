@@ -310,8 +310,14 @@ L.Icon.Default.mergeOptions({
 // mapa no dice cual es cual y hay que ir y volver a la lista para averiguarlo.
 // El contenedor va con ancho fijo (Leaflet lo posiciona por iconSize/iconAnchor) y la pildora se
 // centra adentro, asi el anclaje no depende de cuanto mida el texto.
-const createFoodIcon = (emoji, rating) => L.divIcon({
-  html: `<div class="marker-pill"><span class="marker-pill__emoji">${emoji}</span>`
+// Los marcadores caen en cascada, en el orden en que el bot los recomendo: el escalonado no es
+// adorno, es lo que hace visible que hay un ranking. Se topea a los 10 primeros para que una
+// lista larga no tarde una eternidad en terminar de aparecer.
+const RETARDO_CASCADA_MS = 60;
+
+const createFoodIcon = (emoji, rating, indice = 0) => L.divIcon({
+  html: `<div class="marker-pill" style="animation-delay:${Math.min(indice, 9) * RETARDO_CASCADA_MS}ms">`
+    + `<span class="marker-pill__emoji">${emoji}</span>`
     + (rating ? `<span class="marker-pill__rating">${rating}</span>` : '')
     + `</div>`,
   className: 'food-marker',
@@ -756,8 +762,8 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
   const iconosPorLugar = useMemo(() => {
     const emoji = detectFoodType(lastQuery);
     const m = {};
-    (mapLocations || []).forEach(loc => {
-      m[loc.nombre] = createFoodIcon(emoji, ratingDe(loc, restaurantCards));
+    (mapLocations || []).forEach((loc, idx) => {
+      m[loc.nombre] = createFoodIcon(emoji, ratingDe(loc, restaurantCards), idx);
     });
     return m;
   }, [lastQuery, mapLocations, restaurantCards]);
@@ -1812,7 +1818,13 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
                       onMouseEnter={() => { setHoveredRestaurant(card.nombre); if (!scrollingFromMap.current) setCenterMapOn(card.nombre); }}
                       onMouseLeave={() => { setHoveredRestaurant(null); setCenterMapOn(null); }}
                       onClick={() => openRestaurantDetail(card.nombre)}
-                      style={{ cursor: 'pointer' }}
+                      // Mismo retardo que el marcador de este lugar: la tarjeta y su pin
+                      // aparecen juntos, asi lista y mapa se leen como un solo objeto.
+                      // Va como variable CSS y no como animationDelay directo: un estilo inline
+                      // le ganaria por especificidad a TODA animacion de la tarjeta, incluido el
+                      // pulseHighlight del hover en mobile, que quedaria retrasado hasta medio
+                      // segundo. Asi el retardo se aplica solo donde corresponde (ver App.css).
+                      style={{ cursor: 'pointer', '--retardo-entrada': `${Math.min(idx, 9) * RETARDO_CASCADA_MS}ms` }}
                     >
                       <div className="card-header">
                         <h4>{card.nombre}</h4>
