@@ -4353,3 +4353,55 @@ h4 {
   font-size: 16px;
   line-height: 1;
 }
+
+/* ==========================================================================
+   RESPIRACION DEL GLOW
+   El glow late suavemente, pero animando la OPACIDAD de una capa aparte, no el box-shadow.
+   Animar box-shadow obliga a rasterizar la sombra de nuevo en cada cuadro sobre toda el area del
+   panel: es de los casos mas caros que hay. La opacidad la resuelve el compositor en la GPU, sin
+   repintar nada, asi que el costo es practicamente cero.
+   La capa vive en un ::before con la misma forma que el panel; el box-shadow queda FIJO ahi y lo
+   unico que se mueve es cuanto se la ve.
+   ========================================================================== */
+.app-header,
+.chat-container {
+  position: relative;
+}
+
+.app-header::before,
+.chat-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+  animation: respiraGlow 5s ease-in-out infinite alternate;
+}
+
+.app-header::before {
+  box-shadow: 0 -14px 44px -12px rgba(var(--accent-primary-rgb), 0.55);
+}
+
+.chat-container::before {
+  box-shadow: 0 18px 50px -14px rgba(var(--accent-primary-rgb), 0.5);
+}
+
+@keyframes respiraGlow {
+  from {
+    opacity: 0.45;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .app-header::before,
+  .chat-container::before {
+    animation: none;
+    opacity: 0.8;
+  }
+}
