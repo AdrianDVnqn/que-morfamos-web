@@ -769,9 +769,29 @@ function App() {
       }
     }
 
-    const sueltos = mezclar(PEDIDOS);
+    // Pedidos que no pueden convivir en la misma charla porque se contradicen entre si.
+    const INCOMPATIBLES = [
+      ['Un ramen, hace un frío bárbaro', 'Un lugar con mesas afuera que está lindo'],
+      ['Algo rápido que ando corriendo', 'Algo tranqui donde se pueda charlar'],
+      ['Lo que sea pero ya, me muero de hambre', 'Algo tranqui donde se pueda charlar'],
+      ['Lo que sea pero ya, me muero de hambre', 'Algo rápido que ando corriendo'],
+    ];
+    const chocan = (a, b) => INCOMPATIBLES.some(
+      ([x, y]) => (a === x && b === y) || (a === y && b === x)
+    );
+
     const colores = mezclar(COLORES);
     const [quienAbre, ...piden] = elegidos;
+
+    // Se eligen tantos pedidos rotativos como personas sin pedido fijo haya, descartando los que
+    // se contradigan con alguno ya tomado.
+    const cuantosFaltan = piden.filter(n => !FIJOS[n]).length;
+    const sueltos = [];
+    for (const pedido of mezclar(PEDIDOS)) {
+      if (sueltos.length >= cuantosFaltan) break;
+      if (sueltos.some(ya => chocan(pedido, ya))) continue;
+      sueltos.push(pedido);
+    }
 
     return [
       { role: 'otro', autor: quienAbre, color: colores[0], content: 'Che, ¿qué morfamos esta noche?' },
