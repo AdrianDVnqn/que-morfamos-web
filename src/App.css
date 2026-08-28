@@ -2863,6 +2863,22 @@ body {
   margin: 0 0 5px 0;
 }
 
+/* Dirección y área en la misma fila para no gastar dos renglones en el mismo dato. Con `wrap`
+   porque en pantallas angostas una dirección larga no deja lugar al área al lado, y ahí sí
+   conviene que baje sola en vez de comprimirse. `baseline` para que el área —más chica— quede
+   alineada con el texto de la dirección y no flotando. */
+.modal-location__linea {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-bottom: 5px;
+}
+
+.modal-location__linea p {
+  margin: 0;
+}
+
 .modal-location .location-zone {
   color: var(--text-muted);
   font-size: var(--fs-sm);
@@ -4153,6 +4169,10 @@ h4 {
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
+  /* El boton de cerrar esta posicionado absoluto en la esquina del modal, asi que no participa
+     del flujo y el minimapa se le metia debajo: medido, 21x21px de solapamiento sobre la esquina
+     superior derecha del mapa. Se le reserva el ancho del boton mas aire. */
+  padding-right: 46px;
 }
 
 .modal-header__texto {
@@ -4444,21 +4464,51 @@ h4 {
   position: absolute;
   inset: 0;
   transform-origin: 50% 50%;
-  animation: minimapaZoom 20s linear forwards;
+  will-change: transform, opacity;
 }
 
-@keyframes minimapaZoom {
-  from {
-    transform: scale(1);
-  }
-
-  to {
-    transform: scale(1.18);
-  }
+/* Arranca lejos (z13, se ve en que parte de la ciudad cae) y termina en la cuadra (z17, con los
+   nombres de las dos calles de la esquina). Son 4 niveles de zoom = 16x de escala, imposible con
+   un solo juego de tiles: por eso la capa lejana crece de 1 a 16 mientras la cercana sube de
+   1/16 a 1, y se cruzan en el ultimo tercio, cuando las dos muestran ya casi la misma escala.
+   Los pasos van de a x2 (1-2-4-8-16) en vez de una rampa lineal: el ojo percibe el zoom en
+   escala logaritmica, y una interpolacion lineal de 1 a 16 se vive como un tiron al principio y
+   un arrastre al final. Va `forwards` porque es una entrada, no un latido. */
+.mini-mapa__lienzo--lejos {
+  animation: minimapaZoomLejos 18s linear forwards;
 }
 
+.mini-mapa__lienzo--cerca {
+  animation: minimapaZoomCerca 18s linear forwards;
+}
+
+@keyframes minimapaZoomLejos {
+  0% { transform: scale(1); opacity: 1; }
+  25% { transform: scale(2); }
+  50% { transform: scale(4); }
+  58% { opacity: 1; }
+  75% { transform: scale(8); }
+  82% { opacity: 0; }
+  100% { transform: scale(16); opacity: 0; }
+}
+
+@keyframes minimapaZoomCerca {
+  0% { transform: scale(0.0625); opacity: 0; }
+  25% { transform: scale(0.125); }
+  50% { transform: scale(0.25); }
+  58% { opacity: 0; }
+  75% { transform: scale(0.5); }
+  82% { opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Sin animacion se muestra directamente el estado final: la cuadra, que es el dato util. */
 @media (prefers-reduced-motion: reduce) {
   .mini-mapa__lienzo {
     animation: none;
+  }
+
+  .mini-mapa__lienzo--lejos {
+    display: none;
   }
 }

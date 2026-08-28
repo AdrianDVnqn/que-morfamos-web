@@ -36,52 +36,66 @@ function AvatarChat({ color, emoji, inicial }) {
 // zoom dado, y se dibuja la ventana centrada en ese punto.
 // zoom 14 y no 16: a 16 entran cuatro cuadras y el mapa no te ubica en ningun lado. A 14 se
 // ve el barrio y la referencia sirve de verdad.
-function MiniMapa({ lat, lng, urlTemplate, alto = 132, ancho = 640, zoom = 14 }) {
+function MiniMapa({ lat, lng, urlTemplate, alto = 132, ancho = 640, zoom = 13, zoomDetalle = 17 }) {
   if (!lat || !lng || Number.isNaN(lat) || Number.isNaN(lng)) return null;
 
   const TILE = 256;
-  const n = Math.pow(2, zoom);
-  const mundoX = ((lng + 180) / 360) * n * TILE;
-  const la = (lat * Math.PI) / 180;
-  const mundoY = ((1 - Math.asinh(Math.tan(la)) / Math.PI) / 2) * n * TILE;
 
-  // Ventana visible, centrada en el lugar.
-  const x0 = mundoX - ancho / 2;
-  const y0 = mundoY - alto / 2;
+  // Mosaico de tiles para UN nivel de zoom, cubriendo la ventana visible centrada en el lugar.
+  const capa = (z) => {
+    const n = Math.pow(2, z);
+    const mundoX = ((lng + 180) / 360) * n * TILE;
+    const la = (lat * Math.PI) / 180;
+    const mundoY = ((1 - Math.asinh(Math.tan(la)) / Math.PI) / 2) * n * TILE;
 
-  const tiles = [];
-  for (let tx = Math.floor(x0 / TILE); tx <= Math.floor((x0 + ancho) / TILE); tx++) {
-    for (let ty = Math.floor(y0 / TILE); ty <= Math.floor((y0 + alto) / TILE); ty++) {
-      if (ty < 0 || ty >= n) continue;
-      const src = urlTemplate
-        .replace('{z}', zoom)
-        .replace('{x}', ((tx % n) + n) % n)
-        .replace('{y}', ty)
-        .replace('{r}', '');
-      tiles.push(
-        <img
-          key={`${tx}-${ty}`}
-          src={src}
-          alt=""
-          aria-hidden="true"
-          draggable="false"
-          style={{ position: 'absolute', left: tx * TILE - x0, top: ty * TILE - y0, width: TILE, height: TILE }}
-        />
-      );
+    const x0 = mundoX - ancho / 2;
+    const y0 = mundoY - alto / 2;
+
+    const tiles = [];
+    for (let tx = Math.floor(x0 / TILE); tx <= Math.floor((x0 + ancho) / TILE); tx++) {
+      for (let ty = Math.floor(y0 / TILE); ty <= Math.floor((y0 + alto) / TILE); ty++) {
+        if (ty < 0 || ty >= n) continue;
+        const src = urlTemplate
+          .replace('{z}', z)
+          .replace('{x}', ((tx % n) + n) % n)
+          .replace('{y}', ty)
+          .replace('{r}', '');
+        tiles.push(
+          <img
+            key={`${z}-${tx}-${ty}`}
+            src={src}
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+            style={{ position: 'absolute', left: tx * TILE - x0, top: ty * TILE - y0, width: TILE, height: TILE }}
+          />
+        );
+      }
     }
-  }
+    return tiles;
+  };
 
   return (
     <div className="mini-mapa" style={{ height: alto, width: ancho }} aria-hidden="true">
-      {/* Los tiles van envueltos para poder escalarlos COMO CONJUNTO: cada uno esta posicionado
-          con su left/top propio, asi que escalarlos por separado los correria cada uno respecto
-          de su centro y rompria el mosaico. El pin queda afuera del zoom a proposito, si no
-          dejaria de marcar el mismo punto. */}
-      <div className="mini-mapa__lienzo">{tiles}</div>
+      {/* Dos mosaicos, no uno. Escalar por CSS agranda pixeles, no agrega detalle: con un solo
+          nivel de zoom el final quedaba borroso y sin nombres de calle. Asi que se piden los
+          tiles de los DOS extremos —el lejano para el arranque, el de calle para el final— y se
+          cruzan: el lejano crece y se desvanece justo cuando el cercano ya llego a tamaño real.
+          Es lo mismo que hace Leaflet al cambiar de nivel, pero de una sola pasada.
+          Cada mosaico va envuelto para escalarlo COMO CONJUNTO: los tiles estan posicionados por
+          left/top propio, escalarlos sueltos los correria cada uno respecto de su centro.
+          El pin queda afuera del zoom a proposito, si no dejaria de marcar el mismo punto. */}
+      <div className="mini-mapa__lienzo mini-mapa__lienzo--lejos">{capa(zoom)}</div>
+      <div className="mini-mapa__lienzo mini-mapa__lienzo--cerca">{capa(zoomDetalle)}</div>
       <span className="mini-mapa__pin">📍</span>
     </div>
   );
 }
+
+// La direccion viene de Google con el pais pegado al final ("Rivadavia 68, 8300 Neuquen,
+// Argentina"). En un sitio que solo habla de Neuquen ese sufijo no desambigua nada y se come
+// media linea, asi que se recorta al mostrarlo (el dato crudo en la DB queda intacto).
+const sinPais = (dir) => (dir || '').replace(/,\s*Argentina\s*\.?\s*$/i, '').trim();
 
 // Componente para cambiar el TileLayer dinámicamente
 function ChangeMapStyle({ url, attribution, detectRetina = true, maxNativeZoom }) {
@@ -2164,7 +2178,7 @@ function App() {
                   </div>
 
                   <div className="detail-location">
-                    <p>📍 {inlineDetail.direccion || 'Dirección no disponible'}</p>
+                    <p>📍 {sinPais(inlineDetail.direccion) || 'Dirección no disponible'}</p>
                     {(inlineDetail.barrio || inlineDetail.zona) && (
                       <p className="location-zone">
                         {inlineDetail.barrio}{inlineDetail.barrio && inlineDetail.zona ? ' • ' : ''}{inlineDetail.zona}
@@ -2306,7 +2320,7 @@ function App() {
                         </div>
                       </div>
                       <div className="card-location">
-                        {card.direccion && <p className="address">📍 {card.direccion}</p>}
+                        {card.direccion && <p className="address">📍 {sinPais(card.direccion)}</p>}
                         {(card.barrio || card.zona) && (
                           <p className="zone">
                             {card.barrio}{card.barrio && card.zona ? ' • ' : ''}{card.zona}
@@ -2593,12 +2607,22 @@ function App() {
                     urlTemplate={MAP_STYLE.url}
                     alto={140}
                     ancho={300}
-                    zoom={14}
+                    zoom={13}
+                    zoomDetalle={17}
                   />
                 </div>
 
                 <div className="modal-location">
-                  <p>📍 {selectedRestaurant.direccion || 'Dirección no disponible'}</p>
+                  {/* Dirección y área van en la MISMA fila: son el mismo dato (dónde queda) y
+                      separarlas dejaba el botón de Google Maps partiendo la ubicación al medio. */}
+                  <div className="modal-location__linea">
+                    <p>📍 {sinPais(selectedRestaurant.direccion) || 'Dirección no disponible'}</p>
+                    {(selectedRestaurant.barrio || selectedRestaurant.zona) && (
+                      <p className="location-zone">
+                        {selectedRestaurant.barrio}{selectedRestaurant.barrio && selectedRestaurant.zona ? ' • ' : ''}{selectedRestaurant.zona}
+                      </p>
+                    )}
+                  </div>
                   {/* Horarios, teléfono y cómo llegar no los tenemos ni queremos tenerlos:
                       para eso está la ficha de Google, y linkear devuelve tráfico a la fuente. */}
                   {selectedRestaurant.url && (
@@ -2617,11 +2641,6 @@ function App() {
                       </svg>
                       Ver en Google Maps ↗
                     </a>
-                  )}
-                  {(selectedRestaurant.barrio || selectedRestaurant.zona) && (
-                    <p className="location-zone">
-                      {selectedRestaurant.barrio}{selectedRestaurant.barrio && selectedRestaurant.zona ? ' • ' : ''}{selectedRestaurant.zona}
-                    </p>
                   )}
                 </div>
 
