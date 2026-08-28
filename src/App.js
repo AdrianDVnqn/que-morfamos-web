@@ -1387,10 +1387,13 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
       case 'estadisticas': return 'Estadísticas';
       case 'rag': return 'Recomendaciones';
       case 'resumen': return 'Resumen';
-      // "Morfi-Bot" describia la tecnologia, que es lo menos interesante que tiene. Un datero
-      // es el que te pasa el dato que nadie mas tiene — en la cancha, en el barrio, en el
-      // hipodromo — y el Comahue lo planta en la region en vez de en un servidor.
-      default: return 'El Datero del Comahue';
+      // "Morfi-Bot" describia la tecnologia, que es lo menos interesante que tiene.
+      // El chiste esta en el choque: un titulo frances de alta gastronomia pegado a la meseta
+      // patagonica. Nadie se lo toma en serio, que es el tono correcto para una app que se llama
+      // "¿Que morfamos?" — y convive bien con los tonos soberbio e ironico que ya existen.
+      // "del Comahue" y no "de la Barda": la barda es un accidente neuquino, pero la base incluye
+      // lugares de Cipolletti, que es Rio Negro. El Comahue abarca las dos provincias.
+      default: return 'El Sommelier del Comahue';
     }
   };
 
