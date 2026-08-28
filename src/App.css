@@ -28,6 +28,20 @@
   --warning: #feca57;
   --error: #ff4757;
 
+  /* Escala tipografica.
+     Habia 18 tamanos distintos en 88 declaraciones, varios separados por 1px entre si (10/11,
+     14/15, 16/17, 20/22): diferencias invisibles que solo generaban inconsistencia. Se colapsan
+     a 8 pasos. --fs-md es el piso para <input>: por debajo de 16px iOS Safari hace zoom al
+     enfocar el campo. */
+  --fs-2xs: 11px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 14px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 20px;
+  --fs-2xl: 24px;
+
   /* Tipografía Premium */
   --font-heading: 'Montserrat', -apple-system, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -223,7 +237,7 @@ body {
 
 
 .header-subtitle {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-muted);
   font-weight: 400;
   margin-left: 12px;
@@ -235,7 +249,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   padding: 8px;
   border-radius: 50%;
   font-weight: 600;
@@ -266,7 +280,7 @@ body {
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   padding: 6px 12px;
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   white-space: nowrap;
   border-radius: 8px;
   opacity: 0;
@@ -480,13 +494,13 @@ body {
 
 .chat-sidebar .chat-header h4 {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--fs-base);
   color: var(--text-primary);
   font-weight: 600;
 }
 
 .chat-sidebar .chat-header .chat-badge {
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   background: var(--accent-gradient);
   padding: 4px 10px;
   border-radius: 12px;
@@ -539,7 +553,7 @@ body {
 }
 
 .message-mode {
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   color: var(--text-primary);
   margin-bottom: 0;
   font-weight: 700;
@@ -556,7 +570,7 @@ body {
   border-radius: 20px;
   line-height: 1.5;
   word-wrap: break-word;
-  font-size: 15px;
+  font-size: var(--fs-md);
 }
 
 .message-content p {
@@ -647,7 +661,7 @@ body {
 }
 
 .typing-indicator span {
-  font-size: 18px;
+  font-size: var(--fs-lg);
   line-height: 1;
   animation: emojiTyping 1.4s infinite;
   display: inline-block;
@@ -743,7 +757,7 @@ body {
   border: none;
   padding: 10px 20px;
   border-radius: 24px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   cursor: pointer;
   z-index: 100;
@@ -788,7 +802,7 @@ body {
   padding: 16px 24px;
   border: 2px solid var(--border-color);
   border-radius: 30px;
-  font-size: 16px;
+  font-size: var(--fs-md);
   outline: none;
   transition: all 0.3s ease;
   background: rgba(13, 13, 35, 0.72);
@@ -818,7 +832,7 @@ body {
   border-radius: 50%;
   background: var(--accent-gradient);
   color: white;
-  font-size: 22px;
+  font-size: 22px; /* glifo de icono, no texto: fuera de la escala tipografica */
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -853,7 +867,7 @@ body {
 .app-footer p {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 .app-footer-status {
@@ -862,7 +876,7 @@ body {
   margin-top: auto;
   padding: 32px 15px 15px;
   color: rgba(255, 255, 255, 0.42);
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   letter-spacing: 0.3px;
   text-align: center;
 }
@@ -894,7 +908,7 @@ body {
 @media (max-width: 560px) {
   .dataset-status {
     gap: 2px 12px;
-    font-size: 10px;
+    font-size: var(--fs-2xs);
   }
 
   .dataset-status span:not(:last-child)::after {
@@ -934,7 +948,7 @@ body {
 .map-container h3 {
   margin: 0;
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: var(--fs-lg);
   font-weight: 600;
 }
 
@@ -951,7 +965,7 @@ body {
   background: var(--bg-secondary);
   color: var(--text-secondary);
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -987,7 +1001,7 @@ body {
 
 .leaflet-popup-content {
   font-family: 'Inter', -apple-system, sans-serif;
-  font-size: 14px;
+  font-size: var(--fs-base);
   margin: 12px 15px !important;
 }
 
@@ -1055,14 +1069,14 @@ body {
 
 .map-popup strong {
   display: block;
-  font-size: 14px;
+  font-size: var(--fs-base);
   color: #ffffff;
   margin-bottom: 4px;
 }
 
 .map-popup .popup-rating {
   display: inline-block;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: #f59e0b;
   font-weight: 600;
 }
@@ -1076,12 +1090,12 @@ body {
 
 .map-popup .popup-reviews {
   display: inline-block;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #aaaaaa !important;
 }
 
 .map-popup .popup-address {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #666;
   margin: 0 0 10px 0;
   line-height: 1.3;
@@ -1093,7 +1107,7 @@ body {
   border: none;
   padding: 6px 16px;
   border-radius: 15px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1192,7 +1206,7 @@ body {
   }
 
   .app-header h1 {
-    font-size: 18px;
+    font-size: var(--fs-lg);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -1372,7 +1386,7 @@ body {
 
   .card-mini-name {
     font-weight: 600;
-    font-size: 15px;
+    font-size: var(--fs-md);
     color: var(--text-primary);
     line-height: 1.3;
   }
@@ -1380,7 +1394,7 @@ body {
   .card-mini-stats {
     display: flex;
     gap: 10px;
-    font-size: 13px;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
   }
 
@@ -1448,7 +1462,7 @@ body {
   .mobile-tab-btn {
     flex: 1;
     border-radius: 16px;
-    font-size: 13px;
+    font-size: var(--fs-sm);
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -1608,7 +1622,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: var(--fs-base);
   font-weight: 700;
   color: var(--text-muted);
   background: rgba(255, 255, 255, 0.05);
@@ -1636,7 +1650,7 @@ body {
 }
 
 .message-content {
-  font-size: 14px;
+  font-size: var(--fs-base);
   padding: 14px 16px;
 }
 
@@ -1646,13 +1660,13 @@ body {
 
 .message-input {
   padding: 14px 18px;
-  font-size: 15px;
+  font-size: var(--fs-md);
 }
 
 .send-button {
   width: 50px;
   height: 50px;
-  font-size: 18px;
+  font-size: var(--fs-lg);
 }
 
 .map-style-selector {
@@ -1721,7 +1735,7 @@ body {
 
 .detail-loading p {
   margin-top: 16px;
-  font-size: 14px;
+  font-size: var(--fs-base);
 }
 
 .detail-header {
@@ -1731,7 +1745,7 @@ body {
 }
 
 .detail-header h2 {
-  font-size: 24px;
+  font-size: var(--fs-2xl);
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 10px;
@@ -1749,18 +1763,18 @@ body {
 
 .detail-rating .stars-display {
   color: var(--accent-tertiary);
-  font-size: 18px;
+  font-size: var(--fs-lg);
 }
 
 .detail-rating .rating-number {
-  font-size: 20px;
+  font-size: var(--fs-xl);
   font-weight: 700;
   color: var(--accent-tertiary);
 }
 
 .detail-rating .rating-count {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: var(--fs-base);
 }
 
 .detail-location {
@@ -1777,7 +1791,7 @@ body {
 
 .detail-location .location-zone {
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   margin-top: 4px;
 }
 
@@ -1787,7 +1801,7 @@ body {
 
 .detail-summary h3 {
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: var(--fs-md);
   margin-bottom: 10px;
 }
 
@@ -1804,7 +1818,7 @@ body {
 }
 
 .detail-aspects h4 {
-  font-size: 14px;
+  font-size: var(--fs-base);
   margin-bottom: 10px;
   color: var(--text-primary);
 }
@@ -1818,7 +1832,7 @@ body {
 .detail-aspects li {
   padding: 6px 0;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -1854,7 +1868,7 @@ body {
 
 .detail-reviews h3 {
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: var(--fs-md);
   margin-bottom: 16px;
 }
 
@@ -1885,22 +1899,22 @@ body {
 .detail-reviews .review-author {
   font-weight: 600;
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 .detail-reviews .review-rating {
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 
 .detail-reviews .review-date {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   margin-left: auto;
 }
 
 .detail-reviews .review-text {
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   line-height: 1.5;
   margin: 0;
 }
@@ -1911,7 +1925,7 @@ body {
   }
 
   .detail-header h2 {
-    font-size: 20px;
+    font-size: var(--fs-xl);
   }
 }
 
@@ -1926,7 +1940,7 @@ body {
 
 .cards-container h3 {
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: var(--fs-lg);
   font-weight: 600;
   margin-bottom: 15px;
 }
@@ -1960,7 +1974,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 20px;
   padding: 6px 12px;
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2039,13 +2053,13 @@ body {
 
 .card-mini-name {
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: var(--fs-base);
   font-weight: 500;
 }
 
 .card-mini-rating {
   color: var(--accent-tertiary);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
 }
 
@@ -2067,7 +2081,7 @@ body {
   border: 1px solid rgba(233, 69, 96, 0.3);
   padding: 10px 18px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: var(--fs-base);
   font-weight: 500;
   cursor: pointer;
   transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -2114,7 +2128,7 @@ body {
   border-radius: 50%;
   width: 48px;
   height: 48px;
-  font-size: 14px;
+  font-size: var(--fs-base);
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -2153,7 +2167,7 @@ body {
 }
 
 .bubble-icon {
-  font-size: 22px;
+  font-size: 22px; /* glifo de icono, no texto: fuera de la escala tipografica */
   line-height: 1;
 }
 
@@ -2239,7 +2253,7 @@ body {
 
 .card-mini-rating {
   color: var(--accent-tertiary);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
 }
 
@@ -2251,7 +2265,7 @@ body {
 
 .card-mini-reviews {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: var(--fs-2xs);
 }
 
 /* ========== TARJETAS COMPLETAS (Recomendaciones) ========== */
@@ -2333,7 +2347,7 @@ body {
 .card-header h4 {
   font-family: var(--font-heading);
   color: var(--text-primary);
-  font-size: 17px;
+  font-size: var(--fs-lg);
   font-weight: 700;
   margin: 0;
   flex: 1;
@@ -2350,14 +2364,14 @@ body {
 .card-rating .stars {
   color: var(--accent-tertiary);
   font-weight: 700;
-  font-size: 15px;
+  font-size: var(--fs-md);
 }
 
 .card-rating .reviews {
   /* --text-muted daba 3.65:1 sobre el fondo de la tarjeta, por debajo del minimo WCAG AA de
      4.5:1 para texto chico. Era el unico fallo de contraste real de la app. */
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 
 .card-location {
@@ -2366,13 +2380,13 @@ body {
 
 .card-location .address {
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   margin-bottom: 4px;
 }
 
 .card-location .zone {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   margin: 0;
 }
 
@@ -2385,7 +2399,7 @@ body {
 
 .card-description p {
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   margin: 0;
   line-height: 1.5;
 }
@@ -2401,7 +2415,7 @@ body {
 
 .card-quote p {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: var(--fs-base);
   font-style: italic;
   margin: 0;
   line-height: 1.6;
@@ -2412,7 +2426,7 @@ body {
 .quote-author {
   display: block;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   margin-top: 6px;
   text-align: right;
 }
@@ -2565,7 +2579,7 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  font-size: 18px;
+  font-size: var(--fs-lg);
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -2594,7 +2608,7 @@ body {
     /* más grande */
     height: 48px;
     /* más grande */
-    font-size: 20px;
+    font-size: var(--fs-xl);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2629,7 +2643,7 @@ body {
 
 .modal-header h2 {
   color: var(--text-primary);
-  font-size: 24px;
+  font-size: var(--fs-2xl);
   font-weight: 700;
   margin: 0 0 10px 0;
 }
@@ -2643,19 +2657,19 @@ body {
 
 .stars-display {
   color: var(--accent-tertiary);
-  font-size: 18px;
+  font-size: var(--fs-lg);
   letter-spacing: 2px;
 }
 
 .rating-number {
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: var(--fs-lg);
   font-weight: 700;
 }
 
 .rating-count {
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: var(--fs-base);
 }
 
 .modal-location {
@@ -2664,13 +2678,13 @@ body {
 
 .modal-location p {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: var(--fs-base);
   margin: 0 0 5px 0;
 }
 
 .modal-location .location-zone {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 .modal-summary {
@@ -2683,14 +2697,14 @@ body {
 
 .modal-summary h3 {
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: var(--fs-base);
   font-weight: 600;
   margin: 0 0 8px 0;
 }
 
 .modal-summary p {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: var(--fs-base);
   line-height: 1.6;
   margin: 0;
 }
@@ -2711,7 +2725,7 @@ body {
 
 .aspects-positive h4,
 .aspects-negative h4 {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   margin: 0 0 10px 0;
 }
@@ -2734,7 +2748,7 @@ body {
 .aspects-positive li,
 .aspects-negative li {
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   padding: 4px 0;
   padding-left: 15px;
   position: relative;
@@ -2756,7 +2770,7 @@ body {
 
 .modal-reviews h3 {
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: var(--fs-md);
   font-weight: 600;
   margin: 0 0 15px 0;
 }
@@ -2787,22 +2801,22 @@ body {
 .review-author {
   color: var(--text-primary);
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--fs-base);
 }
 
 .review-rating {
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 
 .review-date {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   margin-left: auto;
 }
 
 .review-text {
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   line-height: 1.6;
   margin: 0;
 }
@@ -2815,7 +2829,7 @@ body {
   }
 
   .modal-header h2 {
-    font-size: 20px;
+    font-size: var(--fs-xl);
   }
 
   .modal-aspects {
@@ -3000,11 +3014,11 @@ body {
 }
 
 .tone-btn .tone-icon {
-  font-size: 18px;
+  font-size: var(--fs-lg);
 }
 
 .tone-btn .tone-name {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--text-muted);
 }
 
@@ -3036,7 +3050,7 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.18);
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
   padding: 6px 10px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   white-space: nowrap;
   border-radius: 8px;
   opacity: 0;
