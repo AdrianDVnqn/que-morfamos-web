@@ -673,11 +673,17 @@ function App() {
   // Guion de la escena. `pausa` es lo que se espera ANTES de mostrar el mensaje, y sale del
   // largo del texto: un mensaje corto se escribe rapido y uno largo tarda, que es lo que hace
   // que se sienta gente tipeando y no un temporizador.
+  // Chat de grupo. Cada uno pide algo distinto —burger, vegano, empanadas— asi que la escena
+  // muestra el RANGO del bot sin tener que explicarlo, ademas de dramatizar el problema.
+  // Los nombres van en colores distintos como en WhatsApp: es lo que hace que se lea como un
+  // grupo y no como una persona hablando sola.
   const BIENVENIDA = useMemo(() => ([
-    { role: 'user',  autor: 'Vos', content: 'Che, ¿a dónde vamos hoy? Tengo ganas de una buena burger' },
-    { role: 'otro',  autor: 'Meli', content: 'Ni idea, no conozco mucho por acá' },
+    { role: 'otro', autor: 'Sabro', color: '#7fd1ff', content: 'Che, ¿qué morfamos esta noche?' },
+    { role: 'otro', autor: 'Colo',  color: '#ffb27f', content: 'Yo quiero una buena burger' },
+    { role: 'otro', autor: 'Edu',   color: '#8ee6a8', content: 'Yo voy a pedir algo vegan' },
+    { role: 'otro', autor: 'Lauti', color: '#c9a7ff', content: 'Empanadas fritas papáaa' },
     // Guiño a Los Simuladores: la frase que antecede a la entrada del especialista.
-    { role: 'user',  autor: 'Vos', content: 'Esperá que conozco a alguien que nos puede ayudar... 🕵️' },
+    { role: 'user', autor: 'Vos', content: 'Banquen que conozco a alguien que nos puede ayudar... 🕵️' },
     // Aviso de sistema: nadie lo "escribe", asi que no lleva indicador de tipeo.
     { role: 'sistema', content: 'El Sommelier del Comahue se unió al grupo' },
     { role: 'assistant', autor: 'El Sommelier del Comahue', mode: 'system', content: 'Decime qué te pinta y te digo dónde. 🧐' },
@@ -687,7 +693,7 @@ function App() {
   // el comentario decia que salia del largo del texto, pero no era cierto. Ahora si: 32ms por
   // caracter, con un piso para que los mensajes cortos no aparezcan de golpe y un techo para que
   // los largos no eternicen la escena.
-  const tiempoDeTipeo = (texto) => Math.min(2200, Math.max(700, texto.length * 32));
+  const tiempoDeTipeo = (texto) => Math.min(1800, Math.max(550, texto.length * 26));
 
   const [escribiendo, setEscribiendo] = useState(null);
 
@@ -710,7 +716,7 @@ function App() {
       for (const m of BIENVENIDA) {
         if (cancelado) return;
         if (m.role !== 'sistema') {
-          setEscribiendo({ role: m.role, autor: m.autor });
+          setEscribiendo({ role: m.role, autor: m.autor, color: m.color });
           await esperar(tiempoDeTipeo(m.content));
           if (cancelado) return;
           setEscribiendo(null);
@@ -719,7 +725,7 @@ function App() {
         reproducirBlip(m.role === 'user');
         // Un respiro antes de que el siguiente empiece a tipear, como cuando alguien lee lo que
         // le acaban de mandar.
-        await esperar(m.role === 'sistema' ? 700 : 500);
+        await esperar(m.role === 'sistema' ? 600 : 340);
       }
       if (!cancelado) setBienvenidaEnCurso(false);
     })();
@@ -1848,19 +1854,37 @@ function App() {
                   </div>
                 )}
                 {message.role === 'otro' && message.autor && (
-                  <div className="message-mode">{message.autor}</div>
+                  <span className="chat-avatar" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill={message.color}>
+                      <circle cx="12" cy="8.2" r="3.9" />
+                      <path d="M12 13.6c-4 0-7.2 2.4-7.2 5.4v1.4h14.4v-1.4c0-3-3.2-5.4-7.2-5.4z" />
+                    </svg>
+                  </span>
                 )}
                 <div className="message-content">
+                  {message.role === 'otro' && message.autor && (
+                    <span className="autor-nombre" style={{ color: message.color }}>{message.autor}</span>
+                  )}
                   <ReactMarkdown>{message.content}</ReactMarkdown>
                 </div>
               </div>
             ))}
             {escribiendo && (
               <div className={`message message-${escribiendo.role} message-tipeando`}>
-                {escribiendo.role !== 'user' && escribiendo.autor && (
-                  <div className="message-mode">{escribiendo.autor} está escribiendo…</div>
+                {escribiendo.role === 'otro' && escribiendo.autor && (
+                  <span className="chat-avatar" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill={escribiendo.color}>
+                      <circle cx="12" cy="8.2" r="3.9" />
+                      <path d="M12 13.6c-4 0-7.2 2.4-7.2 5.4v1.4h14.4v-1.4c0-3-3.2-5.4-7.2-5.4z" />
+                    </svg>
+                  </span>
                 )}
                 <div className="message-content">
+                  {escribiendo.role !== 'user' && escribiendo.autor && (
+                    <span className="autor-nombre" style={{ color: escribiendo.color }}>
+                      {escribiendo.autor} está escribiendo…
+                    </span>
+                  )}
                   <span className="puntos-tipeo"><span /><span /><span /></span>
                 </div>
               </div>

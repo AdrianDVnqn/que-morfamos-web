@@ -3435,7 +3435,15 @@ body {
 /* El contenedor del chat no necesita estirarse: al centrarlo, el aire queda repartido arriba y
    abajo en vez de acumularse abajo. Se le da un poco mas de respiro al bloque de bienvenida. */
 .App:not(.sidebar-layout) .chat-container {
-  max-height: min(72vh, 700px);
+  /* La escena son siete mensajes: con el min-height de 400px el chat scrollea y los primeros se
+     pierden de vista justo mientras se estan actuando. Se le da lo que necesita, topeado contra
+     el alto de la ventana para que en pantallas bajas no desborde. */
+  /* Medido: la escena completa son 703px de mensajes; con los chips y el input, el panel
+     necesita ~850. El tope de 700px que trae .chat-container dejaba fuera los dos primeros
+     mensajes justo mientras se estaban actuando. Los min() lo topean contra el alto real de la
+     ventana para que en pantallas bajas no desborde. */
+  min-height: min(700px, 78vh);
+  max-height: min(850px, 84vh);
 }
 
 /* Los chips de ejemplo son el llamado a la accion de la pantalla inicial: merecen aire y quedar
@@ -4257,4 +4265,71 @@ h4 {
   box-shadow:
     0 16px 44px -16px rgba(var(--accent-primary-rgb), 0.42),
     inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ==========================================================================
+   ESTILO DE GRUPO: AVATAR + NOMBRE DENTRO DEL GLOBO
+   Como en WhatsApp: el nombre NO va en una barra aparte sino como primera linea del globo, en el
+   color del participante, y a la izquierda va su avatar. El nombre en barra oscura leia como una
+   etiqueta del sistema y no como parte de lo que dice la persona.
+   ========================================================================== */
+.message-otro {
+  flex-direction: row;
+  align-items: flex-start;
+  /* 16px y no menos: la cola del globo mide 15px y se mete en este hueco. Con un gap chico la
+     cola le pisa el avatar. */
+  gap: 16px;
+}
+
+/* Silueta en el mismo color que el nombre: es lo que ata visualmente el avatar con quien habla,
+   sin inventar caras ni cargar imagenes. El circulo va neutro para que el color sea el de la
+   figura, que es lo que se compara con el nombre. */
+.chat-avatar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 1px;
+}
+
+.chat-avatar svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.autor-nombre {
+  display: block;
+  margin-bottom: 2px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   GLOBOS COMPACTOS
+   Los mensajes de la conversacion son frases cortas: con el padding de 14px que necesita una
+   respuesta larga del bot, cada globo ocupaba el triple de lo que dice y la escena no entraba en
+   pantalla. Se aprieta solo a los mensajes conversacionales; .message-assistant conserva su aire
+   porque ahi si hay parrafos.
+   ========================================================================== */
+.message-otro .message-content,
+.message-user .message-content {
+  padding: 8px 13px;
+  line-height: 1.4;
+}
+
+.message-otro .message-content p,
+.message-user .message-content p {
+  margin: 0;
+}
+
+/* Y menos aire entre mensajes: 20px separaba tanto que se perdia la sensacion de conversacion. */
+.messages-container {
+  gap: 12px;
 }
