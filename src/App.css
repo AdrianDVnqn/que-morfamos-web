@@ -3248,22 +3248,32 @@ body {
   }
 }
 
-/* ========== HOURGLASS ANIMATION ========== */
-@keyframes hourglassBounce {
+/* ========== HOURGLASS ANIMATION ==========
+   Un reloj de arena no gira sin parar como una rueda: se da vuelta cuando se le acaba la arena.
+   Por eso el giro va de a 180 grados con una pausa a cada lado, en vez de rotacion continua —
+   que ademas lo convertiria en un spinner generico cualquiera. Los dos medios giros van
+   0 -> 180 -> 360 para que el ciclo cierre sin volver de un salto. */
+@keyframes hourglassGira {
 
   0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
+  30% {
+    transform: rotate(0deg);
   }
 
-  50% {
-    transform: translateY(-6px) rotate(10deg);
+  45%,
+  75% {
+    transform: rotate(180deg);
+  }
+
+  90%,
+  100% {
+    transform: rotate(360deg);
   }
 }
 
 .hourglass-anim {
   display: inline-block;
-  animation: hourglassBounce 1.2s var(--transition-smooth) infinite;
+  animation: hourglassGira 3s ease-in-out infinite;
   transform-origin: center;
   will-change: transform;
 }
