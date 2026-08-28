@@ -591,6 +591,9 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
   const [showBackendInactiveModal, setShowBackendInactiveModal] = useState(false);
   const [showBackendConnectingModal, setShowBackendConnectingModal] = useState(false);
   const [backendConnectingSeconds, setBackendConnectingSeconds] = useState(0);
+  // Duracion tipica del arranque en frio de la maquina de Fly. Solo se usa para dibujar la
+  // barra de progreso: si tarda mas, la barra queda topeada y el contador sigue subiendo.
+  const ESPERA_ARRANQUE_SEGUNDOS = 30;
   const [backendCountdown, setBackendCountdown] = useState(60);
   const [showConnectionToast, setShowConnectionToast] = useState(false);
   const prevApiStatus = useRef(apiStatus);
@@ -1925,43 +1928,35 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
 
       {/* Modal de conexión inicial / arranque en frío */}
       {showBackendConnectingModal && (
-        <div className="modal-overlay" style={{
-          zIndex: 9998,
-          background: 'rgba(5, 10, 20, 0.72)',
-          backdropFilter: 'blur(4px)'
-        }}>
-          <div className="modal-content" style={{
-            maxWidth: 420,
-            textAlign: 'center',
-            background: 'rgba(14, 18, 34, 0.98)',
-            borderRadius: 16,
-            color: '#fff',
-            boxShadow: '0 16px 48px rgba(0,0,0,0.35)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            padding: 28
-          }}>
-            <div style={{ fontSize: 44, marginBottom: 14 }}>⏳</div>
+        <div className="modal-overlay" style={{ zIndex: 9998 }} role="status" aria-live="polite">
+          <div className="conn-modal">
+            <div className="conn-modal__icon" aria-hidden="true">⏳</div>
 
-            <p style={{ marginBottom: 12, fontSize: 16, color: '#d9e6ff', lineHeight: 1.5 }}>
-              Por favor espere en esta pantalla. El servidor está arrancando y suele tardar unos 30 segundos máx.
+            <p className="conn-modal__text">
+              Estamos despertando el servidor. Suele tardar unos 30 segundos.
             </p>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 10,
-              marginBottom: 12,
-              padding: '10px 16px',
-              borderRadius: 999,
-              background: 'rgba(80, 130, 255, 0.16)',
-              border: '1px solid rgba(120, 170, 255, 0.35)',
-              color: '#eaf2ff',
-              fontSize: 16,
-              fontWeight: 700
-            }}>
-              <span className="hourglass-anim" style={{ fontSize: 18 }}>⏳</span>
-              <span style={{ color: '#7fd1ff', fontSize: 18 }}>{backendConnectingSeconds}s</span>
+
+            {/* Se topea en 97% para no mostrar la barra llena mientras todavia se espera. */}
+            <div
+              className="conn-modal__progress"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={ESPERA_ARRANQUE_SEGUNDOS}
+              aria-valuenow={backendConnectingSeconds}
+              aria-label="Progreso del arranque del servidor"
+            >
+              <div
+                className="conn-modal__progress-bar"
+                style={{ width: `${Math.min(97, (backendConnectingSeconds / ESPERA_ARRANQUE_SEGUNDOS) * 100)}%` }}
+              />
             </div>
-            <p style={{ marginBottom: 0, fontSize: 14, color: '#9cb6da' }}>
+
+            <div className="conn-modal__timer">
+              <span className="hourglass-anim" aria-hidden="true">⏳</span>
+              <span className="conn-modal__seconds">{backendConnectingSeconds}s</span>
+            </div>
+
+            <p className="conn-modal__hint" style={{ marginTop: 18 }}>
               No cierres la pestaña: en cuanto termine de conectar, la página se habilita sola.
             </p>
           </div>
@@ -1970,72 +1965,29 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
 
       {/* Modal backend inactivo por inactividad */}
       {showBackendInactiveModal && (
-        <div className="modal-overlay" style={{
-          zIndex: 9999,
-          background: 'rgba(10, 20, 40, 0.55)', // azul oscuro, menos opaco
-          backdropFilter: 'blur(2px)'
-        }}>
-          <div className="modal-content" style={{
-            maxWidth: 400,
-            textAlign: 'center',
-            background: 'rgba(20, 30, 60, 0.98)',
-            borderRadius: 14,
-            color: '#fff',
-            boxShadow: '0 4px 32px 0 rgba(0,0,0,0.25)',
-            border: '1.5px solid #2a4a7a',
-            padding: 24
-          }}>
-            <img src="https://bvtelevision.wordpress.com/wp-content/uploads/2015/04/technical.jpg?w=300" alt="Backend inactivo" style={{ width: '100%', maxWidth: 250, borderRadius: 8, marginBottom: 18, border: '2px solid #2a4a7a' }} />
-            <h2
-              className="modal-title-gradient"
-              style={{
-                marginBottom: 16,
-                fontWeight: 700,
-                letterSpacing: 0.5,
-                fontSize: '2rem',
-                background: 'var(--accent-gradient)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                color: 'transparent',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0 2px 8px rgba(0,0,0,0.18), 0 1px 0 #fff2',
-                backgroundSize: '200% 200%',
-                animation: 'gradient-move 6s ease-in-out infinite',
-              }}
-            >Backend inactivo... Reconectando</h2>
-            <p style={{ marginBottom: 14, fontSize: 17, color: '#fff', lineHeight: 1.5 }}>
+        <div className="modal-overlay" style={{ zIndex: 9999 }} role="status" aria-live="polite">
+          <div className="conn-modal">
+            <img
+              src={`${process.env.PUBLIC_URL}/backend-inactivo.jpg`}
+              alt=""
+              className="conn-modal__img"
+            />
+            <h2 className="conn-modal__title">Backend inactivo... Reconectando</h2>
+            <p className="conn-modal__text">
               El backend fue desactivado por inactividad prolongada.<br />
-              <span style={{ color: '#6ec1ff' }}>Intentando reactivar en <b>{backendCountdown}</b> segundos.</span>
+              Intentando reactivar en <b className="conn-modal__countdown">{backendCountdown}</b> segundos.
             </p>
-            <div style={{ fontSize: 32, margin: '12px 0' }}>
-              <span role="img" aria-label="reloj">⏳</span>
-            </div>
-            <p style={{ fontSize: 14, color: '#b3d8ff', marginTop: 10 }}>La página intentará reconectar automáticamente.</p>
+            <div className="conn-modal__icon" aria-hidden="true">⏳</div>
+            <p className="conn-modal__hint">La página intentará reconectar automáticamente.</p>
           </div>
         </div>
       )}
 
       {/* Toast de conexión exitosa */}
       {showConnectionToast && (
-        <div style={{
-          position: 'fixed',
-          bottom: 24,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'linear-gradient(135deg, #1a4a2e 0%, #2d5a3d 100%)',
-          color: '#fff',
-          padding: '12px 24px',
-          borderRadius: 8,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-          zIndex: 10000,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          animation: 'slideUp 0.3s ease-out',
-          border: '1px solid #3d7a4d'
-        }}>
-          <span style={{ fontSize: 20 }}>✅</span>
-          <span style={{ fontWeight: 500 }}>¡Conexión establecida!</span>
+        <div className="conn-toast" role="status" aria-live="polite">
+          <span aria-hidden="true">✅</span>
+          <span>¡Conexión establecida!</span>
         </div>
       )}
 
