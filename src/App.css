@@ -18,8 +18,14 @@
   --accent-primary: #e94560;
   --accent-secondary: #ff6b6b;
   --accent-tertiary: #feca57;
-  --accent-gradient: linear-gradient(135deg, #e94560 0%, #ff6b6b 50%, #feca57 100%);
-  --accent-glow: 0 0 20px rgba(233, 69, 96, 0.4);
+  --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 50%, var(--accent-tertiary) 100%);
+  --accent-glow: 0 0 20px rgba(var(--accent-primary-rgb), 0.4);
+  /* Los canales sueltos existen para poder pedir el color de marca con transparencia sin
+     reescribir el hex: rgba(var(--accent-primary-rgb), 0.4). Estaba copiado a mano en 37
+     lugares, asi que cambiar el color de marca dejaba desincronizados bordes y sombras. */
+  --accent-primary-rgb: 233, 69, 96;
+  --accent-secondary-rgb: 255, 107, 107;
+  --accent-tertiary-rgb: 254, 202, 87;
   --text-primary: #ffffff;
   --text-secondary: #a0a0a0;
   --text-muted: #6b6b6b;
@@ -66,8 +72,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg-primary);
   background-image:
-    radial-gradient(ellipse at top left, rgba(233, 69, 96, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(254, 202, 87, 0.1) 0%, transparent 50%);
+    radial-gradient(ellipse at top left, rgba(var(--accent-primary-rgb), 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(var(--accent-tertiary-rgb), 0.1) 0%, transparent 50%);
   min-height: 100vh;
 }
 
@@ -339,9 +345,9 @@ body {
 }
 
 .status-checking {
-  background: rgba(254, 202, 87, 0.15);
+  background: rgba(var(--accent-tertiary-rgb), 0.15);
   color: var(--warning);
-  border: 1px solid rgba(254, 202, 87, 0.3);
+  border: 1px solid rgba(var(--accent-tertiary-rgb), 0.3);
 }
 
 .status-checking .status-dot {
@@ -614,7 +620,7 @@ body {
 .message-assistant .message-content {
   /* Fondo sólido para evitar mismatch de color con el tail */
   background: #23273a;
-  color: #ffffff;
+  color: var(--text-primary);
   border: none;
   /* Eliminado el borde para que coincida con el tail */
   border-top-left-radius: 0;
@@ -738,7 +744,7 @@ body {
 }
 
 .message-content code {
-  background: rgba(233, 69, 96, 0.2);
+  background: rgba(var(--accent-primary-rgb), 0.2);
   padding: 3px 8px;
   border-radius: 6px;
   font-family: 'Fira Code', 'Courier New', monospace;
@@ -761,14 +767,14 @@ body {
   font-weight: 600;
   cursor: pointer;
   z-index: 100;
-  box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(var(--accent-primary-rgb), 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
   animation: bounceIn 0.3s var(--transition-bounce);
   transition: all 0.2s ease;
 }
 
 .scroll-to-bottom-btn:hover {
   transform: translateX(-50%) scale(1.05);
-  box-shadow: 0 6px 25px rgba(233, 69, 96, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 25px rgba(var(--accent-primary-rgb), 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 @keyframes bounceIn {
@@ -816,7 +822,7 @@ body {
 
 .message-input:focus {
   border-color: var(--accent-primary);
-  box-shadow: 0 0 20px rgba(233, 69, 96, 0.2);
+  box-shadow: 0 0 20px rgba(var(--accent-primary-rgb), 0.2);
 }
 
 .message-input:disabled {
@@ -973,7 +979,7 @@ body {
 .map-style-btn:hover {
   border-color: var(--accent-primary);
   color: var(--accent-primary);
-  background: rgba(233, 69, 96, 0.1);
+  background: rgba(var(--accent-primary-rgb), 0.1);
 }
 
 .map-style-btn.active {
@@ -1030,7 +1036,7 @@ body {
 
 .food-marker:hover .marker-emoji,
 .marker-highlighted .marker-emoji {
-  filter: drop-shadow(0 0 8px #e94560) drop-shadow(0 0 16px #ff6b6b) drop-shadow(0 0 24px #e94560);
+  filter: drop-shadow(0 0 8px var(--accent-primary)) drop-shadow(0 0 16px var(--accent-secondary)) drop-shadow(0 0 24px var(--accent-primary));
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
 }
 
@@ -1070,7 +1076,7 @@ body {
 .map-popup strong {
   display: block;
   font-size: var(--fs-base);
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
@@ -1102,7 +1108,7 @@ body {
 }
 
 .map-popup .popup-btn {
-  background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   color: white;
   border: none;
   padding: 6px 16px;
@@ -1115,7 +1121,7 @@ body {
 
 .map-popup .popup-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
+  box-shadow: 0 4px 12px rgba(var(--accent-primary-rgb), 0.4);
 }
 
 /* ========== RESPONSIVE ========== */
@@ -1381,7 +1387,7 @@ body {
 
   .card-mini:hover {
     border-color: var(--accent-primary);
-    background: rgba(233, 69, 96, 0.05);
+    background: rgba(var(--accent-primary-rgb), 0.05);
   }
 
   .card-mini-name {
@@ -1517,7 +1523,7 @@ body {
 
   /* Al tocar un chip, se ilumina */
   .chip-btn:active {
-    background: rgba(233, 69, 96, 0.6) !important;
+    background: rgba(var(--accent-primary-rgb), 0.6) !important;
     /* Tu color accent */
     border-color: transparent;
   }
@@ -1990,7 +1996,7 @@ body {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   border-color: transparent;
   color: white;
-  box-shadow: 0 2px 8px rgba(233, 69, 96, 0.3);
+  box-shadow: 0 2px 8px rgba(var(--accent-primary-rgb), 0.3);
 }
 
 .cards-list {
@@ -2048,7 +2054,7 @@ body {
 .card-mini:hover,
 .card-mini.card-highlighted {
   border-color: var(--accent-primary);
-  background: rgba(233, 69, 96, 0.08);
+  background: rgba(var(--accent-primary-rgb), 0.08);
 }
 
 .card-mini-name {
@@ -2076,9 +2082,9 @@ body {
 }
 
 .chip-btn {
-  background: rgba(233, 69, 96, 0.12);
+  background: rgba(var(--accent-primary-rgb), 0.12);
   color: var(--text-primary);
-  border: 1px solid rgba(233, 69, 96, 0.3);
+  border: 1px solid rgba(var(--accent-primary-rgb), 0.3);
   padding: 10px 18px;
   border-radius: 999px;
   font-size: var(--fs-base);
@@ -2093,14 +2099,14 @@ body {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(233, 69, 96, 0.4);
+  box-shadow: 0 6px 16px rgba(var(--accent-primary-rgb), 0.4);
   border-color: transparent;
   outline: none;
 }
 
 .chip-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(233, 69, 96, 0.3);
+  box-shadow: 0 2px 8px rgba(var(--accent-primary-rgb), 0.3);
 }
 
 /* Mobile sticky chip bar with expandable chips */
@@ -2123,7 +2129,7 @@ body {
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
-  border: 1px solid rgba(233, 69, 96, 0.3);
+  border: 1px solid rgba(var(--accent-primary-rgb), 0.3);
   padding: 12px;
   border-radius: 50%;
   width: 48px;
@@ -2144,13 +2150,13 @@ body {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   color: white;
   transform: scale(1.1);
-  box-shadow: 0 8px 24px rgba(233, 69, 96, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(var(--accent-primary-rgb), 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .chip-bubble-btn.expanded {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   color: white;
-  box-shadow: 0 0 20px rgba(233, 69, 96, 0.8), 0 0 40px rgba(233, 69, 96, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 20px rgba(var(--accent-primary-rgb), 0.8), 0 0 40px rgba(var(--accent-primary-rgb), 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
@@ -2158,11 +2164,11 @@ body {
 
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(233, 69, 96, 0.8), 0 0 40px rgba(233, 69, 96, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 20px rgba(var(--accent-primary-rgb), 0.8), 0 0 40px rgba(var(--accent-primary-rgb), 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
   }
 
   50% {
-    box-shadow: 0 0 30px rgba(233, 69, 96, 1), 0 0 60px rgba(233, 69, 96, 0.6), 0 4px 16px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 30px rgba(var(--accent-primary-rgb), 1), 0 0 60px rgba(var(--accent-primary-rgb), 0.6), 0 4px 16px rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -2227,7 +2233,7 @@ body {
     z-index: 50;
     -webkit-overflow-scrolling: touch;
     background: linear-gradient(180deg, rgba(15, 15, 35, 0.98), rgba(22, 33, 62, 0.96));
-    border-top: 1px solid rgba(233, 69, 96, 0.2);
+    border-top: 1px solid rgba(var(--accent-primary-rgb), 0.2);
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
   }
 
@@ -2297,9 +2303,9 @@ body {
   border-color: var(--accent-primary);
   transform: translateY(-8px) scale(1.02);
   box-shadow:
-    0 20px 50px rgba(233, 69, 96, 0.25),
+    0 20px 50px rgba(var(--accent-primary-rgb), 0.25),
     0 0 0 1px var(--accent-primary),
-    0 0 30px rgba(233, 69, 96, 0.15);
+    0 0 30px rgba(var(--accent-primary-rgb), 0.15);
 }
 
 .restaurant-card:hover::before {
@@ -2320,8 +2326,8 @@ body {
 .restaurant-card.card-highlighted {
   border-color: var(--accent-primary);
   transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 0 25px rgba(233, 69, 96, 0.5), 0 15px 40px rgba(233, 69, 96, 0.25);
-  background: linear-gradient(135deg, var(--glass-medium) 0%, rgba(233, 69, 96, 0.12) 100%);
+  box-shadow: 0 0 25px rgba(var(--accent-primary-rgb), 0.5), 0 15px 40px rgba(var(--accent-primary-rgb), 0.25);
+  background: linear-gradient(135deg, var(--glass-medium) 0%, rgba(var(--accent-primary-rgb), 0.12) 100%);
 }
 
 @keyframes cardSlideIn {
@@ -2406,7 +2412,7 @@ body {
 
 .card-quote {
   position: relative;
-  background: rgba(233, 69, 96, 0.08);
+  background: rgba(var(--accent-primary-rgb), 0.08);
   border-left: 3px solid var(--accent-primary);
   padding: 14px 16px;
   border-radius: 0 8px 8px 0;
@@ -2440,7 +2446,7 @@ body {
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 700;
   font-size: 56px;
-  color: rgba(233, 69, 96, 0.12);
+  color: rgba(var(--accent-primary-rgb), 0.12);
   line-height: 1;
   z-index: 1;
   pointer-events: none;
@@ -2454,7 +2460,7 @@ body {
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 700;
   font-size: 44px;
-  color: rgba(233, 69, 96, 0.12);
+  color: rgba(var(--accent-primary-rgb), 0.12);
   line-height: 1;
   z-index: 1;
   pointer-events: none;
@@ -2688,7 +2694,7 @@ body {
 }
 
 .modal-summary {
-  background: rgba(233, 69, 96, 0.08);
+  background: rgba(var(--accent-primary-rgb), 0.08);
   border-left: 4px solid var(--accent-primary);
   padding: 15px 20px;
   border-radius: 0 12px 12px 0;
@@ -3045,7 +3051,7 @@ body {
   bottom: calc(100% + 6px);
   /* Use accent color for tooltip background to match theme */
   background: var(--accent-primary);
-  color: #ffffff;
+  color: var(--text-primary);
   /* Improve contrast with a thin dark border and subtle text-shadow */
   border: 1px solid rgba(0, 0, 0, 0.18);
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
@@ -3164,7 +3170,7 @@ body {
    para que el anillo aparezca en navegacion por teclado pero no al hacer click con el mouse.
    ========================================================================== */
 :where(a, button, input, textarea, select, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
-  outline: 2px solid var(--accent-primary, #e94560);
+  outline: 2px solid var(--accent-primary, var(--accent-primary));
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -3173,7 +3179,7 @@ body {
    claro para que se lea contra cualquier fondo. */
 .leaflet-container :focus-visible,
 .map-container :focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--text-primary);
   outline-offset: 1px;
   box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.55);
 }
@@ -3186,7 +3192,7 @@ body {
   z-index: 2000;
   padding: 10px 16px;
   border-radius: 8px;
-  background: var(--accent-primary, #e94560);
+  background: var(--accent-primary, var(--accent-primary));
   color: #fff;
   font-weight: 600;
   text-decoration: none;
