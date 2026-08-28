@@ -282,7 +282,7 @@ body {
      alrededor del cartel. El filtro anterior lo empeoraba — contrast(89.4%) BAJA el contraste,
      o sea que aclaraba todavia mas esos negros. Subirlo los aplasta contra el 0 y el blend los
      hace desaparecer. */
-  filter: contrast(1.3) brightness(0.92);
+  filter: contrast(1.15) brightness(0.95);
 
   border-radius: 50px;
 
