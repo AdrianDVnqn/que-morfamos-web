@@ -703,7 +703,7 @@ function App() {
   // deps vacias); si se recalculara en cada render, los nombres bailarian mientras se actua.
   const BIENVENIDA = useMemo(() => {
     const POOL = ['Vic', 'Sabro', 'Lauti', 'Colo', 'Edu', 'Santi', 'Fabio', 'Juli',
-      'Juan', 'Fer', 'Stefa', 'Vicky', 'Lau', 'Lia'];
+      'Juan', 'Fer', 'Stefa', 'Vicky', 'Lau', 'Lia', 'Dani'];
     const COLORES = ['#7fd1ff', '#ffb27f', '#8ee6a8', '#c9a7ff', '#ffd479', '#8fd4c8'];
     // Pedidos variados para el resto. Edu y Sabro tienen el suyo fijo (ver mas abajo).
     const PEDIDOS = [
@@ -715,7 +715,6 @@ function App() {
       'Sushi, invito yo',
       'Quiero unos tacos bien picantes',
       'Pastas caseras y no se discute',
-      'Algo con buena cerveza artesanal',
       'Yo quiero helado, no me importa la hora',
     ];
 
@@ -731,16 +730,25 @@ function App() {
     const elegidos = mezclar(POOL).slice(0, 4);
     // Edu y Sabro tienen pedido propio, asi que no pueden ser quien abre la charla: ahi se
     // perderia su linea. Si les toca esa posicion, se los cambia por otro del grupo.
-    // Estos tres piden siempre lo mismo porque es parte de quienes son, no del humor del dia.
-    // Lau es celiaca: para ella no es preferencia, es necesidad, y la linea lo dice.
+    // Estos cuatro piden siempre lo mismo porque es parte de quienes son, no del humor del dia.
     const FIJOS = {
       Edu: 'Yo voy a pedir algo vegan',
       Sabro: 'Yo quiero algo vegetariano',
       Lau: 'Yo algo sin TACC, acuérdense',
+      Dani: 'Yo quiero unas buenas birras artesanales en un bar copado',
     };
+    // Ninguno de ellos puede ser quien abre la charla: esa posicion lleva la pregunta y su
+    // pedido se perderia. Primero se intenta cambiarlo por otro del grupo.
     if (FIJOS[elegidos[0]]) {
       const otro = elegidos.findIndex((n, i) => i > 0 && !FIJOS[n]);
-      if (otro > 0) [elegidos[0], elegidos[otro]] = [elegidos[otro], elegidos[0]];
+      if (otro > 0) {
+        [elegidos[0], elegidos[otro]] = [elegidos[otro], elegidos[0]];
+      } else {
+        // Y si los cuatro elegidos tienen pedido fijo —posible desde que son cuatro— no hay con
+        // quien cambiar, asi que se trae a alguien libre de afuera.
+        const libre = mezclar(POOL).find(n => !FIJOS[n] && !elegidos.includes(n));
+        if (libre) elegidos[0] = libre;
+      }
     }
 
     const sueltos = mezclar(PEDIDOS);
