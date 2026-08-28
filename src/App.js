@@ -802,10 +802,10 @@ function App() {
         content: FIJOS[nombre] || sueltos.pop(),
       })),
       // Guiño a Los Simuladores: la frase que antecede a la entrada del especialista.
-      // Corta y seca a proposito: despues de que cuatro personas pidieron cosas incompatibles,
-      // la gracia esta en la confianza, y la confianza se transmite con brevedad. "Conozco a
-      // alguien" es ademas la formula exacta con la que se convoca al especialista.
-      { role: 'user', autor: 'Vos', content: 'Esperen. Conozco a alguien. 🕵️' },
+      // "Falta alguien aca" es mejor que "conozco a alguien": no anuncia lo que va a hacer, deja
+      // el hueco para que lo llene la linea siguiente (el aviso de que el Sommelier se unio al
+      // grupo). Y los puntos suspensivos hacen el trabajo de la pausa.
+      { role: 'user', autor: 'Vos', content: 'Banquen... falta alguien acá 🕵️' },
       // Aviso de sistema: nadie lo "escribe", asi que no lleva indicador de tipeo.
       { role: 'sistema', content: 'El Sommelier del Comahue se unió al grupo' },
       { role: 'assistant', autor: 'El Sommelier del Comahue', mode: 'system', content: 'A sus órdenes. Yo les tiro la posta. 🧐' },
