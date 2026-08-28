@@ -4424,3 +4424,29 @@ h4 {
     opacity: 0.8;
   }
 }
+
+/* Zoom lento del minimapa al abrir la tarjeta. Le da algo de vida a lo que si no es una imagen
+   completamente quieta, sin distraer: 14s para un 8% de escala es una deriva que se percibe
+   pero no se mira. Va `forwards` porque no tiene que volver: no es un latido, es una entrada. */
+.mini-mapa__lienzo {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  animation: minimapaZoom 14s ease-out forwards;
+}
+
+@keyframes minimapaZoom {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini-mapa__lienzo {
+    animation: none;
+  }
+}

@@ -73,7 +73,11 @@ function MiniMapa({ lat, lng, urlTemplate, alto = 132, ancho = 640, zoom = 14 })
 
   return (
     <div className="mini-mapa" style={{ height: alto, width: ancho }} aria-hidden="true">
-      {tiles}
+      {/* Los tiles van envueltos para poder escalarlos COMO CONJUNTO: cada uno esta posicionado
+          con su left/top propio, asi que escalarlos por separado los correria cada uno respecto
+          de su centro y rompria el mosaico. El pin queda afuera del zoom a proposito, si no
+          dejaria de marcar el mismo punto. */}
+      <div className="mini-mapa__lienzo">{tiles}</div>
       <span className="mini-mapa__pin">📍</span>
     </div>
   );
