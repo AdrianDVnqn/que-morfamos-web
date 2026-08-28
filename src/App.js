@@ -533,18 +533,28 @@ function App() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `¿No sabés dónde ir? Tranqui, me leí todas las reseñas de Neuquén para tirarte la posta. 🍷
+      // El texto anterior gastaba tres párrafos en explicar la taxonomía interna del bot
+      // (recomendaciones / lugar específico / stats). Nadie piensa "necesito el modo STATS": esa
+      // es nuestra cabeza, no la del que llega con hambre. Y los ejemplos entre paréntesis
+      // repetían lo que ya hacen los chips, que están dos centímetros más abajo.
+      // Ahora arranca por el diferencial concreto —el número real— y enseña de qué es capaz con
+      // un ejemplo difícil en vez de con una lista de modos.
+      content: `Me leí las **204.726 reseñas** de los 929 lugares de Neuquén. Vos preguntá nomás. 🍷
 
-Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar por un **lugar específico** ('¿qué onda este bar?') o chusmear **stats** ('¿cuántas birrerías hay?').
-
-¡Decime qué te pinta hoy y arrancamos!`,
+Y no hace falta que sea simple: *"una parrilla con juegos para los chicos"* o *"dónde desayunar sin TACC"* también.`,
       mode: 'system'
     }
   ]);
+  // Los chips son el mejor cartel de lo que el bot sabe hacer, así que conviene que muestren
+  // RANGO y no tres veces la misma clase de consulta. Antes eran tres categorías sueltas y dos
+  // arrancaban con "Mejores". Ahora: una categoría común, una restricción de dieta, una consulta
+  // multi-concepto (lo más difícil que resuelve) y una por ocasión, que deja claro que no es un
+  // buscador por palabra clave.
   const SAMPLE_CHIPS = [
-    { label: '🍕 Mejores Pizzas', query: 'Mejores pizzas' },
-    { label: '🥗 Opciones Veganas', query: 'Opciones veganas' },
-    { label: '🍺 Mejores cervecerías', query: 'Mejores cervecerías' }
+    { label: '🍕 Mejores pizzas', query: 'Mejores pizzas' },
+    { label: '🌱 Opciones veganas', query: 'Opciones veganas' },
+    { label: '👦 Parrilla con juegos para chicos', query: 'Parrilla con juegos para chicos' },
+    { label: '💛 Lugar para una cita', query: 'Lugar para una cita' }
   ];
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);

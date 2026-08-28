@@ -3380,8 +3380,22 @@ body {
    negro entre el contenido y el pie. Es la primera pantalla que ve cualquier visitante y era la
    peor de la app. Se centra el bloque verticalmente en vez de dejarlo pegado arriba.
    ========================================================================== */
+/* El header y el chat estan disenados para leerse como UN solo panel: .app-header cierra con
+   border-radius 20px 20px 0 0 y border-bottom:none, y .chat-container cierra abajo con el radio
+   inverso. Son hermanos dentro de .App, asi que centrar solo .main-content abria 248px de fondo
+   entre los dos y partia el panel al medio.
+   Se centra el CONJUNTO: main-content deja de absorber el espacio libre, y los margenes auto del
+   header y del pie reparten ese espacio arriba y abajo del bloque header+chat. */
 .App:not(.sidebar-layout) .main-content {
-  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.App:not(.sidebar-layout) .app-header {
+  margin-top: auto;
+}
+
+.App:not(.sidebar-layout) .app-footer-status {
+  margin-top: auto;
 }
 
 /* El contenedor del chat no necesita estirarse: al centrarlo, el aire queda repartido arriba y
@@ -3393,7 +3407,13 @@ body {
 /* Los chips de ejemplo son el llamado a la accion de la pantalla inicial: merecen aire y quedar
    centrados debajo del mensaje de bienvenida. */
 .App:not(.sidebar-layout) .chips-expandable.expanded {
-  justify-content: center;
+  /* `safe` es imprescindible aca: la fila scrollea, y centrar contenido que desborda lo saca por
+     los DOS lados. El scroll no puede ir a negativo, asi que la parte que se va por la izquierda
+     queda inalcanzable — medido a 375px: el primer chip nacia en x=-179 y no habia forma de
+     llegar a el. Con `safe`, cuando el contenido no entra se comporta como flex-start.
+     La declaracion de arriba queda de reserva para navegadores sin soporte. */
+  justify-content: flex-start;
+  justify-content: safe center;
   padding-top: 4px;
 }
 
@@ -3685,4 +3705,16 @@ h4 {
     animation: none;
     background: rgba(255, 255, 255, 0.07);
   }
+}
+
+/* ==========================================================================
+   FILA DE CHIPS EN MOBILE
+   .chip-bar-mobile es un flex [burbuja 💡 | fila de chips], y la fila tiene overflow-x: auto.
+   Pero un item de flex arranca con min-width: auto, o sea que se niega a achicarse por debajo
+   del ancho de su contenido: en vez de scrollear adentro, desbordaba. Medido a 375px: la fila
+   media 524px en un espacio de 259px y su borde izquierdo quedaba en x=-179, asi que el primer
+   chip nacia fuera de la pantalla y parecia que la fila estaba scrolleada sola.
+   ========================================================================== */
+.chips-expandable {
+  min-width: 0;
 }
