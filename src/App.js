@@ -540,9 +540,11 @@ function App() {
       // Esto nombra el momento real: la app se llama "¿Qué morfamos?", o sea que el chiste ya
       // está en la marca y se puede cobrar. Los ejemplos de qué pedirle los cargan los chips,
       // que están justo abajo.
+      // "qué te pinta" y no "qué se te antoja": antojarse es español neutro, no rioplatense.
+      // Tampoco "qué tenés ganas", que repetiría el placeholder del input.
       content: `*—¿Dónde comemos? —Y... no sé, ¿vos qué querés?*
 
-Cortemos con eso: decime qué se te antoja y te digo dónde.`,
+Cortemos con eso: decime qué te pinta y te digo dónde.`,
       mode: 'system'
     }
   ]);
