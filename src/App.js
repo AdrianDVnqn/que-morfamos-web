@@ -127,6 +127,49 @@ function MapResizer() {
   return null;
 }
 
+// Corre `fn` cuando el mapa tenga tamano real, y no antes.
+//
+// Por que existe: en mobile el mapa vive detras de la pestana "Mapa", asi que cuando llegan los
+// resultados esta oculto y mide 0x0. Medido instrumentando las llamadas de camara:
+//     fitBounds  size: { x: 0, y: 0 }
+//     setView    size: { x: 0, y: 0 }
+// Leaflet divide por el tamano del contenedor para armar la animacion: con 0 la cuenta da NaN, y
+// cuando el panel se vuelve visible proyecta desde ahi y tira "Invalid LatLng object: (NaN, NaN)"
+// en loop. El try/catch que habia alrededor no servia porque el throw ocurre despues, dentro de
+// un requestAnimationFrame. Validar las coordenadas tampoco: las coordenadas estaban bien.
+function cuandoTengaTamano(map, fn) {
+  const cont = map.getContainer();
+  const listo = () => cont.clientWidth > 0 && cont.clientHeight > 0;
+
+  const ejecutar = () => {
+    // getSize() esta cacheado: si el contenedor cambio de tamano mientras estaba oculto, Leaflet
+    // sigue creyendo que mide lo de antes hasta que se lo invalida. Preguntarle a el en vez de al
+    // DOM fue justamente el error de la primera version de este helper: el observer disparaba,
+    // getSize() seguia devolviendo 0x0 y el encuadre no se hacia nunca.
+    const s = map.getSize();
+    if (s.x !== cont.clientWidth || s.y !== cont.clientHeight) map.invalidateSize();
+    fn();
+  };
+
+  if (listo()) {
+    ejecutar();
+    return () => { };
+  }
+  const obs = new ResizeObserver(() => {
+    if (!listo()) return;
+    obs.disconnect();
+    ejecutar();
+  });
+  obs.observe(cont);
+  return () => obs.disconnect();
+}
+
+// Quien pidio menos movimiento en el sistema no quiere que el mapa le vuele en la cara.
+function movimientoReducido() {
+  return typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 // Componente para ajustar el zoom para mostrar todos los marcadores
 // Ahora recibe 'trigger' para saber cuándo recalcular (ej: al cambiar de tab)
 function FitBounds({ locations, allViewRef, trigger }) {
@@ -150,11 +193,10 @@ function FitBounds({ locations, allViewRef, trigger }) {
       } catch (e) { /* ignore */ }
     };
 
-    // Forzar recalculo de tamaño antes de ajustar bounds
-    map.invalidateSize();
-
-    // Damos un pequeño respiro para que el invalidateSize surta efecto
-    const timer = setTimeout(() => {
+    // Antes esto era invalidateSize() + setTimeout(150) y a encomendarse: adivinar cuanto tarda
+    // el layout. En mobile el mapa esta oculto detras de la pestana, asi que a los 150ms seguia
+    // midiendo 0x0 y encuadraba contra la nada. Ahora se espera al tamano real, sea cuando sea.
+    const cancelar = cuandoTengaTamano(map, () => {
       try {
         if (locations.length === 1) {
           const loc = locations[0];
@@ -175,9 +217,9 @@ function FitBounds({ locations, allViewRef, trigger }) {
           }
         }
       } catch (e) { console.warn('FitBounds error:', e); }
-    }, 150); // Delay aumentado ligeramente para asegurar que el mapa ya es visible
+    });
 
-    return () => clearTimeout(timer);
+    return cancelar;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, locations, allViewRef, trigger]);
@@ -185,59 +227,90 @@ function FitBounds({ locations, allViewRef, trigger }) {
   return null;
 }
 
-// Componente para centrar el mapa en el restaurante hovereado (solo desde tarjetas)
+// Mueve el mapa al lugar que el usuario esta hovereando en la lista de tarjetas.
+//
+// El comportamiento anterior tenia tres problemas de sensacion, todos por la misma causa: cada
+// mouseenter y cada mouseleave disparaba su propio flyTo de inmediato.
+//   1. Rebote. Al pasar de una tarjeta a la de al lado, el mouseleave manda a volar de vuelta a
+//      la vista general y el mouseenter siguiente manda a volar al lugar nuevo: dos viajes para
+//      un movimiento que deberia ser uno solo, y el mapa "pasa por el medio" sin motivo.
+//   2. Cascada. Barrer la lista con el mouse encolaba un vuelo por tarjeta rozada, aunque el
+//      usuario nunca hubiera querido mirar ninguna de ellas.
+//   3. Arco innecesario. flyTo hace zoom out y zoom in en el medio del recorrido. Eso esta bien
+//      para el primer salto (cambia el zoom), pero entre dos tarjetas ya estando cerca es puro
+//      mareo: ahi lo natural es desplazarse en linea recta.
 function CenterOnHover({ centerOn, locations, allViewRef }) {
   const map = useMap();
-  // Al pasar el mouse por una card el mapa se acerca a ese lugar. Antes sumaba 2 niveles SIN
-  // techo: si la vista general ya venia en 16 el hover saltaba a 18, y desde 18 a 20 — a ese
-  // zoom se pierde toda referencia y no se entiende donde esta el lugar.
-  // El hover sobre una card acerca el mapa a ese lugar, con techo en 16. Antes sumaba 2 niveles
-  // SIN techo: si la vista general ya venia en 16 el hover saltaba a 18, y desde 18 a 20, donde
-  // se pierde toda referencia de donde queda el lugar.
-  const HOVER_ZOOM_DELTA = 2;
-  const MAX_HOVER_ZOOM = 19;
-  const DEFAULT_HOVER_ZOOM = 19;
+
+  // Se acerca a un techo fijo en vez de "el zoom actual + 2". Con el delta, el zoom de destino
+  // dependia de como hubiera quedado la vista general de esa busqueda, asi que el mismo gesto
+  // daba acercamientos distintos segun la consulta. Un destino fijo es predecible.
+  const ZOOM_HOVER = 17;
+
+  // Esperar un toque antes de moverse descarta las tarjetas que el mouse solo roza de paso.
+  const RETARDO_ENTRADA_MS = 130;
+  // Y esperar antes de volver a la vista general permite encadenar tarjeta -> tarjeta sin pasar
+  // por el medio. Tiene que ser comodamente mayor al hueco entre el mouseleave de una tarjeta y
+  // el mouseenter de la siguiente.
+  const RETARDO_SALIDA_MS = 420;
+
+  const temporizador = useRef(null);
+  const cancelarEspera = useRef(null);
+  const enfocado = useRef(false); // ya estamos acercados sobre alguna tarjeta
 
   useEffect(() => {
-    // Caso 1: Centrar en un restaurante específico
+    clearTimeout(temporizador.current);
+
+    const suave = !movimientoReducido();
+    const irA = (latlng, zoom, { recto }) => {
+      cancelarEspera.current && cancelarEspera.current();
+      cancelarEspera.current = cuandoTengaTamano(map, () => {
+        try {
+          if (!suave) {
+            map.setView(latlng, zoom, { animate: false });
+          } else if (recto) {
+            // Mismo zoom: desplazamiento en linea recta, sin el arco de flyTo.
+            map.panTo(latlng, { duration: 0.45 });
+          } else {
+            map.flyTo(latlng, zoom, { duration: 0.6 });
+          }
+        } catch (e) { console.warn('CenterOnHover:', e); }
+      });
+    };
+
+    // Entrar en una tarjeta
     if (centerOn && locations.length > 0) {
       const loc = locations.find(l => l.nombre === centerOn);
-      // Validar coordenadas estrictamente antes de volar
-      if (loc && typeof loc.lat === 'number' && typeof loc.lng === 'number' && !isNaN(loc.lat) && !isNaN(loc.lng)) {
-        let hoverZoom = DEFAULT_HOVER_ZOOM;
-        if (allViewRef && allViewRef.current && typeof allViewRef.current.zoom === 'number' && !isNaN(allViewRef.current.zoom)) {
-          hoverZoom = Math.min(
-            Math.max(allViewRef.current.zoom + HOVER_ZOOM_DELTA, 3),
-            MAX_HOVER_ZOOM
-          );
-        }
-        try {
-          map.flyTo([loc.lat, loc.lng], hoverZoom, { duration: 0.5 });
-        } catch (e) { console.warn("Error en flyTo", e); }
-      }
-    }
-    // Caso 2: Restaurar vista general
-    else {
-      if (allViewRef && allViewRef.current && allViewRef.current.center) {
-        const [lat, lng] = allViewRef.current.center;
-        const zoom = allViewRef.current.zoom || 13;
+      if (!loc || typeof loc.lat !== 'number' || typeof loc.lng !== 'number'
+        || isNaN(loc.lat) || isNaN(loc.lng)) return;
 
-        // VALIDACIÓN CRÍTICA PARA EVITAR ERROR (NaN, NaN)
-        if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
-          try {
-            map.flyTo([lat, lng], zoom, { duration: 0.5 });
-          } catch (e) {
-            console.warn('FlyTo preventivo evitado:', e);
-          }
-        }
-      }
+      const yaEstabaEnfocado = enfocado.current;
+      temporizador.current = setTimeout(() => {
+        enfocado.current = true;
+        irA([loc.lat, loc.lng], ZOOM_HOVER, { recto: yaEstabaEnfocado });
+      }, RETARDO_ENTRADA_MS);
     }
+    // Salir: volver a la vista general, pero recien si no entra otra tarjeta enseguida
+    else if (allViewRef && allViewRef.current && allViewRef.current.center) {
+      const [lat, lng] = allViewRef.current.center;
+      const zoom = allViewRef.current.zoom || 13;
+      if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) return;
+
+      temporizador.current = setTimeout(() => {
+        enfocado.current = false;
+        irA([lat, lng], zoom, { recto: false });
+      }, RETARDO_SALIDA_MS);
+    }
+
+    return () => {
+      clearTimeout(temporizador.current);
+      cancelarEspera.current && cancelarEspera.current();
+    };
   }, [centerOn, locations, map, allViewRef]);
 
   return null;
 }
 
-// Small helper component: when `visible` becomes true, call invalidateSize on the map ref a couple of times
 function MapKick({ visible, mapRef }) {
   useEffect(() => {
     if (!visible || !mapRef?.current) return;
