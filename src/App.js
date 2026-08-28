@@ -736,7 +736,7 @@ function App() {
     const FIJOS = {
       Edu: 'Yo voy a pedir algo vegan',
       Sabro: 'Yo quiero algo vegetariano',
-      Lau: 'Yo necesito algo sin TACC, acuérdense',
+      Lau: 'Yo algo sin TACC, acuérdense',
     };
     if (FIJOS[elegidos[0]]) {
       const otro = elegidos.findIndex((n, i) => i > 0 && !FIJOS[n]);
