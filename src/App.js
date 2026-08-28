@@ -706,6 +706,9 @@ function App() {
       'Juan', 'Fer', 'Stefa', 'Vicky', 'Lau', 'Lia', 'Dani'];
     const COLORES = ['#7fd1ff', '#ffb27f', '#8ee6a8', '#c9a7ff', '#ffd479', '#8fd4c8'];
     // Pedidos variados para el resto. Edu y Sabro tienen el suyo fijo (ver mas abajo).
+    // Mezcla a proposito pedidos POR COMIDA y pedidos POR OCASION (pet friendly, mesas afuera,
+    // abierto tarde, barato). Los segundos insinuan que al bot se le puede pedir bastante mas que
+    // una categoria, que es justo lo que lo distingue de un buscador por palabra clave.
     const PEDIDOS = [
       'Yo quiero una buena burger',
       'Empanadas fritas papáaa',
@@ -716,6 +719,20 @@ function App() {
       'Quiero unos tacos bien picantes',
       'Pastas caseras y no se discute',
       'Yo quiero helado, no me importa la hora',
+      'Un buen sánguche de milanesa y listo',
+      'Choripán, no me compliquen',
+      'Papas con cheddar y soy feliz',
+      'Pollo al spiedo con papas, básico',
+      'Un ramen, hace un frío bárbaro',
+      'Algo que esté abierto hasta tarde',
+      'Un lugar con mesas afuera que está lindo',
+      'Llevo al perro, que sea pet friendly',
+      'Algo tranqui donde se pueda charlar',
+      'Cualquier cosa, pero que no salga un ojo de la cara',
+      'Algo rápido que ando corriendo',
+      'Yo arranco por el postre y después vemos',
+      // Esta apunta a otra cosa que el bot sabe hacer: preguntar por UN lugar puntual.
+      'Che, me contaron de un lugar nuevo pero no sé qué onda',
     ];
 
     const mezclar = (arr) => {
