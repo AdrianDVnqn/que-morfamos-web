@@ -686,7 +686,7 @@ function App() {
     { role: 'user', autor: 'Vos', content: 'Banquen que conozco a alguien que nos puede ayudar... 🕵️' },
     // Aviso de sistema: nadie lo "escribe", asi que no lleva indicador de tipeo.
     { role: 'sistema', content: 'El Sommelier del Comahue se unió al grupo' },
-    { role: 'assistant', autor: 'El Sommelier del Comahue', mode: 'system', content: 'Decime qué te pinta y te digo dónde. 🧐' },
+    { role: 'assistant', autor: 'El Sommelier del Comahue', mode: 'system', content: 'A sus órdenes. Burger, vegano o empanadas: díganme qué buscan y les digo dónde. 🧐' },
   ]), []);
 
   // Cuanto tarda alguien en escribir un mensaje. Antes esto era un numero a mano por mensaje —

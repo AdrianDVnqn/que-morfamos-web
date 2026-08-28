@@ -4175,6 +4175,12 @@ h4 {
   display: none;
 }
 
+/* El <p> que genera el markdown trae margin-bottom, asi que el texto quedaba pegado arriba
+   (medido: 6px de aire arriba contra 18 abajo) y la pastilla se veia descentrada. */
+.message-sistema .message-content p {
+  margin: 0;
+}
+
 /* ==========================================================================
    "X ESTA ESCRIBIENDO..."
    Tres puntos que rebotan escalonados, dentro de una burbuja del lado que corresponde a quien
