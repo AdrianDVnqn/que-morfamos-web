@@ -1673,12 +1673,32 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
             <div className={`detail-panel ${mobileTab !== 'results' ? 'mobile-hidden' : ''}`}>
               {loadingInlineDetail ? (
                 <div className="detail-loading">
-                  <div className="typing-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+  <div className="detalle-esqueleto" role="status" aria-live="polite" aria-busy="true">
+                    <span className="sr-only">Cargando la informacion del lugar</span>
+                    <div className="esq esq--titulo" />
+                    <div className="esq esq--rating" />
+                    <div className="esq esq--direccion" />
+
+                    <div className="esq-bloque">
+                      <div className="esq esq--subtitulo" />
+                      <div className="esq esq--linea" />
+                      <div className="esq esq--linea" />
+                      <div className="esq esq--linea es-ultima" />
+                    </div>
+
+                    <div className="esq-columnas">
+                      <div className="esq-bloque">
+                        <div className="esq esq--subtitulo" />
+                        <div className="esq esq--linea" />
+                        <div className="esq esq--linea es-ultima" />
+                      </div>
+                      <div className="esq-bloque">
+                        <div className="esq esq--subtitulo" />
+                        <div className="esq esq--linea" />
+                        <div className="esq esq--linea es-ultima" />
+                      </div>
+                    </div>
                   </div>
-                  <p>Cargando información del restaurante...</p>
                 </div>
               ) : inlineDetail && (
                 <>
@@ -2071,12 +2091,32 @@ Podés pedirme **recomendaciones** ('mejor pizza', 'lugar para cita'), preguntar
             <button className="modal-close" onClick={closeModal}>✕</button>
             {loadingDetail ? (
               <div className="modal-loading">
-                <div className="typing-indicator">
-                  <span></span>
-                  <span></span>
-                  <span></span>
+<div className="detalle-esqueleto" role="status" aria-live="polite" aria-busy="true">
+                  <span className="sr-only">Cargando la informacion del lugar</span>
+                  <div className="esq esq--titulo" />
+                  <div className="esq esq--rating" />
+                  <div className="esq esq--direccion" />
+
+                  <div className="esq-bloque">
+                    <div className="esq esq--subtitulo" />
+                    <div className="esq esq--linea" />
+                    <div className="esq esq--linea" />
+                    <div className="esq esq--linea es-ultima" />
+                  </div>
+
+                  <div className="esq-columnas">
+                    <div className="esq-bloque">
+                      <div className="esq esq--subtitulo" />
+                      <div className="esq esq--linea" />
+                      <div className="esq esq--linea es-ultima" />
+                    </div>
+                    <div className="esq-bloque">
+                      <div className="esq esq--subtitulo" />
+                      <div className="esq esq--linea" />
+                      <div className="esq esq--linea es-ultima" />
+                    </div>
+                  </div>
                 </div>
-                <p>Cargando información...</p>
               </div>
             ) : selectedRestaurant && (
               <>

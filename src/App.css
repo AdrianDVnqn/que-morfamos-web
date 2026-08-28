@@ -3567,3 +3567,112 @@ h4 {
   color: var(--accent-tertiary);
   font-variant-numeric: tabular-nums;
 }
+
+/* ==========================================================================
+   ESQUELETO DE CARGA DEL DETALLE
+   Antes el estado de carga eran tres <span> vacios con la clase .typing-indicator: ese CSS
+   anima el contenido del span (en el chat llevan un emoji), asi que sin contenido no se
+   dibujaba nada. Quedaba el texto "Cargando informacion..." solo, sin ninguna senal de vida.
+   Se reemplaza por un esqueleto con la forma del contenido real: dice QUE viene, no solo que
+   hay que esperar, y evita el salto de layout cuando llega el dato.
+   ========================================================================== */
+/* Los contenedores de carga son flex centrados, pensados para un spinner chico. El esqueleto,
+   en cambio, tiene que ocupar el ancho del modal: sin esto los bloques con ancho porcentual se
+   colapsan a una tira fina en el medio. */
+.modal-loading:has(.detalle-esqueleto),
+.detail-loading:has(.detalle-esqueleto) {
+  align-items: stretch;
+  padding: 12px 4px;
+}
+
+.detalle-esqueleto {
+  width: 100%;
+  align-self: stretch;
+  padding: 8px 0 4px;
+}
+
+.esq {
+  border-radius: 8px;
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.04) 25%,
+      rgba(255, 255, 255, 0.11) 37%,
+      rgba(255, 255, 255, 0.04) 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* El barrido arranca un toque despues en cada bloque, asi recorre el modal de arriba abajo
+   en vez de latir todo junto. */
+.detalle-esqueleto .esq:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.detalle-esqueleto .esq:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.esq--titulo {
+  height: 26px;
+  width: 62%;
+  margin-bottom: 12px;
+}
+
+.esq--rating {
+  height: 14px;
+  width: 38%;
+  margin-bottom: 22px;
+}
+
+.esq--direccion {
+  height: 13px;
+  width: 74%;
+  margin-bottom: 26px;
+}
+
+.esq-bloque {
+  margin-bottom: 26px;
+}
+
+.esq-bloque .esq--subtitulo {
+  height: 15px;
+  width: 30%;
+  margin-bottom: 12px;
+}
+
+.esq--linea {
+  height: 11px;
+  margin-bottom: 9px;
+}
+
+.esq--linea:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.esq--linea:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+/* La ultima linea corta imita el final de un parrafo real. */
+.esq--linea.es-ultima {
+  width: 55%;
+}
+
+.esq-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+@media (max-width: 800px) {
+  .esq-columnas {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .esq {
+    animation: none;
+    background: rgba(255, 255, 255, 0.07);
+  }
+}
