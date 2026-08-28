@@ -678,7 +678,10 @@ function App() {
     { role: 'otro',  content: 'Ni idea, no conozco mucho por acá', pausa: 1500 },
     // Guiño a Los Simuladores: la frase que antecede a la entrada del especialista.
     { role: 'user',  content: 'Esperá que conozco a alguien que nos puede ayudar... 🕵️', pausa: 1400 },
-    { role: 'assistant', mode: 'system', pausa: 1600, content: 'Decime qué te pinta y te digo dónde. 🧐' },
+    // Aviso de sistema, igual que cuando WhatsApp anuncia que alguien entro al grupo: convierte
+    // la aparicion del bot en un hecho de la escena en vez de un mensaje que cae de la nada.
+    { role: 'sistema', content: 'El Sommelier del Comahue se unió al grupo', pausa: 900 },
+    { role: 'assistant', mode: 'system', pausa: 1200, content: 'Decime qué te pinta y te digo dónde. 🧐' },
   ]), []);
 
   useEffect(() => {

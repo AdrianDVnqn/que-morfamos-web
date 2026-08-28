@@ -61,9 +61,9 @@
 :root {
   /* Colores base */
   --bg-primary: #0d0d0d;
-  --bg-secondary: rgba(26, 26, 46, 0.55);
-  --bg-card: rgba(22, 33, 62, 0.55);
-  --bg-chat: rgba(15, 15, 35, 0.55);
+  --bg-secondary: rgba(34, 22, 32, 0.55);
+  --bg-card: rgba(38, 23, 35, 0.55);
+  --bg-chat: rgba(24, 15, 23, 0.55);
   --accent-primary: #e94560;
   --accent-secondary: #ff6b6b;
   --accent-tertiary: #feca57;
@@ -78,7 +78,7 @@
   --text-primary: #ffffff;
   --text-secondary: #a0a0a0;
   --text-muted: #6b6b6b;
-  --border-color: #2a2a4a;
+  --border-color: #3b2534;
   --success: #00d26a;
   --warning: #feca57;
   --error: #ff4757;
@@ -103,8 +103,8 @@
 
   /* Glassmorphism System */
   --glass-light: rgba(255, 255, 255, 0.03);
-  --glass-medium: rgba(20, 24, 40, 0.75);
-  --glass-heavy: rgba(10, 12, 20, 0.88);
+  --glass-medium: rgba(29, 20, 28, 0.75);
+  --glass-heavy: rgba(15, 10, 14, 0.88);
   --glass-blur-light: blur(8px) saturate(1.1);
   --glass-blur-medium: blur(16px) saturate(1.2);
   --glass-blur-heavy: blur(24px) saturate(1.3);
@@ -222,7 +222,7 @@ body {
 /* ========== HEADER ========== */
 .app-header {
   /* ligera transparencia para layer sobre el fondo */
-  background: rgba(18, 20, 36, 0.68);
+  background: rgba(27, 18, 26, 0.68);
   padding: 10px 30px;
   border-radius: 20px 20px 0 0;
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -432,7 +432,7 @@ body {
 /* ========== CHAT CONTAINER ========== */
 .chat-container {
   /* Mantener color del chat con leve transparencia para mostrar el fondo */
-  background: rgba(15, 15, 35, 0.64);
+  background: rgba(24, 15, 23, 0.64);
   /* levemente transparente */
   display: flex;
   flex-direction: column;
@@ -668,7 +668,7 @@ body {
 
 .message-assistant .message-content {
   /* Fondo sólido para evitar mismatch de color con el tail */
-  background: #23273a;
+  background: #30222d;
   color: var(--text-primary);
   border: none;
   /* Eliminado el borde para que coincida con el tail */
@@ -695,7 +695,7 @@ body {
   border-style: solid;
   border-width: 0 15px 15px 0;
   /* Más grande */
-  border-color: transparent #23273a transparent transparent;
+  border-color: transparent #30222d transparent transparent;
   /* Mismo color sólido */
   /* Sombra para el triangulito para que se una a la caja */
   filter: drop-shadow(-2px 2px 2px rgba(0, 0, 0, 0.2));
@@ -844,7 +844,7 @@ body {
   gap: 12px;
   padding: 20px 25px;
   border-top: 1px solid var(--border-color);
-  background: rgba(26, 26, 46, 0.62);
+  background: rgba(34, 22, 32, 0.62);
   /* leve transparencia */
   backdrop-filter: blur(6px) saturate(0.95);
   /* make the chat input area rounded at the bottom to match the header */
@@ -860,7 +860,7 @@ body {
   font-size: var(--fs-md);
   outline: none;
   transition: all 0.3s ease;
-  background: rgba(13, 13, 35, 0.72);
+  background: rgba(22, 13, 21, 0.72);
   /* ligeramente translúcido */
   color: var(--text-primary);
 }
@@ -1091,7 +1091,7 @@ body {
   animation: marcadorCae 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
   padding: 3px 9px 3px 7px;
   border-radius: 999px;
-  background: rgba(15, 15, 35, 0.92);
+  background: rgba(24, 15, 23, 0.92);
   border: 1px solid rgba(var(--accent-primary-rgb), 0.45);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
@@ -1419,7 +1419,7 @@ body {
     overflow: hidden;
     /* El scroll va en messages-container */
     /* 0.2 de opacidad (muy transparente) */
-    background: rgba(10, 12, 20, 0.2) !important;
+    background: rgba(15, 10, 14, 0.2) !important;
     /* Blur ligero para que el texto siga siendo legible sobre fotos complejas */
     backdrop-filter: blur(3px) !important;
     border: none !important;
@@ -1435,7 +1435,7 @@ body {
 
   /* Aseguramos que el mensaje del asistente tenga contraste */
   .message-assistant .message-content {
-    background: #23273a !important;
+    background: #30222d !important;
     /* Burbuja sólida igual que desktop */
     /* backdrop-filter: blur(10px); Eliminado por coherencia de color */
     border: none !important;
@@ -1608,7 +1608,7 @@ body {
     /* Más espacio entre botones */
     justify-content: space-between;
     /* Estilo cristal oscuro idéntico al Header */
-    background: rgba(18, 20, 36, 0.85);
+    background: rgba(27, 18, 26, 0.85);
     backdrop-filter: blur(12px) saturate(1.1);
     border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 8px;
@@ -1657,7 +1657,7 @@ body {
 
   /* Botón de la lamparita (Ejemplos) - Efecto Glass */
   .chip-bubble-btn {
-    background: rgba(20, 20, 40, 0.45) !important;
+    background: rgba(29, 18, 27, 0.45) !important;
     /* Semi-transparente */
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1667,7 +1667,7 @@ body {
 
   /* Chips de sugerencias (Pizzas, Vegano, etc.) - Efecto Glass */
   .chip-btn {
-    background: rgba(20, 20, 40, 0.45) !important;
+    background: rgba(29, 18, 27, 0.45) !important;
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: #eee;
@@ -1704,7 +1704,7 @@ body {
     /* Redondeado arriba, pegado abajo */
     margin-bottom: 0;
     /* Pegado al fondo por defecto */
-    background: rgba(20, 20, 40, 0.92);
+    background: rgba(29, 18, 27, 0.92);
     border-top: 1px solid var(--border-color);
     z-index: 50;
   }
@@ -2278,7 +2278,7 @@ body {
 }
 
 .chip-bubble-btn {
-  background: rgba(20, 20, 40, 0.45) !important;
+  background: rgba(29, 18, 27, 0.45) !important;
   /* Semi-transparente */
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -2386,7 +2386,7 @@ body {
     overflow-x: auto;
     z-index: 50;
     -webkit-overflow-scrolling: touch;
-    background: linear-gradient(180deg, rgba(15, 15, 35, 0.98), rgba(22, 33, 62, 0.96));
+    background: linear-gradient(180deg, rgba(24, 15, 23, 0.98), rgba(38, 23, 35, 0.96));
     border-top: 1px solid rgba(var(--accent-primary-rgb), 0.2);
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
   }
@@ -3082,7 +3082,7 @@ body {
   inset: 0;
   /* Gradiente aún más oscuro para atenuar las fotos y mejorar contraste */
   /* Overlay: dark purple gradient (darker than UI) so slideshow is tinted purple, not black */
-  background: linear-gradient(180deg, rgba(22, 33, 62, 0.8), rgba(12, 12, 24, 0.94));
+  background: linear-gradient(180deg, rgba(38, 23, 35, 0.8), rgba(12, 12, 24, 0.94));
   pointer-events: none;
 }
 
@@ -3766,8 +3766,8 @@ h4 {
   z-index: 3;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 45%, transparent 32%, rgba(8, 8, 18, 0.55) 100%),
-    linear-gradient(180deg, rgba(8, 8, 18, 0.38) 0%, transparent 22%, transparent 68%, rgba(8, 8, 18, 0.5) 100%);
+    radial-gradient(ellipse at 50% 45%, transparent 32%, rgba(12, 7, 11, 0.55) 100%),
+    linear-gradient(180deg, rgba(12, 7, 11, 0.38) 0%, transparent 22%, transparent 68%, rgba(12, 7, 11, 0.5) 100%);
 }
 
 /* Sin movimiento: se cortan el Ken Burns y el cruce, y queda la primera imagen fija. */
@@ -4022,7 +4022,7 @@ h4 {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent 55%, rgba(8, 8, 18, 0.55) 100%);
+  background: linear-gradient(180deg, transparent 55%, rgba(12, 7, 11, 0.55) 100%);
 }
 
 /* ==========================================================================
@@ -4039,11 +4039,32 @@ h4 {
   max-width: 85%;
 }
 
+/* El color va SOLIDO, no rgba sobre el fondo: el triangulito es un borde CSS y no puede ser
+   translucido, asi que con un fondo semitransparente la burbuja y su cola quedan de dos colores
+   distintos. Es la misma razon por la que .message-assistant usa un solido y tiene un comentario
+   pidiendo que no se le ponga backdrop-filter. */
 .message-otro .message-content {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top-left-radius: 6px;
+  background: #332632;
+  border: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 6px;
+  border-bottom-left-radius: 6px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   color: var(--text-primary);
+  position: relative;
+}
+
+/* Cola hacia la izquierda, igual que la del bot: el interlocutor tambien habla desde ese lado. */
+.message-otro .message-content::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -15px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 15px 15px 0;
+  border-color: transparent #332632 transparent transparent;
 }
 
 /* Cada mensaje entra por su lado, como llegando. */
@@ -4122,4 +4143,26 @@ h4 {
     width: 100% !important;
     max-width: none;
   }
+}
+
+/* Aviso de sistema del chat ("fulano se unió al grupo"): centrado, chico y apagado, como en
+   cualquier chat grupal. No es nadie hablando, asi que no lleva burbuja ni cola. */
+.message-sistema {
+  align-self: center;
+  max-width: 90%;
+}
+
+.message-sistema .message-content {
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  text-align: center;
+  box-shadow: none;
+}
+
+.message-sistema .message-content::after {
+  display: none;
 }
