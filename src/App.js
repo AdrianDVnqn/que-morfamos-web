@@ -7,6 +7,60 @@ import 'leaflet/dist/leaflet.css';
 import './App.css';
 import { lanzarLluviaTono } from './utils/emojiRain.js';
 
+// Mini mapa estatico para la cabecera del detalle.
+//
+// Se arma con <img> de tiles y aritmetica de coordenadas en vez de montar un Leaflet: una
+// instancia de Leaflet dentro de un modal hereda el problema de tamano cero que ya nos costo caro
+// (el contenedor no tiene medidas hasta que el modal esta pintado), mas su propio ciclo de vida
+// para algo que ni siquiera es interactivo. Asi es un puñado de imagenes y cero JS por cuadro.
+//
+// La cuenta es la proyeccion Web Mercator estandar: se pasa lat/lon a pixeles del mundo en el
+// zoom dado, y se dibuja la ventana centrada en ese punto.
+// zoom 14 y no 16: a 16 entran cuatro cuadras y el mapa no te ubica en ningun lado. A 14 se
+// ve el barrio y la referencia sirve de verdad.
+function MiniMapa({ lat, lng, urlTemplate, alto = 132, ancho = 640, zoom = 14 }) {
+  if (!lat || !lng || Number.isNaN(lat) || Number.isNaN(lng)) return null;
+
+  const TILE = 256;
+  const n = Math.pow(2, zoom);
+  const mundoX = ((lng + 180) / 360) * n * TILE;
+  const la = (lat * Math.PI) / 180;
+  const mundoY = ((1 - Math.asinh(Math.tan(la)) / Math.PI) / 2) * n * TILE;
+
+  // Ventana visible, centrada en el lugar.
+  const x0 = mundoX - ancho / 2;
+  const y0 = mundoY - alto / 2;
+
+  const tiles = [];
+  for (let tx = Math.floor(x0 / TILE); tx <= Math.floor((x0 + ancho) / TILE); tx++) {
+    for (let ty = Math.floor(y0 / TILE); ty <= Math.floor((y0 + alto) / TILE); ty++) {
+      if (ty < 0 || ty >= n) continue;
+      const src = urlTemplate
+        .replace('{z}', zoom)
+        .replace('{x}', ((tx % n) + n) % n)
+        .replace('{y}', ty)
+        .replace('{r}', '');
+      tiles.push(
+        <img
+          key={`${tx}-${ty}`}
+          src={src}
+          alt=""
+          aria-hidden="true"
+          draggable="false"
+          style={{ position: 'absolute', left: tx * TILE - x0, top: ty * TILE - y0, width: TILE, height: TILE }}
+        />
+      );
+    }
+  }
+
+  return (
+    <div className="mini-mapa" style={{ height: alto, width: ancho }} aria-hidden="true">
+      {tiles}
+      <span className="mini-mapa__pin">📍</span>
+    </div>
+  );
+}
+
 // Componente para cambiar el TileLayer dinámicamente
 function ChangeMapStyle({ url, attribution, detectRetina = true, maxNativeZoom }) {
   const map = useMap();
@@ -530,24 +584,134 @@ function App() {
       img.src = src;
     });
   }, []);
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      // Las versiones anteriores arrancaban con "me leí X reseñas": un dato sobre el bot, no
-      // sobre el que llega con hambre. A un dev le impresiona el número; a alguien decidiendo
-      // dónde cenar un martes, no le mueve nada. Y seguían con una orden ("preguntá", "decime"),
-      // que es el tipo de frase más flojo que hay.
-      // Esto nombra el momento real: la app se llama "¿Qué morfamos?", o sea que el chiste ya
-      // está en la marca y se puede cobrar. Los ejemplos de qué pedirle los cargan los chips,
-      // que están justo abajo.
-      // "qué te pinta" y no "qué se te antoja": antojarse es español neutro, no rioplatense.
-      // Tampoco "qué tenés ganas", que repetiría el placeholder del input.
-      content: `*—¿Dónde comemos? —Y... no sé, ¿vos qué querés?*
+  // La bienvenida se representa como una CONVERSACION que se va escribiendo sola, no como un
+  // cartel. Dos personas intentando decidir donde comer —que es la escena que todo el mundo
+  // vivio— y el bot cortandola. Dramatiza el problema en vez de describirlo, y de paso muestra
+  // como se ve el chat antes de que escribas nada.
+  // Arranca vacia: la llena BIENVENIDA con temporizadores (ver el efecto mas abajo).
+  const [messages, setMessages] = useState([]);
+  // La bienvenida terminada cuenta como "pagina inicial" aunque tenga 4 mensajes: varios lugares
+  // preguntaban messages.length <= 1 para saberlo, y eso se rompia al partirla en varios.
+  const [bienvenidaEnCurso, setBienvenidaEnCurso] = useState(true);
+  // Sonidito de mensaje.
+  //
+  // Se SINTETIZA con Web Audio en vez de reproducir un archivo: el tono de WhatsApp es marca
+  // registrada, y ademas asi no hay assets que cargar ni licencias que revisar.
+  //
+  // Ojo con las expectativas: los navegadores bloquean el audio hasta que hubo una interaccion
+  // del usuario, asi que en la PRIMERA carga la escena de bienvenida va a ser muda. No es un bug
+  // ni algo que se pueda esquivar. De ahi en adelante suena normal, porque cualquier mensaje
+  // posterior viene despues de que el usuario escribio o toco algo.
+  const audioRef = useRef(null);
+  const [sonidoActivo, setSonidoActivo] = useState(() => {
+    try { return localStorage.getItem('qm_sonido') !== 'off'; } catch { return true; }
+  });
 
-Cortemos con eso: decime qué te pinta y te digo dónde.`,
-      mode: 'system'
+  // Un tono de notificacion no es UN pitido: son dos notas cortas, la segunda mas alta, con
+  // ataque casi instantaneo y caida rapida. Eso es lo que el oido reconoce como "mensaje" y no
+  // como alarma. Se le suma una octava por debajo a volumen bajo para darle cuerpo, si no suena
+  // a beep de microondas.
+  const reproducirBlip = (saliente = false) => {
+    if (!sonidoActivo) return;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      if (!audioRef.current) audioRef.current = new Ctx();
+      const ctx = audioRef.current;
+      if (ctx.state === 'suspended') return;  // bloqueado por el navegador: no insistimos
+
+      // Saliente (lo que "manda" el usuario) va mas agudo y mas corto; entrante mas redondo.
+      const notas = saliente ? [1046, 1568] : [784, 1175];
+      const salida = ctx.createGain();
+      salida.gain.value = 0.16;
+      // Un pasabajos suave le saca el filo metalico de la onda cruda.
+      const filtro = ctx.createBiquadFilter();
+      filtro.type = 'lowpass';
+      filtro.frequency.value = 2600;
+      salida.connect(filtro).connect(ctx.destination);
+
+      notas.forEach((hz, i) => {
+        const t0 = ctx.currentTime + i * 0.075;
+        [[hz, 1], [hz / 2, 0.35]].forEach(([f, peso]) => {
+          const osc = ctx.createOscillator();
+          const vol = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, t0);
+          vol.gain.setValueAtTime(0.0001, t0);
+          vol.gain.exponentialRampToValueAtTime(0.9 * peso, t0 + 0.008);  // ataque casi seco
+          vol.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.16);       // y se apaga rapido
+          osc.connect(vol).connect(salida);
+          osc.start(t0);
+          osc.stop(t0 + 0.18);
+        });
+      });
+    } catch { /* si el navegador no deja, no pasa nada */ }
+  };
+
+  // Cualquier interaccion del usuario habilita el audio: el navegador mantiene el contexto
+  // suspendido hasta que hay un gesto.
+  useEffect(() => {
+    const despertarAudio = () => {
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!audioRef.current && Ctx) audioRef.current = new Ctx();
+        if (audioRef.current?.state === 'suspended') audioRef.current.resume();
+      } catch { /* ignorado */ }
+    };
+    window.addEventListener('pointerdown', despertarAudio, { once: true });
+    window.addEventListener('keydown', despertarAudio, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', despertarAudio);
+      window.removeEventListener('keydown', despertarAudio);
+    };
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem('qm_sonido', sonidoActivo ? 'on' : 'off'); } catch { /* ignorado */ }
+  }, [sonidoActivo]);
+
+  // Guion de la escena. `pausa` es lo que se espera ANTES de mostrar el mensaje, y sale del
+  // largo del texto: un mensaje corto se escribe rapido y uno largo tarda, que es lo que hace
+  // que se sienta gente tipeando y no un temporizador.
+  const BIENVENIDA = useMemo(() => ([
+    { role: 'user',  content: 'Che, ¿a dónde vamos hoy? Tengo ganas de una buena burger', pausa: 800 },
+    { role: 'otro',  content: 'Ni idea, no conozco mucho por acá', pausa: 1500 },
+    // Guiño a Los Simuladores: la frase que antecede a la entrada del especialista.
+    { role: 'user',  content: 'Esperá que conozco a alguien que nos puede ayudar... 🕵️', pausa: 1400 },
+    { role: 'assistant', mode: 'system', pausa: 1600, content: 'Decime qué te pinta y te digo dónde. 🧐' },
+  ]), []);
+
+  useEffect(() => {
+    // Si el usuario ya escribio algo, la escena no tiene que pisarle nada.
+    let cancelado = false;
+    const temporizadores = [];
+    let acumulado = 0;
+
+    const sinMovimiento = typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (sinMovimiento) {
+      // Quien pidio menos movimiento no quiere ver una escena actuandose: va entera y listo.
+      setMessages(BIENVENIDA.map(({ pausa, ...m }) => m));
+      setBienvenidaEnCurso(false);
+      return;
     }
-  ]);
+
+    BIENVENIDA.forEach((m, i) => {
+      acumulado += m.pausa;
+      temporizadores.push(setTimeout(() => {
+        if (cancelado) return;
+        const { pausa, ...limpio } = m;
+        setMessages(prev => [...prev, limpio]);
+        reproducirBlip(m.role !== 'assistant');
+        if (i === BIENVENIDA.length - 1) setBienvenidaEnCurso(false);
+      }, acumulado));
+    });
+
+    return () => { cancelado = true; temporizadores.forEach(clearTimeout); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Los chips son el mejor cartel de lo que el bot sabe hacer, así que conviene que muestren
   // RANGO y no tres veces la misma clase de consulta. Antes eran tres categorías sueltas y dos
   // arrancaban con "Mejores". Ahora: una categoría común, una restricción de dieta, una consulta
@@ -561,6 +725,16 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
   ];
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Y cuando termina de responder de verdad. Este es el sonido que SI se va a escuchar siempre,
+  // porque para llegar aca el usuario tuvo que escribir o tocar un chip.
+  const estabaCargando = useRef(false);
+  useEffect(() => {
+    if (estabaCargando.current && !loading) reproducirBlip(false);
+    estabaCargando.current = loading;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
   const [apiStatus, setApiStatus] = useState('checking');
   const [backendHealth, setBackendHealth] = useState(null);
   const [conversationContext, setConversationContext] = useState({});
@@ -691,7 +865,7 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
   // Mostrar modal solo si apiStatus === 'error' y es la página inicial (solo mensaje de bienvenida)
   useEffect(() => {
     let countdownInterval;
-    const isInitialPage = messages.length === 1 && messages[0]?.role === 'assistant';
+    const isInitialPage = !sidebarMode && messages.every(m => m.role !== 'user' || m.content.length < 40);
     if (apiStatus === 'error' && isInitialPage) {
       setShowBackendInactiveModal(true);
       setBackendCountdown(60);
@@ -714,7 +888,7 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
 
   // Mostrar popup de arranque en frío mientras el backend está respondiendo
   useEffect(() => {
-    const isInitialPage = messages.length === 1 && messages[0]?.role === 'assistant';
+    const isInitialPage = !sidebarMode && messages.every(m => m.role !== 'user' || m.content.length < 40);
     let timer;
     let interval;
 
@@ -1454,14 +1628,54 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
     setSelectedRestaurant(null);
   };
 
+  // El numero acompaña al relleno de las estrellas: misma duracion (0.9s) y misma sensacion de
+  // curva, asi los dos terminan juntos. easeOutQuint es la version en JS del
+  // cubic-bezier(0.22, 1, 0.36, 1) que usa la animacion CSS.
+  // `clave` reinicia el conteo al abrir otro lugar: sin eso, dos lugares con el mismo rating no
+  // volverian a animar porque el valor no cambio.
+  const useConteo = (valor, clave, duracion = 2200) => {
+    const [n, setN] = useState(0);
+    useEffect(() => {
+      const destino = Number(valor) || 0;
+      const sinMovimiento = typeof window.matchMedia === 'function'
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!destino || sinMovimiento) { setN(destino); return; }
+      let raf, inicio;
+      const paso = (t) => {
+        if (inicio === undefined) inicio = t;
+        const avance = Math.min(1, (t - inicio) / duracion);
+        setN(destino * (1 - Math.pow(1 - avance, 5)));
+        if (avance < 1) raf = requestAnimationFrame(paso);
+        else setN(destino);
+      };
+      raf = requestAnimationFrame(paso);
+      return () => cancelAnimationFrame(raf);
+    }, [valor, clave, duracion]);
+    return n;
+  };
+
+  const ratingAnimado = useConteo(selectedRestaurant?.rating, selectedRestaurant?.nombre);
+  // Las reseñas tardan un toque mas: son un numero mucho mas grande y frenar despues hace que
+  // se lea el conteo en vez de ver un borron.
+  const reviewsAnimadas = useConteo(selectedRestaurant?.total_reviews, selectedRestaurant?.nombre, 2400);
+
+  // Dos capas de 5 estrellas superpuestas: la de abajo apagada, la de arriba dorada y recortada
+  // al porcentaje del rating. Animar ESE ancho es lo que da el efecto de que se van llenando —
+  // y de paso se ven medias estrellas de verdad (un 4.2 recorta a 84%), cosa que la version
+  // anterior no podia: redondeaba a "media" o nada con un caracter '½'.
   const renderStars = (rating) => {
-    const fullStars = Math.floor(rating);
-    const hasHalf = rating % 1 >= 0.5;
+    const valor = Number(rating) || 0;
+    const relleno = Math.max(0, Math.min(100, (valor / 5) * 100));
     return (
-      <span className="stars-display">
-        {'★'.repeat(fullStars)}
-        {hasHalf && '½'}
-        {'☆'.repeat(5 - fullStars - (hasHalf ? 1 : 0))}
+      <span
+        // El estallido se reserva para 3.5+: si aparece en cualquier lugar deja de decir algo.
+        className={`stars-display${valor >= 3.5 ? ' tiene-remate' : ''}`}
+        style={{ '--relleno': `${relleno}%` }}
+        role="img"
+        aria-label={`${valor.toFixed(1)} de 5 estrellas`}
+      >
+        <span className="stars-display__base" aria-hidden="true">★★★★★</span>
+        <span className="stars-display__fill" aria-hidden="true">★★★★★</span>
       </span>
     );
   };
@@ -1573,6 +1787,18 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
               {/* Only show the + indicator in mobile when not expanded */}
               {!tonesExpanded && <span className="tone-expand-indicator">+</span>}
             </div>
+            {/* El sonido se puede apagar y la eleccion queda guardada: un sitio que hace ruido
+                sin forma visible de callarlo es de las cosas que mas molestan. */}
+            <button
+              type="button"
+              className="sonido-toggle"
+              onClick={() => setSonidoActivo(v => !v)}
+              aria-pressed={sonidoActivo}
+              aria-label={sonidoActivo ? 'Silenciar los sonidos' : 'Activar los sonidos'}
+              title={sonidoActivo ? 'Silenciar' : 'Activar sonido'}
+            >
+              {sonidoActivo ? '🔊' : '🔇'}
+            </button>
             <div
               className={`status-indicator status-${apiStatus}`}
               data-tooltip={apiStatus === 'connected' ? 'Backend conectado' : apiStatus === 'checking' ? 'Conectando al backend...' : 'Sin conexión al backend'}
@@ -1662,7 +1888,7 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
 
           {/* Expandable chips bar with bubble trigger */}
           { /* Mostrar chips solo en la página inicial (sin interacciones y sin sidebar) */}
-          {messages.length <= 1 && !sidebarMode && (
+          {!sidebarMode && (
             <div
               className="chip-bar-mobile"
               onMouseEnter={() => setChipsExpanded(true)}
@@ -2071,7 +2297,10 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
       {showBackendConnectingModal && (
         <div className="modal-overlay" style={{ zIndex: 9998 }} role="status" aria-live="polite">
           <div className="conn-modal">
-            <div className="conn-modal__icon" aria-hidden="true">⏳</div>
+            {/* Despertador y no otro reloj de arena: el ⏳ del contador ya dice "pasa el
+                tiempo", asi que repetirlo arriba no agregaba nada. Este tiene que decir POR QUE
+                estas esperando — el servidor esta dormido — y engancha con "despertando". */}
+            <div className="conn-modal__icon" aria-hidden="true">⏰</div>
 
             <p className="conn-modal__text">
               Estamos despertando el servidor. Suele tardar unos 30 segundos.
@@ -2168,17 +2397,49 @@ Cortemos con eso: decime qué te pinta y te digo dónde.`,
               </div>
             ) : selectedRestaurant && (
               <>
-                <div className="modal-header">
+                {/* El minimapa va AL COSTADO del nombre, no cruzando todo el ancho: a la
+                    derecha del titulo quedaba una franja muerta, y una banda de mapa a lo ancho
+                    empujaba todo el contenido hacia abajo por algo que es de apoyo. */}
+                <div className="modal-header modal-header--con-mapa">
+                  <div className="modal-header__texto">
                   <h2>{selectedRestaurant.nombre}</h2>
                   <div className="modal-rating">
                     {renderStars(selectedRestaurant.rating)}
-                    <span className="rating-number">{selectedRestaurant.rating?.toFixed(1)}</span>
-                    <span className="rating-count">({selectedRestaurant.total_reviews} reseñas)</span>
+                    <span className="rating-number">{ratingAnimado.toFixed(1)}</span>
+                    <span className="rating-count">({Math.round(reviewsAnimadas).toLocaleString('es-AR')} reseñas)</span>
                   </div>
+                  </div>
+                  <MiniMapa
+                    lat={selectedRestaurant.lat}
+                    lng={selectedRestaurant.lng}
+                    urlTemplate={MAP_STYLE.url}
+                    alto={140}
+                    ancho={300}
+                    zoom={14}
+                  />
                 </div>
 
                 <div className="modal-location">
                   <p>📍 {selectedRestaurant.direccion || 'Dirección no disponible'}</p>
+                  {/* Horarios, teléfono y cómo llegar no los tenemos ni queremos tenerlos:
+                      para eso está la ficha de Google, y linkear devuelve tráfico a la fuente. */}
+                  {selectedRestaurant.url && (
+                    <a
+                      className="modal-maps-link"
+                      href={selectedRestaurant.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path
+                          d="M12 21s7-5.686 7-11a7 7 0 1 0-14 0c0 5.314 7 11 7 11z"
+                          stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"
+                        />
+                        <circle cx="12" cy="10" r="2.5" fill="currentColor" />
+                      </svg>
+                      Ver en Google Maps ↗
+                    </a>
+                  )}
                   {(selectedRestaurant.barrio || selectedRestaurant.zona) && (
                     <p className="location-zone">
                       {selectedRestaurant.barrio}{selectedRestaurant.barrio && selectedRestaurant.zona ? ' • ' : ''}{selectedRestaurant.zona}
