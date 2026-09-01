@@ -954,59 +954,6 @@ body {
   text-align: center;
 }
 
-/* Las fechas del dataset se pliegan en mobile: son 117px de los 812 del viewport de un telefono
-   (14% de la pantalla) para un dato que se mira una vez. En desktop el <details> arranca abierto
-   desde JS y el disparador se esconde, asi que se ve exactamente igual que antes. */
-.footer-datos {
-  display: inline-block;
-}
-
-.footer-datos__toggle {
-  cursor: pointer;
-  list-style: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  /* 44px de alto para que sea un blanco de toque comodo, que es justo lo que le falta al resto
-     de los controles en mobile. */
-  min-height: 44px;
-  padding: 0 10px;
-  color: inherit;
-  opacity: 0.85;
-}
-
-.footer-datos__toggle::-webkit-details-marker {
-  display: none;
-}
-
-/* Chevron propio: el triangulito nativo no se puede pintar ni animar. */
-.footer-datos__toggle::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: rotate(45deg) translate(-2px, -2px);
-  transition: transform 0.18s ease;
-}
-
-.footer-datos[open] .footer-datos__toggle::after {
-  transform: rotate(-135deg) translate(-2px, -2px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .footer-datos__toggle::after {
-    transition: none;
-  }
-}
-
-/* En desktop el disparador sobra: hay lugar para mostrar las fechas siempre. */
-@media (min-width: 641px) {
-  .footer-datos__toggle {
-    display: none;
-  }
-}
-
 .dataset-status {
   display: flex;
   justify-content: center;
@@ -1782,8 +1729,10 @@ body {
 
   /* REGLA MAGICA: Solo levantamos el input si la App tiene sidebar-layout */
   .sidebar-layout .input-container {
-    margin-bottom: 75px;
-    /* Espacio para el menú flotante */
+    /* Sin margen inferior: la barra flotante ya la reserva `.App.sidebar-layout` con sus 96px de
+       padding-bottom. Reservarla de nuevo acá la contaba dos veces y abria 75px de vacio entre
+       el input y el pie. */
+    margin-bottom: 0;
     border-radius: 20px;
     /* Redondeado completo */
     border: 1px solid var(--border-color);
@@ -1844,7 +1793,9 @@ body {
    vacio y en todo desktop. */
 @media (max-width: 800px) {
   .App.sidebar-layout {
-    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    /* La barra flota en `bottom: 15px` con 60px de alto, o sea que ocupa hasta 75px desde el
+       borde. 96 dejaba 21px muertos de mas; 84 deja 9px de aire, que alcanza. */
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -3558,7 +3509,10 @@ body {
    para que ningun texto quede debajo. Aplica igual con los chips abiertos o colapsados: el alto
    de la barra es practicamente el mismo en ambos estados (~72px). */
 @media (max-width: 800px) {
-  .messages-container {
+  /* Solo en la home: con resultados en pantalla (.sidebar-layout) la barra de chips no se
+     renderiza, y estos 84px quedaban reservados para algo que no esta. Sobre un scroller que en
+     un telefono mide ~220px, eran 38% del alto del chat en blanco. */
+  .App:not(.sidebar-layout) .messages-container {
     padding-bottom: 84px;
   }
 }
@@ -4566,29 +4520,139 @@ h4 {
   }
 }
 
-/* En mobile el pie compite por el mismo espacio que el chat. Se compacta en una sola fila
-   (disparador de fechas + credito) y se recorta el aire de arriba, que estaba calculado para
-   desktop. Medido: el pie pasa de 117px a ~71px de los 812 del viewport de un telefono. */
-@media (max-width: 640px) {
+/* ==========================================================================
+   PANEL DEL INDICADOR DE ESTADO
+   El punto de conexion pasa a ser tambien el acceso a las fechas del dataset. Antes eso vivia en
+   el pie, que en un telefono reservaba ~71px de alto permanente para un dato que se consulta una
+   vez; aca no ocupa nada hasta que se lo pide.
+   ========================================================================== */
+.status-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Era un <div>: ahora es boton y hay que sacarle los estilos que trae el navegador, no los
+   propios (el color, el padding y el border-radius siguen viniendo de .status-indicator). */
+button.status-indicator {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.status-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 120;
+  min-width: 232px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  text-align: left;
+  animation: statusPanelEntra 0.16s ease-out;
+}
+
+@keyframes statusPanelEntra {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-panel {
+    animation: none;
+  }
+}
+
+.status-panel__titulo {
+  margin: 0 0 8px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Adentro del panel las fechas van una debajo de la otra: en fila se cortaban a mitad de dato. */
+.status-panel .dataset-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: var(--fs-2xs);
+  color: var(--text-secondary);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.status-panel__credito {
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+/* En mobile el pie desaparece: su contenido ya esta en el panel de arriba. Son ~71px de alto
+   recuperados en las tres pestañas. */
+@media (max-width: 768px) {
   .app-footer-status {
-    padding: 12px 15px 15px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    display: none;
+  }
+}
+
+/* En desktop el pie sigue como estaba y el panel solo agrega el estado de conexion. */
+@media (min-width: 769px) {
+  .status-panel .dataset-status {
+    display: none;
+  }
+
+  .status-panel__credito {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+}
+
+/* ==========================================================================
+   MOBILE: EL CHAT CRECE HACIA ABAJO, EL BANNER NO SE MUEVE
+   En la home el bloque header+chat se centra verticalmente (`margin-top: auto`), algo pensado
+   para desktop, donde el chat era chico y quedaban 475px de vacio. En un telefono el chat ocupa
+   casi toda la pantalla: centrarlo empuja el banner fuera del viewport y hace que la escena de
+   bienvenida crezca hacia ARRIBA a medida que entran los mensajes.
+   Medido antes de esto: el banner arrancaba en y=19 y saltaba a y=1 mientras se tipeaba la
+   escena, y en estados mas largos llegaba a y=-121, o sea entero fuera de pantalla y sin forma
+   de traerlo (la pagina no scrollea, `.App` es 100dvh con overflow hidden).
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Anclado arriba: el espacio libre queda abajo y el contenido crece en esa direccion. */
+  .App:not(.sidebar-layout) .app-header {
+    margin-top: 0;
+  }
+
+  /* Que absorba el alto sobrante en vez de dimensionarse por su contenido. */
+  .App:not(.sidebar-layout) .main-content {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  /* La pieza que faltaba. Era el unico eslabon de la cadena con `min-height: auto`, que es el
+     valor inicial de un flex item y le impide achicarse por debajo de su contenido: en vez de
+     scrollear, el contenedor crecia y empujaba a sus hermanos. Con esto el chat se llena hasta
+     donde da la pantalla y a partir de ahi scrollea, que es el comportamiento esperado. */
+  .messages-container {
+    min-height: 0;
+  }
+
+  /* El indicador de estado ahora es un boton y abre el panel de datos: necesita ser un blanco
+     de toque de verdad. Medido en 26x26, contra los 44x44 de la referencia (Apple HIG / WCAG). */
+  button.status-indicator {
+    min-width: 44px;
+    min-height: 44px;
     justify-content: center;
-    gap: 0 14px;
-  }
-
-  .app-footer-credit {
-    order: 1;
-  }
-
-  .footer-datos {
-    order: 2;
-  }
-
-  /* Desplegado, las fechas necesitan la fila entera. */
-  .footer-datos[open] {
-    width: 100%;
   }
 }

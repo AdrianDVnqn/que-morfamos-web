@@ -1018,24 +1018,27 @@ function App() {
   // Modal backend inactivo
   const [showBackendInactiveModal, setShowBackendInactiveModal] = useState(false);
   const [showBackendConnectingModal, setShowBackendConnectingModal] = useState(false);
-  // El bloque de fechas del dataset se come 117px de los 812 del viewport de un telefono (14% de
-  // la pantalla) para un dato que se consulta una vez. En mobile arranca plegado; en desktop, donde
-  // el espacio sobra, abierto. Se resuelve en JS y no por CSS porque el contenido de un <details>
-  // cerrado no se puede volver a mostrar de forma confiable desde una media query.
-  const [datosAbiertos, setDatosAbiertos] = useState(
-    () => typeof window === 'undefined' || window.matchMedia('(min-width: 641px)').matches
-  );
-  // Al pasar a ancho de desktop el disparador se esconde por CSS. Si el <details> quedo cerrado
-  // (venia de mobile, o el usuario roto el telefono a landscape) las fechas quedarian invisibles
-  // y sin ninguna forma de mostrarlas. Se reabre solo.
+  // Panel del indicador de estado: aloja las fechas del dataset, que antes vivian en el pie.
+  const [panelEstado, setPanelEstado] = useState(false);
+  const panelEstadoRef = useRef(null);
+
+  // Se cierra con Escape y al tocar afuera, como cualquier popover. Sin esto, en un telefono
+  // queda tapando el header y la unica salida seria volver a apuntarle al boton.
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 641px)');
-    const alCambiar = (e) => {
-      if (e.matches) setDatosAbiertos(true);
+    if (!panelEstado) return undefined;
+    const alTocarAfuera = (e) => {
+      if (panelEstadoRef.current && !panelEstadoRef.current.contains(e.target)) setPanelEstado(false);
     };
-    mq.addEventListener('change', alCambiar);
-    return () => mq.removeEventListener('change', alCambiar);
-  }, []);
+    const alTeclear = (e) => {
+      if (e.key === 'Escape') setPanelEstado(false);
+    };
+    document.addEventListener('mousedown', alTocarAfuera);
+    document.addEventListener('keydown', alTeclear);
+    return () => {
+      document.removeEventListener('mousedown', alTocarAfuera);
+      document.removeEventListener('keydown', alTeclear);
+    };
+  }, [panelEstado]);
 
   const [backendConnectingSeconds, setBackendConnectingSeconds] = useState(0);
   // Duracion tipica del arranque en frio de la maquina de Fly. Solo se usa para dibujar la
@@ -1872,6 +1875,29 @@ function App() {
     );
   };
 
+  // Las mismas fechas viven en dos lugares: el pie en desktop, y el panel del indicador de
+  // estado en mobile, donde el pie se oculta entero. Se arman una sola vez.
+  const fechasDataset = (
+    <div className="dataset-status" aria-label="Estado de actualización de datos">
+      {formatCompacta(backendHealth?.last_scraping || backendHealth?.dataset_updated_at) && (
+        <span title={`Últimos datos scrapeados: ${formatStatusDate(backendHealth?.last_scraping || backendHealth?.dataset_updated_at)}`}>
+          <strong>Datos</strong> {formatCompacta(backendHealth?.last_scraping || backendHealth?.dataset_updated_at)}
+        </span>
+      )}
+      <span title={`Próxima actualización de reseñas: ${formatNextRun(getNextWeeklyRun())} ART`}>
+        <strong>Próx. reseñas</strong> {formatCompacta(getNextWeeklyRun())}
+      </span>
+      <span title={`Próxima búsqueda de lugares nuevos: ${formatNextRun(getNextMonthlyRun())} ART`}>
+        <strong>Próx. lugares</strong> {formatCompacta(getNextMonthlyRun())}
+      </span>
+      {(backendHealth?.backend_updated_at || backendHealth?.updated_at) && (
+        <span title={`Backend desplegado: ${formatStatusDate(backendHealth.backend_updated_at || backendHealth.updated_at)}`}>
+          <strong>Deploy</strong> {formatCompacta(backendHealth.backend_updated_at || backendHealth.updated_at)}
+        </span>
+      )}
+    </div>
+  );
+
   return (
     <div className={`App ${sidebarMode ? 'sidebar-layout' : ''}`}>
       {/* Fondo slideshow detrás del contenido */}
@@ -1991,14 +2017,35 @@ function App() {
             >
               {sonidoActivo ? '🔊' : '🔇'}
             </button>
-            <div
-              className={`status-indicator status-${apiStatus}`}
-              data-tooltip={apiStatus === 'connected' ? 'Backend conectado' : apiStatus === 'checking' ? 'Conectando al backend...' : 'Sin conexión al backend'}
-            >
-              <span className="status-dot"></span>
-              <span className="status-text">
-                {apiStatus === 'connected' ? 'Conectado' : apiStatus === 'checking' ? 'Conectando...' : 'Sin conexión'}
-              </span>
+            {/* El indicador de conexion pasa a ser el acceso a las fechas del dataset. Antes eso
+                vivia en el pie, que en un telefono se comia ~71px de alto permanente para un dato
+                que se mira una vez; aca no ocupa nada hasta que se lo pide. */}
+            <div className="status-wrap" ref={panelEstadoRef}>
+              <button
+                type="button"
+                className={`status-indicator status-${apiStatus}`}
+                onClick={() => setPanelEstado(v => !v)}
+                aria-expanded={panelEstado}
+                aria-haspopup="dialog"
+                aria-label={`${apiStatus === 'connected' ? 'Backend conectado' : apiStatus === 'checking' ? 'Conectando al backend' : 'Sin conexión al backend'}. Ver estado de los datos`}
+                data-tooltip={apiStatus === 'connected' ? 'Backend conectado' : apiStatus === 'checking' ? 'Conectando al backend...' : 'Sin conexión al backend'}
+              >
+                <span className="status-dot"></span>
+                <span className="status-text">
+                  {apiStatus === 'connected' ? 'Conectado' : apiStatus === 'checking' ? 'Conectando...' : 'Sin conexión'}
+                </span>
+              </button>
+              {panelEstado && (
+                <div className="status-panel" role="dialog" aria-label="Estado de los datos">
+                  <p className="status-panel__titulo">
+                    {apiStatus === 'connected' ? 'Backend conectado' : apiStatus === 'checking' ? 'Conectando al backend…' : 'Sin conexión al backend'}
+                  </p>
+                  {fechasDataset}
+                  <p className="status-panel__credito">
+                    Creado con ❤️ por <a href="https://adriandv.dev" target="_blank" rel="noopener noreferrer">adriandv.dev</a>
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -2749,34 +2796,7 @@ function App() {
       <footer className="app-footer-status">
         {/* Etiquetas y fechas abreviadas: cuatro items con año y hora completa saturaban la
             linea. El dato preciso sigue disponible en el title de cada uno. */}
-        {/* Las fechas del dataset son contexto de la conversacion, no de los resultados: en las
-            pestañas de Lugares y Mapa no vienen a cuento y ademas compiten por el alto con la
-            barra de pestañas, que en mobile es lo mas escaso que hay. */}
-        <details
-          className={`footer-datos ${mobileTab !== 'chat' ? 'mobile-hidden' : ''}`}
-          open={datosAbiertos}
-          onToggle={(e) => setDatosAbiertos(e.currentTarget.open)}
-        >
-          <summary className="footer-datos__toggle">Estado de los datos</summary>
-        <div className="dataset-status" aria-label="Estado de actualización de datos">
-          {formatCompacta(backendHealth?.last_scraping || backendHealth?.dataset_updated_at) && (
-            <span title={`Últimos datos scrapeados: ${formatStatusDate(backendHealth?.last_scraping || backendHealth?.dataset_updated_at)}`}>
-              <strong>Datos</strong> {formatCompacta(backendHealth?.last_scraping || backendHealth?.dataset_updated_at)}
-            </span>
-          )}
-          <span title={`Próxima actualización de reseñas: ${formatNextRun(getNextWeeklyRun())} ART`}>
-            <strong>Próx. reseñas</strong> {formatCompacta(getNextWeeklyRun())}
-          </span>
-          <span title={`Próxima búsqueda de lugares nuevos: ${formatNextRun(getNextMonthlyRun())} ART`}>
-            <strong>Próx. lugares</strong> {formatCompacta(getNextMonthlyRun())}
-          </span>
-          {(backendHealth?.backend_updated_at || backendHealth?.updated_at) && (
-            <span title={`Backend desplegado: ${formatStatusDate(backendHealth.backend_updated_at || backendHealth.updated_at)}`}>
-              <strong>Deploy</strong> {formatCompacta(backendHealth.backend_updated_at || backendHealth.updated_at)}
-            </span>
-          )}
-        </div>
-        </details>
+        {fechasDataset}
         <div className="app-footer-credit">
           Creado con ❤️ por <a href="https://adriandv.dev" target="_blank" rel="noopener noreferrer">adriandv.dev</a>
         </div>
