@@ -850,8 +850,15 @@ function App() {
 
   const [escribiendo, setEscribiendo] = useState(null);
 
+  // La levanta `sendQuery` en cuanto el usuario manda algo. Va en un ref y no en estado porque la
+  // escena corre dentro de un async que se creó una sola vez: una variable de estado quedaría
+  // capturada en el closure con su valor viejo y el bucle nunca se enteraría del cambio.
+  const escenaCancelada = useRef(false);
+
   useEffect(() => {
     let cancelado = false;
+    // Se corta por desmontaje O porque el usuario empezó a usar el bot de verdad.
+    const abortada = () => cancelado || escenaCancelada.current;
     const esperar = (ms) => new Promise(r => setTimeout(r, ms));
 
     const sinMovimiento = typeof window.matchMedia === 'function'
@@ -866,13 +873,17 @@ function App() {
     (async () => {
       await esperar(600);
       for (const m of BIENVENIDA) {
-        if (cancelado) return;
+        if (abortada()) return;
         if (m.role !== 'sistema') {
           setEscribiendo({ role: m.role, autor: m.autor, color: m.color });
           await esperar(tiempoDeTipeo(m.content));
-          if (cancelado) return;
+          if (abortada()) { setEscribiendo(null); return; }
           setEscribiendo(null);
         }
+        // Se vuelve a chequear justo antes de escribir: entre el `await` de arriba y esta línea
+        // el usuario pudo haber enviado, y sin esto se colaría un mensaje mockeado después del
+        // suyo — que es exactamente el síntoma que se está arreglando.
+        if (abortada()) return;
         setMessages(prev => [...prev, m]);
         reproducirBlip(m.role === 'user');
         // Un respiro antes de que el siguiente empiece a tipear, como cuando alguien lee lo que
@@ -1707,6 +1718,14 @@ function App() {
     setChipsExpanded(false); // ya no hacen falta una vez que el usuario sabe que pedir
     setMobileTab('chat');
     setUserScrolledUp(false); // Resetear flag de scroll para bajar al enviar nuevo mensaje
+
+    // La escena de bienvenida se sigue actuando sola con temporizadores, y si el usuario escribe
+    // antes de que termine, sus mensajes mockeados se siguen agregando DESPUÉS del mensaje real:
+    // queda intercalado entre los inventados y el del Sommelier aparece pegado al que sigue.
+    // Acá se corta la escena — la bandera existía pero sólo la levantaba el desmontaje, así que
+    // nada la detenía mientras la página seguía abierta.
+    escenaCancelada.current = true;
+    setEscribiendo(null);
 
     // Add User Message
     setMessages(prev => [...prev, { role: 'user', content: um }]);
