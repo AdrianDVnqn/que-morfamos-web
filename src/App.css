@@ -4698,3 +4698,42 @@ button.status-indicator {
     max-width: 100%;
   }
 }
+
+/* ==========================================================================
+   MOBILE: DETALLES DE TOQUE Y DESBORDE DE LOS CHIPS
+   ========================================================================== */
+@media (max-width: 800px) {
+  /* La barra de chips es `position: fixed` con `bottom: 72px` y el formulario arranca 9px mas
+     arriba de donde ella termina: medido, se solapaban 9px. Se la sube lo justo. */
+  .chip-bar-mobile {
+    bottom: 84px;
+  }
+
+  /* El scroller horizontal de chips no daba ninguna pista de que siguiera: se ven 259px de 789
+     y los chips quedan cortados al medio, que se lee como algo roto y no como algo que sigue.
+     Un degradado en el borde derecho es la convencion para eso. `mask-image` en vez de un
+     pseudo-elemento porque el contenedor ya scrollea y un ::after se iria con el scroll. */
+  .chips-expandable {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+  }
+
+  /* Al llegar al final no queda nada cortado, asi que el degradado sobra y ademas apagaria el
+     ultimo chip sin motivo. */
+  .chips-expandable.al-final {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  /* Blancos de toque: la referencia (Apple HIG / WCAG 2.5.5) es 44x44. Medidos: mute 34x34,
+     chips 41px de alto, atajo de accesibilidad 41. */
+  .sonido-toggle {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .chip-btn,
+  .skip-link {
+    min-height: 44px;
+  }
+}

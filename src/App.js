@@ -2175,7 +2175,18 @@ function App() {
                 <span className="bubble-icon">💡</span>
                 <span className="bubble-text">Ejemplos</span>
               </button>
-              <div className={`chips-expandable ${chipsExpanded ? 'expanded' : ''}`}>
+              {/* El degradado del borde derecho avisa que la fila sigue. Se apaga al llegar al
+                  final, si no apagaria el ultimo chip sin motivo. Va como clase en el DOM y no
+                  como estado de React: esto corre en cada frame de scroll y no tiene por que
+                  provocar un render. El margen de 2px es porque con devicePixelRatio
+                  fraccionario scrollLeft nunca da exacto y el degradado quedaria siempre. */}
+              <div
+                className={`chips-expandable ${chipsExpanded ? 'expanded' : ''}`}
+                onScroll={(e) => {
+                  const el = e.currentTarget;
+                  el.classList.toggle('al-final', el.scrollLeft + el.clientWidth >= el.scrollWidth - 2);
+                }}
+              >
                 {SAMPLE_CHIPS.map((c, i) => (
                   <button key={i} className="chip-btn" type="button" onClick={() => handleChipClick(c.query)}>
                     {c.label}
@@ -2191,7 +2202,7 @@ function App() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onFocus={() => setMobileTab('chat')}
-              placeholder="¿Qué tenés ganas de comer hoy?"
+              placeholder="¿Qué te tienta hoy?"
               disabled={loading || apiStatus !== 'connected'}
               className="message-input"
               /* El placeholder no sirve como etiqueta: desaparece al escribir y varios lectores
