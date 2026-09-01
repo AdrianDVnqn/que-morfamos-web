@@ -1749,9 +1749,9 @@ body {
     height: 48px;
   }
 
-  .tone-expand-indicator {
-    display: none !important;
-  }
+  /* El "+" se ocultaba aca porque en mobile se mostraban los tres tonos y no habia nada que
+     expandir. Ahora el selector arranca plegado, asi que el indicador es la unica pista de que
+     se puede tocar para cambiar el tono: se lo deja visible (ver la regla del final del archivo). */
 
   /* === BARRAS DE SCROLL LLAMATIVAS (MOBILE) === */
 
@@ -4654,5 +4654,47 @@ button.status-indicator {
     min-width: 44px;
     min-height: 44px;
     justify-content: center;
+  }
+}
+
+/* ==========================================================================
+   MOBILE: MAS IDENTIDAD, MENOS CROMO EN EL HEADER
+   El reparto del header estaba al reves de lo que importa: el logo se llevaba 56px de los 323
+   de la fila (17%) y los controles 262px (81%). Y como el video es 960x720 con `object-fit:
+   contain` dentro de una caja de 56x120, el cartel se dibujaba a 56x42 dejando 78px de alto
+   vacio arriba y abajo.
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* El colapso del selector de tono ya estaba escrito en JS —estado `tonesExpanded`, cierre al
+     tocar afuera, indicador "+"— pero nunca se le escribio el CSS que esconde los tonos
+     inactivos, asi que los tres se mostraban siempre. Solo faltaba esto. */
+  .tone-btn.hidden {
+    display: none;
+  }
+
+  .tone-expand-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    font-size: var(--fs-sm);
+    opacity: 0.55;
+  }
+
+  /* Plegado es un solo boton: sin esto el area tocable quedaba en 45x36. */
+  .tone-toggle:not(.expanded) {
+    min-height: 44px;
+  }
+
+  /* Con los controles compactos, el grupo del titulo deja de estar aplastado y el video llena su
+     caja: pasa de dibujarse a 56x42 a usar los ~120px de alto que ya tenia reservados. */
+  .header-title-group {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .header-video {
+    width: auto;
+    max-width: 100%;
   }
 }
