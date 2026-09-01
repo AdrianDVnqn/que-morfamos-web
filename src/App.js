@@ -1016,6 +1016,9 @@ function App() {
   const [inlineDetail, setInlineDetail] = useState(null); // Para modo resumen
   const [loadingInlineDetail, setLoadingInlineDetail] = useState(false);
   // Modal backend inactivo
+  // Se prende cuando el usuario toca la barra de escribir. Los avisos de conexion cuelgan de
+  // esto: sin intencion de usar el bot, que el backend este dormido no es un problema suyo.
+  const [usuarioQuiereEscribir, setUsuarioQuiereEscribir] = useState(false);
   const [showBackendInactiveModal, setShowBackendInactiveModal] = useState(false);
   const [showBackendConnectingModal, setShowBackendConnectingModal] = useState(false);
   // Panel del indicador de estado: aloja las fechas del dataset, que antes vivian en el pie.
@@ -1057,11 +1060,18 @@ function App() {
     prevApiStatus.current = apiStatus;
   }, [apiStatus]);
 
+  // `messages` NO puede ir en las dependencias de los efectos de abajo. Se usa solo para este
+  // booleano, pero depender del array entero significaba volver a correr el efecto con CADA
+  // mensaje que aparece — y la escena de bienvenida los agrega de a uno con temporizadores. Cada
+  // uno limpiaba el setInterval y reiniciaba el contador: se veia 1, 0, 1, 0, 1, 2, 3, 0... en
+  // vez de subir. Reducido a un booleano, el efecto solo corre cuando el valor CAMBIA.
+  const esPaginaInicial =
+    !sidebarMode && messages.every(m => m.role !== 'user' || m.content.length < 40);
+
   // Mostrar modal solo si apiStatus === 'error' y es la página inicial (solo mensaje de bienvenida)
   useEffect(() => {
     let countdownInterval;
-    const isInitialPage = !sidebarMode && messages.every(m => m.role !== 'user' || m.content.length < 40);
-    if (apiStatus === 'error' && isInitialPage) {
+    if (apiStatus === 'error' && esPaginaInicial && usuarioQuiereEscribir) {
       setShowBackendInactiveModal(true);
       setBackendCountdown(60);
       countdownInterval = setInterval(() => {
@@ -1079,15 +1089,17 @@ function App() {
     return () => {
       if (countdownInterval) clearInterval(countdownInterval);
     };
-  }, [apiStatus, messages, sidebarMode]);
+  }, [apiStatus, esPaginaInicial, usuarioQuiereEscribir]);
 
-  // Mostrar popup de arranque en frío mientras el backend está respondiendo
+  // Popup de arranque en frio. Solo despues de que el usuario toca la barra de escribir: antes
+  // aparecia al entrar a la pagina, interrumpiendo sin que nadie hubiera pedido nada todavia (y
+  // tapando la escena de bienvenida, que es lo que explica de que va el sitio). Si el backend
+  // despierta solo mientras tanto, el usuario nunca se entera de que estuvo dormido.
   useEffect(() => {
-    const isInitialPage = !sidebarMode && messages.every(m => m.role !== 'user' || m.content.length < 40);
     let timer;
     let interval;
 
-    if (apiStatus === 'checking' && isInitialPage) {
+    if (apiStatus === 'checking' && esPaginaInicial && usuarioQuiereEscribir) {
       setBackendConnectingSeconds(0);
       timer = setTimeout(() => {
         setShowBackendConnectingModal(true);
@@ -1105,7 +1117,7 @@ function App() {
       if (timer) clearTimeout(timer);
       if (interval) clearInterval(interval);
     };
-  }, [apiStatus, messages, sidebarMode]);
+  }, [apiStatus, esPaginaInicial, usuarioQuiereEscribir]);
 
   // === NUEVO REF PARA CONTENEDOR DE MENSAJES ===
   const messagesContainerRef = useRef(null);
@@ -2196,7 +2208,15 @@ function App() {
             </div>
           )}
 
-          <form className="input-container" onSubmit={sendMessage}>
+          {/* La intencion va en el FORM, no en el onFocus del input: el input esta `disabled`
+              justamente cuando el backend no responde, que es el unico caso en que este aviso
+              importa, asi que nunca habria recibido el foco. Un toque en cualquier parte de la
+              barra cuenta. */}
+          <form
+            className="input-container"
+            onSubmit={sendMessage}
+            onPointerDown={() => setUsuarioQuiereEscribir(true)}
+          >
             <input
               type="text"
               value={input}
