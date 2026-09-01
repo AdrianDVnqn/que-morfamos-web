@@ -2405,7 +2405,17 @@ function App() {
                 </>
               ) : (
                 // Tarjetas completas para recomendaciones
-                <div className="cards-grid" ref={cardsContainerRef}>
+                /* Mismo criterio que la fila de chips: el degradado del pie avisa que la lista
+                   sigue y se apaga al llegar al final. Clase en el DOM y no estado de React,
+                   porque corre en cada frame de scroll. */
+                <div
+                  className="cards-grid"
+                  ref={cardsContainerRef}
+                  onScroll={(e) => {
+                    const el = e.currentTarget;
+                    el.classList.toggle('al-final', el.scrollTop + el.clientHeight >= el.scrollHeight - 2);
+                  }}
+                >
                   {sortedCards.map((card, idx) => (
                     <div
                       key={`${card.nombre}-${idx}`}
@@ -2449,6 +2459,14 @@ function App() {
                           {card.autor_reseña && <span className="quote-author">— {card.autor_reseña}</span>}
                         </div>
                       )}
+                      {/* Solo se ve en mobile, donde la tarjeta va colapsada: sin esta pista
+                          parece que la tarjeta es asi y no que hay algo mas atras. Va como
+                          markup y no como `content` de un ::after para que exista de verdad en
+                          el arbol de accesibilidad. `aria-hidden` porque la tarjeta entera ya
+                          es el control y anunciar "ver mas" aparte solo duplica. */}
+                      <span className="card-ver-mas" aria-hidden="true">
+                        Ver reseñas y resumen
+                      </span>
                     </div>
                   ))}
                 </div>

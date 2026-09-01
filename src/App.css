@@ -1546,8 +1546,11 @@ body {
     border-radius: 16px;
     border: 1px solid var(--border-color);
     width: 100%;
-    min-height: 370px;
-    /* Altura generosa para evitar cortes */
+    /* Sin piso de alto. Los 370px fijos venian de cuando la descripcion y la cita no se
+       recortaban y podian desbordar ("altura generosa para evitar cortes"); ahora estan
+       limitadas a 3 lineas, asi que el contenido esta acotado y el piso solo servia para
+       impedir que la card se achicara y dejara asomar a la siguiente. */
+    min-height: auto;
     height: auto;
     /* Dejar crecer según contenido */
     display: flex;
@@ -4735,5 +4738,108 @@ button.status-indicator {
   .chip-btn,
   .skip-link {
     min-height: 44px;
+  }
+}
+
+/* ==========================================================================
+   MOBILE: LOS DOS PENDIENTES QUE QUEDABAN
+   ========================================================================== */
+@media (max-width: 800px) {
+  /* Plegado el selector ya era un blanco de 44px, pero cada tono suelto media 45x36 una vez
+     expandido, que es justo cuando hay que acertarle a uno entre tres. */
+  .tone-toggle.expanded .tone-btn {
+    min-height: 44px;
+  }
+
+  /* La grilla mostraba UNA card por vez: entraba entera (370px en 453 de alto) pero no se veia
+     nada de la siguiente, asi que no habia ninguna señal de que la lista siguiera. Se recortan
+     los dos bloques largos —descripcion y cita— para que la card baje de 370 a ~300px y asome
+     la de abajo. No se pierde nada: el texto completo esta en el detalle, que es a lo que lleva
+     tocar la card. */
+  .card-description p {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* La cita se recorta sola, sin el autor: si se recortara el contenedor entero, el "— Fulano"
+     seria lo primero en desaparecer y la cita quedaria sin atribucion. */
+  .card-quote p {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Y un degradado al pie del scroller, que es la señal de "sigue" que funciona aunque la ultima
+     card visible termine justo en el borde. `mask-image` y no un ::after porque el contenedor
+     scrollea y un pseudo-elemento se iria con el scroll. */
+  .cards-grid {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent 100%);
+  }
+
+  .cards-grid.al-final {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+@media (max-width: 800px) {
+  /* Las filas se dimensionan por su contenido, no por el alto disponible. Sin esto el grid
+     repartia su alto entre las 5 filas y las aplastaba a 74px (el contenido quedaba recortado);
+     lo unico que lo impedia era el `min-height: 370px` fijo de la card, que a su vez era lo que
+     hacia que entrara una sola por pantalla. */
+  .cards-grid {
+    grid-auto-rows: max-content;
+  }
+}
+
+/* ==========================================================================
+   MOBILE: TARJETAS COMPACTAS EN LA PESTAÑA DE LUGARES
+   Con la descripcion y la cita entraba UNA card por pantalla (370px de 453): para comparar
+   opciones habia que scrollear a ciegas, que es lo contrario de lo que sirve una lista. La card
+   pasa a ser lo que se necesita para ELEGIR —nombre, rating, direccion y zona— y el texto largo
+   vive en el detalle, que es a lo que lleva tocarla. No se pierde nada: esta a un toque.
+   ========================================================================== */
+@media (max-width: 800px) {
+  .cards-container:not(.cards-compact) .card-description,
+  .cards-container:not(.cards-compact) .card-quote {
+    display: none;
+  }
+
+  /* Sin los bloques largos, el ultimo elemento no necesita separacion abajo. */
+  .cards-container:not(.cards-compact) .card-location {
+    margin-bottom: 0;
+  }
+}
+
+/* Pista de que la tarjeta esta colapsada. En desktop la tarjeta muestra todo, asi que sobra. */
+.card-ver-mas {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .cards-container:not(.cards-compact) .card-ver-mas {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 9px;
+    border-top: 1px solid var(--border-color);
+    font-size: var(--fs-2xs);
+    color: var(--accent-primary);
+    font-weight: 600;
+  }
+
+  /* Chevron dibujado, para no depender de una fuente de iconos por una flechita. */
+  .cards-container:not(.cards-compact) .card-ver-mas::after {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(-45deg);
   }
 }
