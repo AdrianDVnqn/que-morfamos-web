@@ -954,6 +954,59 @@ body {
   text-align: center;
 }
 
+/* Las fechas del dataset se pliegan en mobile: son 117px de los 812 del viewport de un telefono
+   (14% de la pantalla) para un dato que se mira una vez. En desktop el <details> arranca abierto
+   desde JS y el disparador se esconde, asi que se ve exactamente igual que antes. */
+.footer-datos {
+  display: inline-block;
+}
+
+.footer-datos__toggle {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  /* 44px de alto para que sea un blanco de toque comodo, que es justo lo que le falta al resto
+     de los controles en mobile. */
+  min-height: 44px;
+  padding: 0 10px;
+  color: inherit;
+  opacity: 0.85;
+}
+
+.footer-datos__toggle::-webkit-details-marker {
+  display: none;
+}
+
+/* Chevron propio: el triangulito nativo no se puede pintar ni animar. */
+.footer-datos__toggle::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.18s ease;
+}
+
+.footer-datos[open] .footer-datos__toggle::after {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-datos__toggle::after {
+    transition: none;
+  }
+}
+
+/* En desktop el disparador sobra: hay lugar para mostrar las fechas siempre. */
+@media (min-width: 641px) {
+  .footer-datos__toggle {
+    display: none;
+  }
+}
+
 .dataset-status {
   display: flex;
   justify-content: center;
@@ -4510,5 +4563,32 @@ h4 {
 
   .mini-mapa__lienzo--lejos {
     display: none;
+  }
+}
+
+/* En mobile el pie compite por el mismo espacio que el chat. Se compacta en una sola fila
+   (disparador de fechas + credito) y se recorta el aire de arriba, que estaba calculado para
+   desktop. Medido: el pie pasa de 117px a ~71px de los 812 del viewport de un telefono. */
+@media (max-width: 640px) {
+  .app-footer-status {
+    padding: 12px 15px 15px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0 14px;
+  }
+
+  .app-footer-credit {
+    order: 1;
+  }
+
+  .footer-datos {
+    order: 2;
+  }
+
+  /* Desplegado, las fechas necesitan la fila entera. */
+  .footer-datos[open] {
+    width: 100%;
   }
 }

@@ -796,6 +796,20 @@ function App() {
       ([x, y]) => (a === x && b === y) || (a === y && b === x)
     );
 
+    // El que abre la charla se adapta a la hora local. Decir "esta noche" a las 9 de la mañana
+    // rompe la ilusion de que es una conversacion que esta pasando ahora, que es lo unico que
+    // sostiene toda la escena. Dos variantes por franja para que tampoco sea siempre igual.
+    const OPENERS = [
+      { hasta: 6, frases: ['Che, ¿queda algo abierto a esta hora?', 'Che, ¿algo para picar? No aguanto'] },
+      { hasta: 11, frases: ['Che, ¿dónde desayunamos?', 'Che, ¿un café con algo rico?'] },
+      { hasta: 15, frases: ['Che, ¿qué morfamos al mediodía?', 'Che, ¿dónde almorzamos?'] },
+      { hasta: 19, frases: ['Che, ¿dónde merendamos?', 'Che, ¿unas facturas y un café?'] },
+      { hasta: 24, frases: ['Che, ¿qué morfamos esta noche?', 'Che, ¿dónde cenamos hoy?'] },
+    ];
+    const hora = new Date().getHours();
+    const franja = OPENERS.find(f => hora < f.hasta) || OPENERS[OPENERS.length - 1];
+    const apertura = franja.frases[Math.floor(Math.random() * franja.frases.length)];
+
     const colores = mezclar(COLORES);
     const [quienAbre, ...piden] = elegidos;
 
@@ -810,7 +824,7 @@ function App() {
     }
 
     return [
-      { role: 'otro', autor: quienAbre, color: colores[0], content: 'Che, ¿qué morfamos esta noche?' },
+      { role: 'otro', autor: quienAbre, color: colores[0], content: apertura },
       ...piden.map((nombre, i) => ({
         role: 'otro',
         autor: nombre,
@@ -1004,6 +1018,25 @@ function App() {
   // Modal backend inactivo
   const [showBackendInactiveModal, setShowBackendInactiveModal] = useState(false);
   const [showBackendConnectingModal, setShowBackendConnectingModal] = useState(false);
+  // El bloque de fechas del dataset se come 117px de los 812 del viewport de un telefono (14% de
+  // la pantalla) para un dato que se consulta una vez. En mobile arranca plegado; en desktop, donde
+  // el espacio sobra, abierto. Se resuelve en JS y no por CSS porque el contenido de un <details>
+  // cerrado no se puede volver a mostrar de forma confiable desde una media query.
+  const [datosAbiertos, setDatosAbiertos] = useState(
+    () => typeof window === 'undefined' || window.matchMedia('(min-width: 641px)').matches
+  );
+  // Al pasar a ancho de desktop el disparador se esconde por CSS. Si el <details> quedo cerrado
+  // (venia de mobile, o el usuario roto el telefono a landscape) las fechas quedarian invisibles
+  // y sin ninguna forma de mostrarlas. Se reabre solo.
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 641px)');
+    const alCambiar = (e) => {
+      if (e.matches) setDatosAbiertos(true);
+    };
+    mq.addEventListener('change', alCambiar);
+    return () => mq.removeEventListener('change', alCambiar);
+  }, []);
+
   const [backendConnectingSeconds, setBackendConnectingSeconds] = useState(0);
   // Duracion tipica del arranque en frio de la maquina de Fly. Solo se usa para dibujar la
   // barra de progreso: si tarda mas, la barra queda topeada y el contador sigue subiendo.
@@ -2716,6 +2749,12 @@ function App() {
       <footer className="app-footer-status">
         {/* Etiquetas y fechas abreviadas: cuatro items con año y hora completa saturaban la
             linea. El dato preciso sigue disponible en el title de cada uno. */}
+        <details
+          className="footer-datos"
+          open={datosAbiertos}
+          onToggle={(e) => setDatosAbiertos(e.currentTarget.open)}
+        >
+          <summary className="footer-datos__toggle">Estado de los datos</summary>
         <div className="dataset-status" aria-label="Estado de actualización de datos">
           {formatCompacta(backendHealth?.last_scraping || backendHealth?.dataset_updated_at) && (
             <span title={`Últimos datos scrapeados: ${formatStatusDate(backendHealth?.last_scraping || backendHealth?.dataset_updated_at)}`}>
@@ -2734,6 +2773,7 @@ function App() {
             </span>
           )}
         </div>
+        </details>
         <div className="app-footer-credit">
           Creado con ❤️ por <a href="https://adriandv.dev" target="_blank" rel="noopener noreferrer">adriandv.dev</a>
         </div>
