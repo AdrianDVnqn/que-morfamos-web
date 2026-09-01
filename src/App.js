@@ -2749,8 +2749,11 @@ function App() {
       <footer className="app-footer-status">
         {/* Etiquetas y fechas abreviadas: cuatro items con año y hora completa saturaban la
             linea. El dato preciso sigue disponible en el title de cada uno. */}
+        {/* Las fechas del dataset son contexto de la conversacion, no de los resultados: en las
+            pestañas de Lugares y Mapa no vienen a cuento y ademas compiten por el alto con la
+            barra de pestañas, que en mobile es lo mas escaso que hay. */}
         <details
-          className="footer-datos"
+          className={`footer-datos ${mobileTab !== 'chat' ? 'mobile-hidden' : ''}`}
           open={datosAbiertos}
           onToggle={(e) => setDatosAbiertos(e.currentTarget.open)}
         >
